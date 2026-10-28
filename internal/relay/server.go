@@ -60,13 +60,15 @@ type session struct {
 
 // Server has no disk storage, background workers, or external service dependency.
 type Server struct {
-	mu       sync.Mutex
-	sessions map[string]*session
-	config   Config
-	hosts    map[string]bool
-	now      func() time.Time
-	slots    chan struct{}
-	handler  http.Handler
+	mu        sync.Mutex
+	sessions  map[string]*session
+	requests  map[string]*requestRecord
+	waitSlots chan struct{}
+	config    Config
+	hosts     map[string]bool
+	now       func() time.Time
+	slots     chan struct{}
+	handler   http.Handler
 }
 
 // New validates the advertised origins. The caller owns the listener and lifecycle.
@@ -77,7 +79,7 @@ func New(config Config) (*Server, error) {
 	if config.TTL <= 0 || config.TTL > 24*time.Hour {
 		return nil, errors.New("session TTL must be greater than zero and at most 24h")
 	}
-	s := &Server{config: config, sessions: make(map[string]*session), hosts: make(map[string]bool), now: time.Now, slots: make(chan struct{}, 32)}
+	s := &Server{config: config, sessions: make(map[string]*session), requests: make(map[string]*requestRecord), waitSlots: make(chan struct{}, 8), hosts: make(map[string]bool), now: time.Now, slots: make(chan struct{}, 32)}
 	for _, raw := range []string{config.LocalURL, config.PublicURL} {
 		u, err := url.Parse(raw)
 		if err != nil || u.Scheme != "http" || u.Host == "" || u.User != nil || (u.Path != "" && u.Path != "/") || u.RawQuery != "" || u.ForceQuery || u.RawPath != "" || u.Fragment != "" {
@@ -94,6 +96,13 @@ func New(config Config) (*Server, error) {
 	mux.HandleFunc("GET /api/sessions/{id}", s.list)
 	mux.HandleFunc("DELETE /api/sessions/{id}", s.close)
 	mux.HandleFunc("POST /api/sessions/{id}/messages", s.submit)
+	mux.HandleFunc("POST /api/requests", s.createRequestHTTP)
+	mux.HandleFunc("GET /api/requests/{id}", s.requestStatusHTTP)
+	mux.HandleFunc("GET /api/requests/{id}/result", s.readRequestHTTP)
+	mux.HandleFunc("GET /api/requests/{id}/info", s.requestInfoHTTP)
+	mux.HandleFunc("POST /api/requests/{id}/input", s.submitRequestHTTP)
+	mux.HandleFunc("DELETE /api/requests/{id}", s.cancelRequestHTTP)
+	mux.HandleFunc("GET /api/requests/{id}/wait", s.waitRequestHTTP)
 	mux.HandleFunc("GET /", s.static)
 	s.handler = mux
 	return s, nil
@@ -316,6 +325,7 @@ func (s *Server) purgeLocked() {
 			delete(s.sessions, id)
 		}
 	}
+	s.purgeRequestsLocked()
 }
 
 func readJSON(w http.ResponseWriter, r *http.Request, target any) bool {
@@ -334,7 +344,7 @@ func readJSON(w http.ResponseWriter, r *http.Request, target any) bool {
 		}
 		return false
 	}
-	if !utf8.Valid(data) {
+	if !utf8.Valid(data) || !validJSONUnicode(data) {
 		fail(w, http.StatusBadRequest, "UTF-8 JSON required")
 		return false
 	}
@@ -343,6 +353,44 @@ func readJSON(w http.ResponseWriter, r *http.Request, target any) bool {
 	if decoder.Decode(target) != nil || decoder.Decode(new(any)) != io.EOF {
 		fail(w, http.StatusBadRequest, "invalid JSON object")
 		return false
+	}
+	return true
+}
+
+// encoding/json replaces unpaired escaped surrogates with U+FFFD. Reject them
+// before decoding so accepted input is never silently repaired or truncated.
+func validJSONUnicode(data []byte) bool {
+	for i := 0; i < len(data); i++ {
+		if data[i] != '\\' {
+			continue
+		}
+		i++
+		if i >= len(data) {
+			return false
+		}
+		if data[i] != 'u' {
+			continue
+		}
+		if i+4 >= len(data) {
+			return false
+		}
+		value, err := strconv.ParseUint(string(data[i+1:i+5]), 16, 16)
+		if err != nil {
+			return false
+		}
+		i += 4
+		if value >= 0xD800 && value <= 0xDBFF {
+			if i+6 >= len(data) || data[i+1] != '\\' || data[i+2] != 'u' {
+				return false
+			}
+			low, err := strconv.ParseUint(string(data[i+3:i+7]), 16, 16)
+			if err != nil || low < 0xDC00 || low > 0xDFFF {
+				return false
+			}
+			i += 6
+		} else if value >= 0xDC00 && value <= 0xDFFF {
+			return false
+		}
 	}
 	return true
 }
@@ -386,5 +434,18 @@ func writeJSON(w http.ResponseWriter, status int, value any) {
 }
 
 func fail(w http.ResponseWriter, status int, message string) {
-	writeJSON(w, status, map[string]string{"error": message})
+	code := "invalid_argument"
+	switch status {
+	case http.StatusUnauthorized, http.StatusForbidden:
+		code = "unauthorized"
+	case http.StatusNotFound, http.StatusGone:
+		code = "gone"
+	case http.StatusConflict:
+		code = "conflict"
+	case http.StatusTooManyRequests:
+		code = "capacity"
+	case http.StatusInternalServerError:
+		code = "internal"
+	}
+	writeJSON(w, status, map[string]string{"error": message, "code": code})
 }

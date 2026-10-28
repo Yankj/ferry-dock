@@ -1,7 +1,8 @@
 "use strict";
 (() => {
   const $ = (id) => document.getElementById(id);
-  const maxText = 65536;
+  const sessionTextLimit = 65536;
+  const requestTextLimit = 16384;
   const encoder = new TextEncoder();
   const store = {
     get(key) { try { return JSON.parse(sessionStorage.getItem(key)); } catch { return null; } },
@@ -20,7 +21,7 @@
       signal: AbortSignal.timeout(10000),
     });
     const body = response.status === 204 ? null : await response.json();
-    if (!response.ok) { const error = new Error(body?.error || "Request failed"); error.status = response.status; throw error; }
+    if (!response.ok) { const error = new Error(body?.error || "Request failed"); error.status = response.status; error.code = body?.code; throw error; }
     return body;
   }
   async function copy(text, button, selectionTarget) {
@@ -48,46 +49,146 @@
   if (location.pathname === "/send") {
     document.body.classList.add("sender-mode");
     $("sender").hidden = false;
-    let phone = fragment.has("session") && fragment.has("key") ? { id: fragment.get("session"), key: fragment.get("key") } : store.get("ferryDock.phone");
+    function phoneContext(value) {
+      if (!value || typeof value.id !== "string" || !value.id || typeof value.key !== "string" || !value.key) return null;
+      // Entries saved before request mode had no kind and always describe sessions.
+      const kind = value.kind === undefined ? "session" : value.kind;
+      return kind === "session" || kind === "request" ? { kind, id: value.id, key: value.key } : null;
+    }
+    const hasPhoneFragment = fragment.has("session") || fragment.has("request") || fragment.has("key");
+    const fragmentKind = fragment.has("request") ? "request" : "session";
+    const phone = phoneContext(hasPhoneFragment ? { kind: fragmentKind, id: fragment.get(fragmentKind), key: fragment.get("key") } : store.get("ferryDock.phone"));
     if (phone) store.set("ferryDock.phone", phone);
+    else if (hasPhoneFragment) store.remove("ferryDock.phone");
     if (!phone) { status("sender-status", "Scan a new QR code on your computer to start.", true); $("send").disabled = true; return; }
+    const isRequest = phone.kind === "request";
+    let maxText = isRequest ? requestTextLimit : sessionTextLimit;
     let pending = null;
-    $("text").addEventListener("input", () => {
+    let sending = false;
+    let sessionEnded = false;
+    let requestState = isRequest ? "loading" : null;
+    const canPaste = window.isSecureContext && !!navigator.clipboard?.readText;
+    function limitLabel() {
+      return maxText >= 1024 && maxText % 1024 === 0 ? `${maxText / 1024} KiB` : `${maxText.toLocaleString()} bytes`;
+    }
+    function countBytes() {
       const bytes = encoder.encode($("text").value).length;
-      $("bytes").textContent = `${(bytes / 1024).toFixed(1)} / 64 KiB`;
+      $("bytes").textContent = maxText >= 1024 && maxText % 1024 === 0 ? `${(bytes / 1024).toFixed(1)} / ${maxText / 1024} KiB` : `${bytes.toLocaleString()} / ${maxText.toLocaleString()} bytes`;
       $("bytes").classList.toggle("error", bytes > maxText);
-      if (pending && pending.text !== $("text").value) pending = null;
-    });
-    if (window.isSecureContext && navigator.clipboard?.readText) {
-      $("paste").hidden = false;
+    }
+    function presentSender() {
+      $("send").disabled = sending || sessionEnded || (isRequest && requestState !== "pending");
+      $("text").readOnly = isRequest && (sending || requestState === "received");
+      $("paste").hidden = !canPaste || $("text").readOnly;
+      $("retry-request").hidden = !isRequest || requestState !== "unavailable";
+      if (sending) $("send").textContent = "Sending…";
+      else if (sessionEnded) $("send").textContent = "Session ended";
+      else if (!isRequest) $("send").textContent = "Send to computer";
+      else if (requestState === "pending") $("send").textContent = "Send response";
+      else if (requestState === "received") $("send").textContent = "Received";
+      else if (requestState === "loading") $("send").textContent = "Loading request…";
+      else if (requestState === "unavailable") $("send").textContent = "Load request first";
+      else $("send").textContent = "Request ended";
+    }
+    function requestEnded(state) {
+      requestState = state;
+      const reason = state === "canceled" ? "This request was canceled." : state === "expired" ? "This request has expired." : state === "unauthorized" ? "This request link is no longer valid." : "This request has ended or expired.";
+      status("sender-status", `${reason} Your text is still here. Ask for a new QR code to continue.`, true);
+      $("sender-note").textContent = "This request is no longer accepting responses.";
+      presentSender();
+    }
+    function requestReceived(alreadyReceived = false) {
+      requestState = "received";
+      status("sender-status", alreadyReceived ? "A response has already been received." : "Received.");
+      $("sender-note").textContent = "This request accepts one response.";
+      presentSender();
+    }
+    async function loadRequest() {
+      requestState = "loading";
+      presentSender();
+      status("sender-status", "Loading request…");
+      try {
+        const info = await api(`/api/requests/${encodeURIComponent(phone.id)}/info`, phone.key);
+        if (info?.requestId !== phone.id || typeof info.taskId !== "string" || typeof info.prompt !== "string" || !["pending", "received", "canceled", "expired"].includes(info.state) || !Number.isSafeInteger(info.maxTextBytes) || info.maxTextBytes < 1 || info.maxTextBytes > requestTextLimit) {
+          throw new Error("Could not read the request details");
+        }
+        $("request-task").textContent = info.taskId ? `For ${info.taskId}` : "";
+        $("request-task").hidden = !info.taskId;
+        $("request-prompt").textContent = info.prompt;
+        maxText = info.maxTextBytes;
+        countBytes();
+        if (info.state === "received") requestReceived(true);
+        else if (info.state === "canceled" || info.state === "expired") requestEnded(info.state);
+        else { requestState = "pending"; status("sender-status", ""); }
+      } catch (error) {
+        if (error.status === 410) requestEnded("gone");
+        else if (error.status === 401) requestEnded("unauthorized");
+        else {
+          requestState = "unavailable";
+          status("sender-status", `${error.message}. Your text is still here. Retry loading the request to continue.`, true);
+        }
+      } finally { presentSender(); }
+    }
+    $("text").addEventListener("input", countBytes);
+    if (canPaste) {
       $("paste").addEventListener("click", async () => {
-        try { $("text").value = await navigator.clipboard.readText(); $("text").dispatchEvent(new Event("input")); status("sender-status", ""); }
+        if ($("text").readOnly) return;
+        try {
+          const text = await navigator.clipboard.readText();
+          if ($("text").readOnly) return;
+          $("text").value = text; $("text").dispatchEvent(new Event("input")); status("sender-status", "");
+        }
         catch { status("sender-status", "Touch and hold the text box, then choose Paste."); }
         $("text").focus();
       });
     }
-    let sessionEnded = false;
     $("send-form").addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (sending || sessionEnded || (isRequest && requestState !== "pending")) return;
       const text = $("text").value;
       if (!text.trim()) { status("sender-status", "Add some text first.", true); return; }
-      if (encoder.encode(text).length > maxText) { status("sender-status", "Keep this text under 64 KiB.", true); return; }
-      if (!pending) {
+      if (encoder.encode(text).length > maxText) { status("sender-status", `Keep this text within ${limitLabel()}.`, true); return; }
+      // Retain the attempt for an unchanged draft, including a lost success response.
+      if (!pending || pending.text !== text) {
         const bytes = new Uint8Array(16); crypto.getRandomValues(bytes);
         pending = { key: Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join(""), text };
       }
-      $("send").disabled = true; $("send").textContent = "Sending…";
+      sending = true;
+      presentSender();
       try {
-        await api(`/api/sessions/${encodeURIComponent(phone.id)}/messages`, phone.key, { method: "POST", body: JSON.stringify({ idempotencyKey: pending.key, text: pending.text }) });
-        if ($("text").value === text) { $("text").value = ""; $("text").dispatchEvent(new Event("input")); }
+        const path = isRequest ? `/api/requests/${encodeURIComponent(phone.id)}/input` : `/api/sessions/${encodeURIComponent(phone.id)}/messages`;
+        await api(path, phone.key, { method: "POST", body: JSON.stringify({ idempotencyKey: pending.key, text: pending.text }) });
+        if (isRequest) requestReceived();
+        else {
+          if ($("text").value === text) { $("text").value = ""; countBytes(); }
+          status("sender-status", "Received. Ready on your computer.");
+        }
         pending = null;
-        status("sender-status", "Received. Ready on your computer.");
       } catch (error) {
-        sessionEnded = error.status === 410 || error.status === 401;
-        if (sessionEnded) store.remove("ferryDock.phone");
-        status("sender-status", sessionEnded ? "This session has ended. Your text is still here. Scan a new QR code on your computer to continue." : `${error.message}. Your text is still here; you can try again.`, true);
-      } finally { $("send").disabled = sessionEnded; $("send").textContent = sessionEnded ? "Session ended" : "Send to computer"; }
+        if (isRequest) {
+          if (error.status === 410) requestEnded("gone");
+          else if (error.status === 401) requestEnded("unauthorized");
+          else if (error.status === 409) {
+            await loadRequest();
+            if (requestState === "pending") status("sender-status", "This response conflicts with an earlier attempt. Your text is still here.", true);
+          } else status("sender-status", `${error.message}. Your text is still here; you can try again.`, true);
+        } else {
+          sessionEnded = error.status === 410 || error.status === 401;
+          if (sessionEnded) store.remove("ferryDock.phone");
+          status("sender-status", sessionEnded ? "This session has ended. Your text is still here. Scan a new QR code on your computer to continue." : `${error.message}. Your text is still here; you can try again.`, true);
+        }
+      } finally { sending = false; presentSender(); }
     });
+    if (isRequest) {
+      $("sender-title").textContent = "Send a response.";
+      $("sender-lead").hidden = true;
+      $("request-context").hidden = false;
+      $("sender-note").textContent = "One response, delivered to this request. Your text stays here if sending fails.";
+      $("retry-request").addEventListener("click", loadRequest);
+      loadRequest();
+    }
+    countBytes();
+    presentSender();
     return;
   }
 

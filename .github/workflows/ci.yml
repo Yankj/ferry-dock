@@ -42,4 +42,6 @@ jobs:
       - run: go test -race -cover ./...
       - run: go build ./cmd/ferry-dock
       - run: python scripts/smoke-http.py
+      - run: python scripts/smoke-request.py
       - run: node --check internal/relay/web/app.js
+      - run: node scripts/test-ui.cjs
