@@ -1,0 +1,33 @@
+name: Bug report
+description: Report a reproducible problem with Tapbeam.
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: "For security issues, follow SECURITY.md. Do not include real content, capability links, or credentials."
+  - type: textarea
+    id: behavior
+    attributes:
+      label: What happened?
+      description: Include the expected behavior and the actual result.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Use synthetic text and redact private addresses or links.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Commit, Go version, computer OS, phone OS/browser, and relevant network setup.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Additional evidence
+      description: Sanitized logs, screenshots, and whether the issue repeats.

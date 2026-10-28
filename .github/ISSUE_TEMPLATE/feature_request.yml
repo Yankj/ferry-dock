@@ -1,0 +1,23 @@
+name: Feature request
+description: Propose a focused improvement to the transfer flow.
+title: "feature: "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What are you trying to finish, and where does the current flow get in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the shortest useful flow and who benefits.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+      description: Include any impact on privacy, dependencies, or ordinary transfer without AI.
