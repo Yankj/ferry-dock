@@ -30,7 +30,14 @@ jobs:
           cache: true
       - name: Check formatting
         shell: bash
-        run: test -z "$(gofmt -l cmd internal)"
+        run: |
+          files="$(gofmt -l cmd internal)"
+          if [ -n "$files" ]; then
+            printf '%s\n' "$files"
+            gofmt -d cmd internal
+            git ls-files --eol cmd internal
+            exit 1
+          fi
       - run: go vet ./...
       - run: go test -race -cover ./...
       - run: go build ./cmd/tapbeam
