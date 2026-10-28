@@ -5,20 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <meta name="referrer" content="no-referrer">
-  <title>Tapbeam</title>
+  <title>渡口 · Ferry Dock</title>
+  <link rel="icon" href="/brand/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
   <main class="shell">
-    <header><a class="wordmark" href="/">tapbeam<span aria-hidden="true">↗</span></a><span class="quiet">Phone → computer</span></header>
+    <header>
+      <a class="wordmark" href="/" aria-label="渡口 · Ferry Dock home">
+        <picture><source media="(prefers-color-scheme: dark)" srcset="/brand/logo-dark.svg"><img src="/brand/logo-light.svg" width="34" height="34" alt=""></picture>
+        <span class="brand-name"><span class="brand-cn" lang="zh-CN">渡口</span><span class="brand-en">Ferry Dock</span></span>
+      </a>
+      <span class="quiet">Phone → computer</span>
+    </header>
     <section id="entry" hidden>
-      <h1>Bring it over.</h1>
-      <p>On your computer, open the private link printed by Tapbeam in your terminal.</p>
+      <h1>A place to cross.</h1>
+      <p>On your computer, open the private link printed by Ferry Dock in your terminal.</p>
       <p>On your phone, scan the QR code on that page.</p>
     </section>
     <section id="receiver" hidden>
-      <div class="intro"><h1>Your phone.<br>Your words.<br>Right here.</h1><p>Scan, send, then copy.</p></div>
+      <div class="intro"><div><p class="eyebrow">A small local bridge</p><h1>From your phone.<br>Ready here.</h1></div><p>Scan, send, then copy.</p></div>
       <div class="workspace">
         <div class="pairing">
           <div id="invite" hidden>
@@ -40,8 +47,8 @@
       <p class="footnote">Temporary session. Text is cleared when you end it or it expires.</p>
     </section>
     <section id="sender" hidden>
-      <h1>Send a text.</h1>
-      <p class="lead">It will be ready on your computer.</p>
+      <h1>Send to your computer.</h1>
+      <p class="lead">Paste your text. We’ll carry it across.</p>
       <form id="send-form">
         <div class="field-heading"><label for="text">Your text</label><button id="paste" class="plain" type="button" hidden>Paste</button></div>
         <textarea id="text" rows="9" placeholder="Paste or type here…" autocomplete="off" spellcheck="false" required></textarea>
@@ -51,7 +58,7 @@
       <p id="sender-status" role="status" aria-live="polite"></p>
       <p class="footnote">Sending keeps this page ready for your next text.</p>
     </section>
-    <noscript>Tapbeam needs JavaScript to send and receive text.</noscript>
+    <noscript>Ferry Dock needs JavaScript to send and receive text.</noscript>
   </main>
 </body>
 </html>

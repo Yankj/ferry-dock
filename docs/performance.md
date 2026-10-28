@@ -1,6 +1,6 @@
 # Performance budgets and measurement plan
 
-These are provisional engineering targets, not measured Tapbeam results or cross-language rankings. The first published baseline must name its reference machine and include raw samples. Revise a target with evidence and a recorded rationale.
+These are provisional engineering targets, not measured Ferry Dock results or cross-language rankings. The first published baseline must name its reference machine and include raw samples. Revise a target with evidence and a recorded rationale.
 
 ## Alpha targets
 
@@ -21,7 +21,7 @@ Incremental browser polling adds user-visible delay beyond API latency. Measure 
 ## Reproducible checks
 
 1. Record `git rev-parse HEAD`, `go version`, OS/architecture, build command, limits, and listener configuration.
-2. Build once with `go build -trimpath -o bin/tapbeam ./cmd/tapbeam`. Run correctness checks separately with `go test -race ./...`; do not use race-enabled timings as a release baseline.
+2. Build once with `go build -trimpath -o bin/ferry-dock ./cmd/ferry-dock`. Run correctness checks separately with `go test -race ./...`; do not use race-enabled timings as a release baseline.
 3. Run cold-process startup samples and idle RSS sampling using platform-native process metrics. State whether filesystem caches were warm; process restart is not an OS cold boot.
 4. Use a fixed payload corpus: ASCII, multi-byte UTF-8, preserved whitespace, near-limit bodies, and invalid/oversized requests. Keep success and rejection latency separate.
 5. Run timed HTTP workloads after warm-up. Record request counts, concurrency, percentiles, errors, throughput, peak RSS, allocations, and CPU. Expired/full sessions must not silently change the successful workload into cheap rejections.

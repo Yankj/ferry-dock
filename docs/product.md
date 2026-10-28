@@ -1,20 +1,19 @@
 # Product contract
 
-Tapbeam moves text from a phone to a computer with a short, deliberate interaction: scan, paste, send, copy. The computer runs the service; the phone uses its browser. Basic use requires no account, model, cloud service, or mobile installation.
+Ferry Dock moves text from a phone to a computer with a short, deliberate interaction: scan, paste, send, copy. The computer runs the service; the phone uses its browser. Basic use requires no account, model, cloud service, or mobile installation.
 
 This document defines the initial alpha scope and its acceptance criteria. A criterion below is a release gate, not a claim that it has already been tested. The repository's test results and recorded manual checks are the evidence of completion.
 
 ## The first useful experience
 
-1. Start Tapbeam on the computer and open its local receiver page.
-2. Create a temporary receiving session. The receiver shows a QR code and a readable phone link.
-3. Scan the code on a phone that can reach the computer on the local network.
-4. Paste or type text into the phone page, then press **Send**.
-5. The computer displays the text. Press **Copy** to put the original text on the clipboard.
+1. Start Ferry Dock on the computer and open its private computer URL. The page automatically creates a temporary session and displays its QR code and phone link.
+2. Scan the code on a phone that can reach the computer on the local network.
+3. Paste or type text into the phone page, then press **Send to computer**.
+4. The computer displays the text. Press **Copy** to put the original text on the clipboard.
 
 The QR code is generated locally from embedded code. Rendering or scanning it does not require a third-party QR website. The phone still needs network access to the computer; the code does not bypass client isolation, routing, or firewall rules.
 
-An active session remains useful for subsequent messages. Sending a second message must not require scanning another code. Ending the session invalidates its phone link and removes its retained messages from the service. A new session gets new credentials.
+An active session remains useful for subsequent messages. Sending a second message must not require scanning another code. **End session** invalidates its phone link and removes its retained messages from the service; **New session** creates a fresh identifier and sender capability. The process owner capability remains valid until the process ends.
 
 ## Interface rules
 
@@ -48,7 +47,7 @@ These capabilities are intentionally outside the text alpha:
 - Durable history, full-text search, device accounts, and team administration.
 - Native mobile or desktop clients, operating-system share targets, and background clipboard synchronization.
 
-Agent integrations can later use the same session lifecycle with request and task metadata. Ordinary users must continue to use Tapbeam without installing or configuring any AI component.
+Agent integrations can later use the same session lifecycle with request and task metadata. Ordinary users must continue to use Ferry Dock without installing or configuring any AI component.
 
 ## Measurable acceptance
 
@@ -61,7 +60,7 @@ Record the browser, operating system, network, build revision, and result for ma
 | Text fidelity | A fixture containing leading/trailing spaces, multiple lines, emoji, and non-ASCII characters is retrieved and copied byte-for-byte as submitted. |
 | Empty and oversized input | Whitespace-only input is rejected. Input beyond the configured UTF-8 body limit is rejected; the service remains responsive and the phone retains its draft. |
 | Acknowledgement | A success receipt identifies accepted delivery. It makes no claim that the receiver viewed or copied the message. |
-| Interrupted request | Retrying an accepted delivery with the same message identifier does not create another message. Reusing that identifier with different text produces a conflict. |
+| Interrupted request | Retrying an accepted delivery with the same client idempotency key does not create another message. Reusing that key with different text produces a conflict. |
 | Receiver reconnect | After a temporary connection interruption, retrieval from the last confirmed cursor includes missed messages once and in order. |
 | Role isolation | A phone capability can submit only to its session. It cannot read messages, close the session, or authorize another session. |
 | Session end and expiry | Closed or expired sessions reject further delivery and retrieval. Their retained content is removed from the service's accessible state; an old QR code cannot reopen them. |
@@ -70,7 +69,7 @@ Record the browser, operating system, network, build revision, and result for ma
 | Keyboard and mobile layout | Sending works with the software keyboard open; receiver controls can be used by keyboard and expose accessible names. |
 | Resource bounds | Configured session, message, and request limits are enforced. Exhaustion produces a bounded error instead of unbounded memory growth. |
 
-The interaction count can be measured after the phone page has loaded: the normal path is paste/type followed by one **Send** action. Measure service latency separately from scan time, typing, permission prompts, and clipboard interaction. Performance budgets, hardware, and measurements belong in the performance documentation; do not publish latency or memory claims before measuring them.
+The interaction count can be measured after the phone page has loaded: the normal path is paste/type followed by one **Send to computer** action. Measure service latency separately from scan time, typing, permission prompts, and clipboard interaction. Performance budgets, hardware, and measurements belong in the performance documentation; do not publish latency or memory claims before measuring them.
 
 ## Open-source quality
 

@@ -31,14 +31,15 @@ jobs:
       - name: Check formatting
         shell: bash
         run: |
-          files="$(gofmt -l cmd internal)"
+          git ls-files --eol cmd internal brand
+          files="$(gofmt -l cmd internal brand)"
           if [ -n "$files" ]; then
             printf '%s\n' "$files"
-            gofmt -d cmd internal
-            git ls-files --eol cmd internal
+            gofmt -d cmd internal brand
             exit 1
           fi
       - run: go vet ./...
       - run: go test -race -cover ./...
-      - run: go build ./cmd/tapbeam
+      - run: go build ./cmd/ferry-dock
+      - run: python scripts/smoke-http.py
       - run: node --check internal/relay/web/app.js

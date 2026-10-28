@@ -1,6 +1,6 @@
 # Third-party notices
 
-Tapbeam uses [skip2/go-qrcode](https://github.com/skip2/go-qrcode), pinned in
+Ferry Dock uses [skip2/go-qrcode](https://github.com/skip2/go-qrcode), pinned in
 `go.mod` and `go.sum`, to generate QR images locally. The dependency is licensed
 under MIT; its license is included below for binary redistribution.
 
@@ -30,5 +30,5 @@ THE SOFTWARE.
 
 The initial design review studied [DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653)
 and [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1).
-The Tapbeam application and UI are a new implementation; neither upstream
+The Ferry Dock application and UI are a new implementation; neither upstream
 application was copied. Future reuse must retain the relevant notices.

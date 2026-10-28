@@ -1,27 +1,34 @@
-# Tapbeam
+# 渡口 / Ferry Dock
 
-**手机发过来，电脑接着做。**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/wordmark-dark.svg">
+  <img src="brand/wordmark-light.svg" width="200" alt="渡口 / Ferry Dock">
+</picture>
+
+**手机上的文字，渡到电脑。**
 
 [English](README.md)
 
-Tapbeam 是一个轻量本地中转服务：电脑启动，手机扫码，把文字发送到临时收件箱。手机免安装，不需要云账号或 AI 模型。
+Ferry Dock 是一个轻量本地中转服务：电脑启动，手机扫码，把文字发送到临时收件箱。手机免安装，不需要云账号或 AI 模型。
 
 **当前为早期 alpha。** 首个切片只支持手机向电脑发送纯文本。文件传输、与当前任务关联的 Agent 输入尚未实现；目前没有二进制 release 或 npm 包。
+
+本轮初始化将进行浏览器流程实测，结果尚未记录。真实手机的局域网验收仍待完成。
 
 ## 立即尝试
 
 源码构建需要 Go 1.26 或更新版本。构建后的程序内嵌网页，不依赖 Node 运行时或数据库。
 
 ```sh
-git clone https://github.com/Yankj/tapbeam.git
-cd tapbeam
-go run ./cmd/tapbeam
+git clone https://github.com/Yankj/ferry-dock.git
+cd ferry-dock
+go run ./cmd/ferry-dock
 ```
 
 默认监听 `127.0.0.1:8787`，仅供本机访问。手机使用时，显式提供电脑在可信局域网内的可达地址：
 
 ```sh
-go run ./cmd/tapbeam -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
+go run ./cmd/ferry-dock -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
 ```
 
 将 `192.168.1.20` 替换成电脑的局域网 IP。设备之间需实际可达；访客 Wi-Fi 隔离、VPN 路由或防火墙都可能阻断连接。
@@ -35,8 +42,8 @@ go run ./cmd/tapbeam -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
 构建可执行程序：
 
 ```sh
-go build -o bin/tapbeam ./cmd/tapbeam
-./bin/tapbeam -help
+go build -o bin/ferry-dock ./cmd/ferry-dock
+./bin/ferry-dock -help
 ```
 
 ## 当前能力
@@ -53,6 +60,8 @@ go build -o bin/tapbeam ./cmd/tapbeam
 先把普通传输做好。后续通过可选 CLI/Skill 或 MCP，让 Agent 在缺少手机信息时创建请求、展示二维码，并把结果交回原任务。这些适配层共用同一会话核心。文件和图片、更多输入类型及分发安装包都属于后续范围。
 
 核心采用 Go，内嵌 HTML、CSS 和 JavaScript。[运行时决策](docs/decisions/0001-runtime.md) 公平比较 Node、Go 与 Rust；[性能预算](docs/performance.md) 定义测量方法与目标，不代表已取得的跑分。
+
+中文名为「渡口」，英文名为 Ferry Dock；标识及使用方式见[品牌资产说明](brand/README.md)。
 
 ## 使用边界
 
@@ -71,6 +80,6 @@ go test -race ./...
 
 ## 参考与许可
 
-启动及扫码体验参考 [DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653)，文本保真及增量收取参考 [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1)。Tapbeam 核心为独立实现，不是两者的 fork。依赖归属及许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
+启动及扫码体验参考 [DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653)，文本保真及增量收取参考 [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1)。Ferry Dock 核心为独立实现，不是两者的 fork。依赖归属及许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
 
 [MIT](LICENSE)。

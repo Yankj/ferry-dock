@@ -1,6 +1,6 @@
 # Architecture and trust boundary
 
-Tapbeam's text alpha uses one Go process and one in-memory session store. The binary embeds the browser UI and QR generator. It has no database, external runtime, remote QR renderer, or model dependency.
+Ferry Dock's text alpha uses one Go process and one in-memory session store. The binary embeds the browser UI and QR generator. It has no database, external runtime, remote QR renderer, or model dependency.
 
 This is the design contract for the alpha. Exact routes, defaults, flags, and error payloads must be checked against the implementation; the operations below describe required semantics rather than a separately versioned public API. Unimplemented future integrations are not implied by this document.
 
@@ -106,4 +106,4 @@ Files and images require explicit streaming, storage quotas, safe filenames, con
 
 ## Design references
 
-The design considered [DropLocal at `16c9fe0`](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653) for quick local startup and QR-based entry, and [Ferry at `5b78829`](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1) for an embedded Go UI and incremental retrieval. Tapbeam narrows the initial product to ephemeral receiving sessions with separate owner and sender authority. These are design references, not a claim of shared implementation or compatibility. No upstream source code is copied into these documents.
+The design considered [DropLocal at `16c9fe0`](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653) for quick local startup and QR-based entry, and [Ferry at `5b78829`](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1) for an embedded Go UI and incremental retrieval. Ferry Dock narrows the initial product to ephemeral receiving sessions with separate owner and sender authority. These are design references, not a claim of shared implementation or compatibility. No upstream source code is copied into these documents.

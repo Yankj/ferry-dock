@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200">
+<rect width="1400" height="1200" fill="#F7F8F4"/>
+<g font-family="PingFang SC, Heiti SC, Arial, sans-serif" fill="#142D29">
+<svg x="64" y="48" width="32" height="32" viewBox="0 0 32 32" color="#142D29">
+  <title id="mark-1">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg>
+<text x="110" y="71" font-size="22" font-weight="600">渡口 / Ferry Dock</text>
+<text x="1336" y="69" text-anchor="end" font-size="14" fill="#52645E">BRAND PREVIEW · VECTOR RENDER</text>
+<path d="M64 108H1336" stroke="#D6DFD8"/>
+<text x="64" y="173" font-size="15" fill="#0B6159">两岸之间 · BETWEEN TWO SHORES</text>
+<text x="64" y="241" font-size="48" font-weight="600">手机上的文字，渡到电脑。</text>
+<text x="64" y="282" font-size="22" fill="#52645E">A small local bridge from your phone to your computer.</text>
+<rect x="64" y="334" width="636" height="300" fill="#FFFFFF" stroke="#D6DFD8"/>
+<rect x="700" y="334" width="636" height="300" fill="#102321"/>
+<text x="92" y="373" font-size="13" fill="#52645E">LIGHT / 暖白底</text>
+<text x="728" y="373" font-size="13" fill="#ADC1BA">DARK / 深青底</text>
+<svg x="230" y="415" width="304" height="122" viewBox="0 0 160 64" color="#142D29">
+  <title id="mark-2">渡口 / Ferry Dock</title>
+  <g transform="translate(0 8) scale(1.5)" fill="currentColor">
+    <path d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+    <rect x="12" y="14" width="8" height="4"/>
+  </g>
+  <g fill="currentColor" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <text x="64" y="32" font-size="28" font-weight="600" letter-spacing="1">渡口</text>
+    <text x="65" y="53" font-size="15" font-weight="500" letter-spacing="0.4">Ferry Dock</text>
+  </g>
+</svg>
+<svg x="866" y="415" width="304" height="122" viewBox="0 0 160 64" color="#F0F6F2">
+  <title id="mark-3">渡口 / Ferry Dock</title>
+  <g transform="translate(0 8) scale(1.5)" fill="currentColor">
+    <path d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+    <rect x="12" y="14" width="8" height="4"/>
+  </g>
+  <g fill="currentColor" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <text x="64" y="32" font-size="28" font-weight="600" letter-spacing="1">渡口</text>
+    <text x="65" y="53" font-size="15" font-weight="500" letter-spacing="0.4">Ferry Dock</text>
+  </g>
+</svg>
+<text x="92" y="599" font-size="13" fill="#52645E">16 / 24 / 32 px</text>
+<text x="728" y="599" font-size="13" fill="#ADC1BA">16 / 24 / 32 px</text>
+<svg x="530" y="580" width="16" height="16" viewBox="0 0 32 32" color="#142D29">
+  <title id="mark-4">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg><svg x="568" y="576" width="24" height="24" viewBox="0 0 32 32" color="#142D29">
+  <title id="mark-5">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg><svg x="614" y="572" width="32" height="32" viewBox="0 0 32 32" color="#142D29">
+  <title id="mark-6">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg>
+<svg x="1166" y="580" width="16" height="16" viewBox="0 0 32 32" color="#F0F6F2">
+  <title id="mark-7">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg><svg x="1204" y="576" width="24" height="24" viewBox="0 0 32 32" color="#F0F6F2">
+  <title id="mark-8">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg><svg x="1250" y="572" width="32" height="32" viewBox="0 0 32 32" color="#F0F6F2">
+  <title id="mark-9">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg>
+<text x="64" y="696" font-size="18" font-weight="600">One shape. Two shores.</text>
+<text x="64" y="727" font-size="15" fill="#52645E">单色轮廓 · 两侧码头与一段渡线 · 可编辑 SVG · 无外部字体或图像服务</text><rect x="64" y="772" width="192" height="60" fill="#F7F8F4" stroke="#D6DFD8"/><text x="64" y="856" font-size="13">Canvas</text><text x="64" y="877" font-size="12" fill="#52645E">#F7F8F4</text><rect x="280" y="772" width="192" height="60" fill="#FFFFFF" stroke="#D6DFD8"/><text x="280" y="856" font-size="13">Surface</text><text x="280" y="877" font-size="12" fill="#52645E">#FFFFFF</text><rect x="496" y="772" width="192" height="60" fill="#142D29" stroke="#D6DFD8"/><text x="496" y="856" font-size="13">Text / mark</text><text x="496" y="877" font-size="12" fill="#52645E">#142D29</text><rect x="712" y="772" width="192" height="60" fill="#52645E" stroke="#D6DFD8"/><text x="712" y="856" font-size="13">Secondary</text><text x="712" y="877" font-size="12" fill="#52645E">#52645E</text><rect x="928" y="772" width="192" height="60" fill="#0B6159" stroke="#D6DFD8"/><text x="928" y="856" font-size="13">Accent</text><text x="928" y="877" font-size="12" fill="#52645E">#0B6159</text><rect x="1144" y="772" width="192" height="60" fill="#D6DFD8" stroke="#D6DFD8"/><text x="1144" y="856" font-size="13">Border</text><text x="1144" y="877" font-size="12" fill="#52645E">#D6DFD8</text><rect x="64" y="904" width="192" height="60" fill="#102321" stroke="#D6DFD8"/><text x="64" y="988" font-size="13">Canvas</text><text x="64" y="1009" font-size="12" fill="#52645E">#102321</text><rect x="280" y="904" width="192" height="60" fill="#17312D" stroke="#D6DFD8"/><text x="280" y="988" font-size="13">Surface</text><text x="280" y="1009" font-size="12" fill="#52645E">#17312D</text><rect x="496" y="904" width="192" height="60" fill="#F0F6F2" stroke="#D6DFD8"/><text x="496" y="988" font-size="13">Text / mark</text><text x="496" y="1009" font-size="12" fill="#52645E">#F0F6F2</text><rect x="712" y="904" width="192" height="60" fill="#ADC1BA" stroke="#D6DFD8"/><text x="712" y="988" font-size="13">Secondary</text><text x="712" y="1009" font-size="12" fill="#52645E">#ADC1BA</text><rect x="928" y="904" width="192" height="60" fill="#76D6C6" stroke="#D6DFD8"/><text x="928" y="988" font-size="13">Accent</text><text x="928" y="1009" font-size="12" fill="#52645E">#76D6C6</text><rect x="1144" y="904" width="192" height="60" fill="#35534C" stroke="#D6DFD8"/><text x="1144" y="988" font-size="13">Border</text><text x="1144" y="1009" font-size="12" fill="#52645E">#35534C</text><path d="M64 1070H1336" stroke="#D6DFD8"/><text x="64" y="1112" font-size="16">Original geometric artwork · MIT</text><text x="1336" y="1112" text-anchor="end" font-size="15" fill="#52645E">github.com/Yankj/ferry-dock</text><text x="64" y="1151" font-size="13" fill="#52645E">This is a vector brand sheet, not a browser or real-device acceptance screenshot.</text></g></svg>

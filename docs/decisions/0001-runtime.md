@@ -6,7 +6,7 @@ Status: accepted for the alpha. Date: 2026-10-28.
 
 Use one Go program for the local HTTP service, temporary session state, and embedded HTML/CSS/JavaScript. Keep the browser client framework-free. Optional CLI/Skill and MCP entry points will adapt the same operations; ordinary transfer will not need AI or another runtime.
 
-This is a packaging and maintenance decision with performance requirements. It is not evidence that Go is universally faster than Node or Rust. No equivalent three-language benchmark has been run for Tapbeam.
+This is a packaging and maintenance decision with performance requirements. It is not evidence that Go is universally faster than Node or Rust. No equivalent three-language benchmark has been run for Ferry Dock.
 
 ## Context
 
@@ -22,7 +22,7 @@ The initial workload is a few local devices sending bounded text. The intended p
 
 Node's stream support makes it a viable I/O implementation: a writable that returns `false` must be allowed to drain before more writes. Its executable packaging is also real, so “Node cannot ship a binary” is not a reason to reject it. See the official [backpressure guide](https://nodejs.org/learn/modules/backpressuring-in-streams) and [single executable documentation](https://nodejs.org/api/single-executable-applications.html).
 
-Go's [HTTP package](https://pkg.go.dev/net/http) and [embed package](https://pkg.go.dev/embed) cover the initial server and asset packaging. Its [garbage collector guide](https://go.dev/doc/gc-guide) explains the memory/CPU tradeoff that still needs measurement. Rust's [official language overview](https://rust-lang.org/) documents its ownership and no-GC model; those properties do not determine Tapbeam's end-to-end speed by themselves.
+Go's [HTTP package](https://pkg.go.dev/net/http) and [embed package](https://pkg.go.dev/embed) cover the initial server and asset packaging. Its [garbage collector guide](https://go.dev/doc/gc-guide) explains the memory/CPU tradeoff that still needs measurement. Rust's [official language overview](https://rust-lang.org/) documents its ownership and no-GC model; those properties do not determine Ferry Dock's end-to-end speed by themselves.
 
 MCP does not force the core into TypeScript. The official [SDK listing, version 2026-07-28](https://modelcontextprotocol.io/docs/2026-07-28/sdk) lists TypeScript, Go, and Rust as Tier 1. SDK availability is a future adapter consideration, not a reason to add an MCP dependency to plain transfer now.
 

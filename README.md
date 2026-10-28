@@ -1,27 +1,34 @@
-# Tapbeam
+# Ferry Dock
 
-**Send from your phone. Continue on your computer.**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/wordmark-dark.svg">
+  <img src="brand/wordmark-light.svg" width="200" alt="渡口 / Ferry Dock">
+</picture>
+
+**A small local bridge from your phone to your computer.**
 
 [简体中文](README.zh-CN.md)
 
-Tapbeam is a small, local transfer service. Open it on your computer, scan a QR code on your phone, and send text into a temporary inbox. No phone app, cloud account, or AI model is required.
+Ferry Dock is a small, local transfer service. Open it on your computer, scan a QR code on your phone, and send text into a temporary inbox. No phone app, cloud account, or AI model is required.
 
 **Status: early alpha.** The first slice covers phone-to-computer plain text. File transfer and task-bound Agent inputs are planned; there is no published binary release or npm package yet.
+
+Browser flow verification is scheduled for this initialization pass; results have not yet been recorded. Real-phone LAN acceptance remains pending.
 
 ## Try it
 
 Build prerequisites: Go 1.26 or newer. The built program embeds its web interface and needs no Node runtime or database.
 
 ```sh
-git clone https://github.com/Yankj/tapbeam.git
-cd tapbeam
-go run ./cmd/tapbeam
+git clone https://github.com/Yankj/ferry-dock.git
+cd ferry-dock
+go run ./cmd/ferry-dock
 ```
 
 The default listener is `127.0.0.1:8787`, for use on this computer. To receive from a phone on a trusted local network, supply a reachable address:
 
 ```sh
-go run ./cmd/tapbeam -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
+go run ./cmd/ferry-dock -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
 ```
 
 Replace `192.168.1.20` with your computer's LAN address. Both devices must be able to reach that address; guest Wi-Fi isolation, a VPN, or a firewall can prevent access.
@@ -35,8 +42,8 @@ Keep the computer URL private: it grants inbox management access. Share only the
 To build an executable:
 
 ```sh
-go build -o bin/tapbeam ./cmd/tapbeam
-./bin/tapbeam -help
+go build -o bin/ferry-dock ./cmd/ferry-dock
+./bin/ferry-dock -help
 ```
 
 ## What the alpha does
@@ -54,6 +61,8 @@ The ordinary transfer flow comes first. Optional CLI/Skill and MCP adapters can 
 
 The core is Go with embedded HTML, CSS, and JavaScript. [The runtime decision](docs/decisions/0001-runtime.md) compares Node, Go, and Rust. [Performance budgets](docs/performance.md) define what to measure; they are targets, not benchmark claims.
 
+[Brand assets and usage](brand/README.md) cover the Ferry Dock identity and its Chinese name, 渡口.
+
 ## Trust boundary
 
 This alpha uses HTTP on a trusted LAN. Traffic and bearer capabilities are not protected from a network observer. It is not an Internet-facing service. URL fragments keep keys out of ordinary request paths, but do not make shared links safe to disclose. See [architecture and threat model](docs/architecture.md) and [security reporting](SECURITY.md).
@@ -69,8 +78,12 @@ go test -race ./...
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for review expectations and the distinction between automated checks and real phone acceptance. [Product scope](docs/product.md) records the shortest supported flow.
 
+The [verification record](docs/verification.md) separates passing automated HTTP
+checks from browser and real-phone acceptance that has not been run. View the
+[brand preview](brand/preview.png) for the current identity and palette.
+
 ## Design references and license
 
-[DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653) informed the local launch and QR experience; [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1) informed text fidelity and incremental retrieval. Tapbeam's core is a new implementation, not a fork of either project. See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency attribution and licenses.
+[DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653) informed the local launch and QR experience; [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1) informed text fidelity and incremental retrieval. Ferry Dock's core is a new implementation, not a fork of either project. See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency attribution and licenses.
 
 [MIT](LICENSE).

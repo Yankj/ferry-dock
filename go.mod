@@ -1,4 +1,4 @@
-module github.com/Yankj/tapbeam
+module github.com/Yankj/ferry-dock
 
 go 1.26.0
 

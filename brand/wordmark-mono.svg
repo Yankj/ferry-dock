@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="64" viewBox="0 0 160 64" role="img" aria-labelledby="title">
+  <title id="title">渡口 / Ferry Dock</title>
+  <g transform="translate(0 8) scale(1.5)" fill="currentColor">
+    <path d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+    <rect x="12" y="14" width="8" height="4"/>
+  </g>
+  <g fill="currentColor" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <text x="64" y="32" font-size="28" font-weight="600" letter-spacing="1">渡口</text>
+    <text x="65" y="53" font-size="15" font-weight="500" letter-spacing="0.4">Ferry Dock</text>
+  </g>
+</svg>

@@ -46,9 +46,10 @@
   }
 
   if (location.pathname === "/send") {
+    document.body.classList.add("sender-mode");
     $("sender").hidden = false;
-    let phone = fragment.has("session") && fragment.has("key") ? { id: fragment.get("session"), key: fragment.get("key") } : store.get("tapbeam.phone");
-    if (phone) store.set("tapbeam.phone", phone);
+    let phone = fragment.has("session") && fragment.has("key") ? { id: fragment.get("session"), key: fragment.get("key") } : store.get("ferryDock.phone");
+    if (phone) store.set("ferryDock.phone", phone);
     if (!phone) { status("sender-status", "Scan a new QR code on your computer to start.", true); $("send").disabled = true; return; }
     let pending = null;
     $("text").addEventListener("input", () => {
@@ -65,6 +66,7 @@
         $("text").focus();
       });
     }
+    let sessionEnded = false;
     $("send-form").addEventListener("submit", async (event) => {
       event.preventDefault();
       const text = $("text").value;
@@ -81,24 +83,28 @@
         pending = null;
         status("sender-status", "Received. Ready on your computer.");
       } catch (error) {
-        status("sender-status", error.status === 410 ? "This session has ended. Scan a new QR code on your computer." : `${error.message}. You can try again.`, true);
-      } finally { $("send").disabled = false; $("send").textContent = "Send to computer"; }
+        sessionEnded = error.status === 410 || error.status === 401;
+        if (sessionEnded) store.remove("ferryDock.phone");
+        status("sender-status", sessionEnded ? "This session has ended. Your text is still here. Scan a new QR code on your computer to continue." : `${error.message}. Your text is still here; you can try again.`, true);
+      } finally { $("send").disabled = sessionEnded; $("send").textContent = sessionEnded ? "Session ended" : "Send to computer"; }
     });
     return;
   }
 
-  const owner = fragment.get("owner") || store.get("tapbeam.owner");
+  const previousOwner = store.get("ferryDock.owner");
+  const owner = fragment.get("owner") || previousOwner;
   if (!owner) { $("entry").hidden = false; return; }
-  store.set("tapbeam.owner", owner);
+  store.set("ferryDock.owner", owner);
   $("receiver").hidden = false;
-  let active = store.get("tapbeam.active"), cursor = 0, generation = 0, busy = false;
+  let active = fragment.has("owner") && owner !== previousOwner ? null : store.get("ferryDock.active"), cursor = 0, generation = 0, busy = false;
+  if (!active) store.remove("ferryDock.active");
   const seen = new Set();
   function present() {
     $("invite").hidden = !active; $("create").hidden = !!active;
     if (active) { $("qr").src = active.qrDataUrl; $("send-link").href = active.sendUrl; }
   }
   function ended() {
-    active = null; generation++; store.remove("tapbeam.active");
+    active = null; generation++; store.remove("ferryDock.active");
     $("messages").replaceChildren(); seen.clear(); $("count").textContent = "0"; $("empty").hidden = false;
     present();
   }
@@ -125,6 +131,7 @@
     } catch (error) {
       if (stamp !== generation) return;
       if (error.status === 410) { ended(); status("receiver-status", "Session ended. Start a new one to receive more text."); }
+      else if (error.status === 401) { ended(); status("receiver-status", "Reopen the private computer link printed in your terminal.", true); }
       else status("receiver-status", `${error.message}. Reconnecting…`, true);
     } finally { busy = false; }
   }
@@ -133,8 +140,8 @@
     try {
       active = await api("/api/sessions", owner, { method: "POST", body: "{}" });
       generation++; cursor = 0; seen.clear(); $("messages").replaceChildren(); $("empty").hidden = false; $("count").textContent = "0";
-      store.set("tapbeam.active", active); present(); status("receiver-status", ""); poll();
-    } catch (error) { status("receiver-status", `${error.message}. Reopen the computer link from your terminal if Tapbeam restarted.`, true); }
+      store.set("ferryDock.active", active); present(); status("receiver-status", ""); poll();
+    } catch (error) { status("receiver-status", `${error.message}. Reopen the computer link from your terminal if Ferry Dock restarted.`, true); }
     finally { $("create").disabled = false; $("create").textContent = "New session"; }
   });
   $("close").addEventListener("click", async () => {

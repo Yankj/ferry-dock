@@ -1,4 +1,4 @@
-// Tapbeam runs a local, ephemeral text inbox.
+// Ferry Dock runs a local, ephemeral text inbox.
 package main
 
 import (
@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Yankj/tapbeam/internal/relay"
+	"github.com/Yankj/ferry-dock/internal/relay"
 )
 
 func main() {
@@ -70,7 +70,7 @@ func run() error {
 	defer stop()
 	done := make(chan error, 1)
 	go func() { done <- server.Serve(listener) }()
-	fmt.Printf("Tapbeam · alpha\n\nOpen on this computer:\n%s/#owner=%s\n\n", localURL, url.QueryEscape(owner))
+	fmt.Printf("Ferry Dock · alpha\n\nOpen on this computer:\n%s/#owner=%s\n\n", localURL, url.QueryEscape(owner))
 	if loopback {
 		fmt.Println("Local-only mode. For phone access, restart with -listen 0.0.0.0:8787 -public-url http://YOUR_LAN_IP:8787")
 	} else {

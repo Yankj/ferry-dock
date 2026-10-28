@@ -1,4 +1,4 @@
-# Contributing to Tapbeam
+# Contributing to Ferry Dock
 
 Small, reviewable contributions are welcome. For a new input type, transport, dependency, or persistent store, open an issue first so that the change can be evaluated against [product scope](docs/product.md).
 
@@ -11,7 +11,7 @@ go fmt ./...
 go vet ./...
 go test ./...
 go test -race ./...
-go build -o bin/tapbeam ./cmd/tapbeam
+go build -o bin/ferry-dock ./cmd/ferry-dock
 ```
 
 Keep formatting changes focused on the files you touch. Run the race detector on a supported host; if unavailable, record the platform and limitation in the PR. Do not claim a check passed unless you ran it.

@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem with Tapbeam.
+description: Report a reproducible problem with Ferry Dock.
 title: "bug: "
 body:
   - type: markdown

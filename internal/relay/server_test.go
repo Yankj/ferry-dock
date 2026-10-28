@@ -46,6 +46,22 @@ func testServer(t testing.TB) *Server {
 	return s
 }
 
+func TestBrandAssetsStayLocal(t *testing.T) {
+	s := testServer(t)
+	for _, path := range []string{"/brand/logo-light.svg", "/brand/logo-dark.svg", "/brand/favicon.svg"} {
+		t.Run(path, func(t *testing.T) {
+			w := request(s, http.MethodGet, path, "", "", nil, nil)
+			requireStatus(t, w, http.StatusOK)
+			if w.Header().Get("Content-Type") != "image/svg+xml" || !strings.Contains(w.Body.String(), "<svg") {
+				t.Fatalf("expected embedded SVG, got %s", w.Body)
+			}
+		})
+	}
+	for _, path := range []string{"/brand/preview.html", "/brand/missing.svg", "/brand/nested/logo.svg"} {
+		requireStatus(t, request(s, http.MethodGet, path, "", "", nil, nil), http.StatusNotFound)
+	}
+}
+
 // request exercises HTTP parsing, routing, authorization, and response encoding
 // without requiring a real listener or changing the host's network settings.
 func request(s http.Handler, method, path, token, contentType string, body []byte, headers map[string]string) *httptest.ResponseRecorder {

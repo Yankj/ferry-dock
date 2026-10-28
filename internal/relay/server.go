@@ -19,6 +19,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/Yankj/ferry-dock/brand"
 	qrcode "github.com/skip2/go-qrcode"
 )
 
@@ -347,6 +348,21 @@ func readJSON(w http.ResponseWriter, r *http.Request, target any) bool {
 }
 
 func (s *Server) static(w http.ResponseWriter, r *http.Request) {
+	if strings.HasPrefix(r.URL.Path, "/brand/") {
+		file := strings.TrimPrefix(r.URL.Path, "/brand/")
+		if strings.Contains(file, "/") || !strings.HasSuffix(file, ".svg") {
+			http.NotFound(w, r)
+			return
+		}
+		data, err := brand.Assets.ReadFile(file)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/svg+xml")
+		_, _ = w.Write(data)
+		return
+	}
 	file := map[string]string{"/": "index.html", "/send": "index.html", "/app.js": "app.js", "/style.css": "style.css"}[r.URL.Path]
 	if file == "" {
 		http.NotFound(w, r)

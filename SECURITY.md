@@ -1,6 +1,6 @@
 # Security
 
-Tapbeam is an early alpha for a trusted local network. Only the current `main` branch is maintained; there is no stable release or guaranteed response time yet.
+Ferry Dock is an early alpha for a trusted local network. Only the current `main` branch is maintained; there is no stable release or guaranteed response time yet.
 
 ## Deployment boundary
 
@@ -16,6 +16,6 @@ See [the architecture threat model](docs/architecture.md) for the enforced bound
 
 Do not post working exploits, capability links, or private content in a public issue.
 
-If GitHub offers **Report a vulnerability** on [this repository's Security page](https://github.com/Yankj/tapbeam/security), use that private channel. Private reporting availability is a repository setting and is not guaranteed by this document. Otherwise, open an issue containing only “Requesting a private security reporting channel” and a broad component name. A maintainer can then arrange a private channel before you share sensitive details.
+If GitHub offers **Report a vulnerability** on [this repository's Security page](https://github.com/Yankj/ferry-dock/security), use that private channel. Private reporting availability is a repository setting and is not guaranteed by this document. Otherwise, open an issue containing only “Requesting a private security reporting channel” and a broad component name. A maintainer can then arrange a private channel before you share sensitive details.
 
 Once a private channel is available, include the affected commit, prerequisites, minimal reproduction, expected impact, and any suggested mitigation. Use synthetic content and redact credentials.

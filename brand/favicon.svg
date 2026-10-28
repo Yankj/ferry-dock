@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" role="img" aria-labelledby="title">
+  <title id="title">渡口 / Ferry Dock</title>
+  <style>
+    path { fill: #142D29; }
+    @media (prefers-color-scheme: dark) { path { fill: #F0F6F2; } }
+  </style>
+  <path d="M2 2h6v2H4v10H2V2Zm12 12H8v-2h4V2h2v12ZM6 7h4v2H6V7Z"/>
+</svg>
