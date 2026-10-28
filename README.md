@@ -23,7 +23,7 @@ The request loop is a transfer tool, not an Agent host. A timed-out wait can be 
 
 ## Build and run
 
-The computer needs Go 1.26 or newer to build from source. The phone needs no installation. There is no published binary release or package installer yet.
+The computer needs Go 1.26 or newer to build from source. The phone needs no installation. There is no published binary release or package installer yet. The shell examples below use macOS/Linux syntax.
 
 ```sh
 git clone https://github.com/Yankj/ferry-dock.git
@@ -31,6 +31,8 @@ cd ferry-dock
 go build -o bin/ferry-dock ./cmd/ferry-dock
 ./bin/ferry-dock serve
 ```
+
+On Windows, build with `go build -o bin/ferry-dock.exe ./cmd/ferry-dock` and invoke `.\bin\ferry-dock.exe` in PowerShell. The request flags are the same; the private-directory example below uses a POSIX shell. Cross-compilation is recorded separately from native Windows acceptance.
 
 Default binding is `127.0.0.1:8787`, which is local to the computer. To receive from a physical phone, restart with a reachable LAN address:
 
@@ -56,7 +58,7 @@ Ordinary text is limited to 64 KiB per message, 1 MiB and 128 messages per sessi
 
 This optional path uses the same Go service and a private local handle, not a model API. The CLI flags below match its help output; use your actual LAN origin and private local paths.
 
-Start a service with an explicit private control file. This POSIX-shell example prints the private runtime directory so that a second terminal can use it:
+Start a service with an explicit private control file. If the earlier quickstart service is still running without one, stop it first; its temporary sessions are then cleared. This POSIX-shell example prints the private runtime directory so that a second terminal can use it:
 
 ```sh
 umask 077
@@ -67,7 +69,7 @@ printf 'Private runtime directory: %s\n' "$runtime_dir"
   --control-file "$runtime_dir/control.json"
 ```
 
-In another terminal, set `runtime_dir` to the printed directory. On Windows, choose a directory private to your user and use its paths with the same CLI flags.
+In another terminal, set `runtime_dir` to the printed directory. The handle and its default PNG path must not already exist. On Windows, choose a directory private to your user and use its paths with the same CLI flags.
 
 ```sh
 runtime_dir="/path/printed/by/the/first/terminal"
@@ -76,11 +78,16 @@ runtime_dir="/path/printed/by/the/first/terminal"
   --task-id proposal-launch \
   --prompt "Launch proposal: paste the changes from your phone chat." \
   --handle "$runtime_dir/proposal.json" --ttl 15m --max-bytes 16384
-./bin/ferry-dock request wait --handle "$runtime_dir/proposal.json" --timeout 10s
-./bin/ferry-dock request read --handle "$runtime_dir/proposal.json"
 ```
 
 Show the generated QR PNG or returned private phone URL to the user. Creation output does not include the process computer token; the control file and handle still contain capabilities and must stay private. Do not print their contents, commit them, or put them under a public document root.
+
+After the phone submits, wait and read through the same handle. Running these before submission can correctly return `pending` and no input; keep the handle and try again later.
+
+```sh
+./bin/ferry-dock request wait --handle "$runtime_dir/proposal.json" --timeout 10s
+./bin/ferry-dock request read --handle "$runtime_dir/proposal.json"
+```
 
 A request accepts one response, at most 16 KiB by default. `--ttl` is a duration such as `15m` or `900s`, restricted to whole seconds; omitting it inherits service retention. Its server-generated request ID identifies the collection; `taskId` is only a correlation label. Each request has independent sender and reader capabilities. A label never grants access.
 

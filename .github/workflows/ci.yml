@@ -45,3 +45,5 @@ jobs:
       - run: python scripts/smoke-request.py
       - run: node --check internal/relay/web/app.js
       - run: node scripts/test-ui.cjs
+      - name: Exercise served scripts against the compiled service
+        run: node scripts/smoke-ui.cjs --binary ./ferry-dock${{ runner.os == 'Windows' && '.exe' || '' }}

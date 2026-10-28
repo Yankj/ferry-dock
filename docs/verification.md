@@ -25,6 +25,52 @@ The CI workflow includes the new scenarios, but the earlier remote CI run below
 belongs to the prior text alpha and is not evidence for this local revision.
 Browser, physical Android/iOS and actual Codex-host acceptance remain **NOT_RUN**.
 
+## Follow-up use-path audit, 2026-10-28
+
+An independent macOS arm64 / Go 1.27.3 cached build at local revision `2c3d695`
+passed 37 README/Skill command checks in two private, independently owned
+loopback services. These included the exact `15m`/16384-byte request flags, a real
+ten-second pending wait followed by an empty read, later submission and stable
+input reads, explicit cancellation, normal process exit, and control-file cleanup.
+After clarifying the examples, all 14 POSIX shell blocks across both READMEs and
+the Skill passed `sh -n`. The documentation now names its shell prerequisites,
+Windows `.exe` output, fresh handle/PNG paths, service restart condition, and the
+QR/submission step before reading. A Windows cross-build confirmed that an
+explicit extensionless `-o` path produces a PE file without appending `.exe`;
+Windows native execution was not performed.
+
+`node scripts/smoke-ui.cjs --binary bin/ferry-dock` passed in two local runs
+(2.634 and 2.728 seconds), with independent static review. This **SCRIPT_HTTP**
+check obtains HTML and `app.js`
+from the compiled service, verifies that the served script matches the working
+source, and executes it with a narrow DOM adapter. It covers:
+
+- CLI create → script prompt/input → real HTTP → CLI wait/read, A/B authority
+  isolation, exact untrusted input, repeat reads, and received-form locking.
+- Real accepted/deduplicated responses (201 then 200 with the same receipt)
+  after dropping the first response inside the adapter; offline info/send
+  injection and retry; real 401/410 responses retaining drafts.
+- Ordinary computer-script session creation, two phone-script submissions,
+  polling failure/recovery, incremental cursor, reload from retained history,
+  and session closure. Copy checks the argument passed to a clipboard test
+  double only.
+- Normal completion stopped the test's processes and removed its private
+  runtime files. The harness bounds its own failures/deadline; it does not promise
+  cleanup after an uncatchable external kill.
+
+The Go/application sources remain at the `5d3caff` freeze. This adds integration
+evidence, not a product runtime change or a new performance baseline. Faults
+are explicitly injected before a request or after its real HTTP response;
+an actual network outage is not claimed. This is **not** rendered-browser,
+OS-clipboard, physical-phone/LAN, QR-scan, or actual Codex-host acceptance.
+
+Both READMEs put the Banner directly below the title. The light/dark SVG paths
+exist in the local Git tree; 320×100 renders were visually inspected with clear
+text and no clipping. This is a vector-render check, not a GitHub page or mobile
+browser screenshot. The public branch still pointed to `13e5b27` during this
+audit; a fresh public clone of this new slice and its remote CI remain unverified
+until publication.
+
 ## Earlier ordinary-transfer slice
 
 The transfer alpha has automated HTTP coverage and a compiled-program loopback
@@ -76,12 +122,17 @@ failure. See the latest Actions run for the result on a real Windows runner.
 
 ## Browser and device acceptance
 
-**NOT_RUN for the Ferry Dock revision.** The connected-browser surface was
-unavailable. Native-browser attempts to create a dedicated test tab stopped when
-the computer-use guard detected that the user changed the browser state. No
-further browser attempts or broader access requests were made. The complete
-receive/copy/paste loop, permission prompts, and responsive rendering therefore
-remain unverified in a browser.
+**NOT_RUN for the Ferry Dock revision.** During this audit, the supported
+computer-use tool reported a locked desktop and no connected browser surface.
+Installed browser applications and cached Chromium binaries were present;
+the blocker was access through that tool/session, rather than missing browser
+software.
+
+The minimum condition for resuming UI acceptance is a manually unlocked Mac
+and a supported isolated test tab/window through the computer-use tool. The
+complete rendered receive/copy/paste loop, permission prompts, and phone-page
+responsive layout remain unverified. The SCRIPT_HTTP result above does not
+satisfy that gate.
 
 Real Android and iOS LAN acceptance is also **NOT_RUN**. Before claiming mobile
 compatibility, verify QR scan, text submission, exact copy, fallback selection,

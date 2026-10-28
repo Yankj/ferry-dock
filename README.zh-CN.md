@@ -23,7 +23,7 @@
 
 ## 构建并运行
 
-电脑源码构建需要 Go 1.26 或更新版本，手机免安装。目前没有发布二进制 release 或安装包。
+电脑源码构建需要 Go 1.26 或更新版本，手机免安装。目前没有发布二进制 release 或安装包。下面的 shell 示例采用 macOS/Linux 语法。
 
 ```sh
 git clone https://github.com/Yankj/ferry-dock.git
@@ -31,6 +31,8 @@ cd ferry-dock
 go build -o bin/ferry-dock ./cmd/ferry-dock
 ./bin/ferry-dock serve
 ```
+
+Windows 请用 `go build -o bin/ferry-dock.exe ./cmd/ferry-dock` 构建，在 PowerShell 中调用 `.\bin\ferry-dock.exe`。请求参数相同，下方私有目录示例使用 POSIX shell；交叉编译结果与 Windows 本机验收分开记录。
 
 默认监听 `127.0.0.1:8787`，仅供电脑本机访问。真实手机使用时，用电脑可达的局域网地址重启：
 
@@ -56,7 +58,7 @@ go build -o bin/ferry-dock ./cmd/ferry-dock
 
 这条可选路径共用 Go 服务，通过私有本地句柄取回结果，不调用模型 API。下列参数已与 CLI 帮助输出核对；请使用真实的局域网地址和私有本地路径。
 
-用显式指定的私有控制文件启动服务。以下 POSIX shell 示例会打印运行目录，供第二个终端使用：
+用显式指定的私有控制文件启动服务。如果前面的快速开始服务仍在运行且没有控制文件，先停止它，其临时会话随之清空。以下 POSIX shell 示例会打印运行目录，供第二个终端使用：
 
 ```sh
 umask 077
@@ -67,7 +69,7 @@ printf 'Private runtime directory: %s\n' "$runtime_dir"
   --control-file "$runtime_dir/control.json"
 ```
 
-在另一个终端，将 `runtime_dir` 设为打印出的目录。Windows 请选择仅当前用户可访问的目录，使用相同 CLI 参数和对应路径。
+在另一个终端，将 `runtime_dir` 设为打印出的目录。句柄及默认 PNG 路径必须尚不存在。Windows 请选择仅当前用户可访问的目录，使用相同 CLI 参数和对应路径。
 
 ```sh
 runtime_dir="/path/printed/by/the/first/terminal"
@@ -76,11 +78,16 @@ runtime_dir="/path/printed/by/the/first/terminal"
   --task-id proposal-launch \
   --prompt "Launch proposal: paste the changes from your phone chat." \
   --handle "$runtime_dir/proposal.json" --ttl 15m --max-bytes 16384
-./bin/ferry-dock request wait --handle "$runtime_dir/proposal.json" --timeout 10s
-./bin/ferry-dock request read --handle "$runtime_dir/proposal.json"
 ```
 
 向用户展示生成的二维码 PNG 或返回的私密手机链接。创建输出不包含进程管理密钥，但控制文件和句柄仍带有权限，必须保密；不要打印文件正文、提交到仓库或放进公开目录。
+
+手机提交后，通过同一句柄等待并读取。在提交前运行这些命令，可能正常返回 `pending` 且没有输入；保留句柄，稍后再查即可。
+
+```sh
+./bin/ferry-dock request wait --handle "$runtime_dir/proposal.json" --timeout 10s
+./bin/ferry-dock request read --handle "$runtime_dir/proposal.json"
+```
 
 一个请求接受一次文字响应，默认上限 16 KiB。`--ttl` 使用 `15m` 或 `900s` 这类整秒时长，省略时继承服务保留时间。服务端生成的 request ID 标识本次收集；`taskId` 只是关联标签，不能授权访问。每个请求的投递与读取能力独立。
 

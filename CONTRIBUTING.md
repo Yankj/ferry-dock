@@ -4,7 +4,7 @@ Small, reviewable contributions are welcome. For a new input type, transport, de
 
 ## Local checks
 
-Use Go 1.26 or newer. There is no frontend build step.
+Use Go 1.26 or newer. There is no frontend build step. These examples use a POSIX shell; on Windows, use the `.exe` build/invocation form in [the README](README.md#build-and-run).
 
 ```sh
 go fmt ./...
@@ -15,6 +15,17 @@ go build -o bin/ferry-dock ./cmd/ferry-dock
 ```
 
 Keep formatting changes focused on the files you touch. Run the race detector on a supported host; if unavailable, record the platform and limitation in the PR. Do not claim a check passed unless you ran it.
+
+The optional developer checks below need Python 3 and Node 18 or newer; neither is an application runtime dependency. After building the binary above:
+
+```sh
+python3 scripts/smoke-http.py --binary bin/ferry-dock
+python3 scripts/smoke-request.py --binary bin/ferry-dock
+node scripts/test-ui.cjs
+node scripts/smoke-ui.cjs --binary bin/ferry-dock
+```
+
+`smoke-ui.cjs` obtains the embedded HTML and JavaScript from its own compiled service, runs that script with a DOM adapter, and uses real loopback HTTP plus the CLI. Offline and lost-response cases are explicit local fault injection. It does not render a browser, use the OS clipboard, scan a QR, or execute an actual Agent host. On Windows, pass the `.exe` binary path.
 
 ## Changes worth testing
 
