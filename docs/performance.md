@@ -2,6 +2,8 @@
 
 These are provisional engineering targets, not measured Ferry Dock results or cross-language rankings. The first published baseline must name its reference machine and include raw samples. Revise a target with evidence and a recorded rationale.
 
+The initial [macOS arm64 / Go 1.27.3 loopback baseline](performance-baseline.md) now records one frozen-binary run, with [raw samples](benchmarks/2026-10-28-macos-arm64.json), build identity, and limitations. Observations from that environment are separate from the targets below. The report preserves both the startup distribution and its slowest sample, and distinguishes stored-content cleanup from observed RSS reclamation.
+
 ## Alpha targets
 
 Measure a compiled executable, not `go run`. Use a fixed commit and toolchain, loopback HTTP, no debugger or race instrumentation, and an otherwise idle machine. Report the OS, CPU, RAM, power mode, and build flags alongside results.
@@ -14,7 +16,7 @@ Measure a compiled executable, not `go run`. Use a fixed commit and toolchain, l
 | Frontend delivery | ≤ 64 KiB uncompressed HTML + CSS + JS | Count first-party assets required for each page; record generated QR bytes separately |
 | State growth | Within configured bounds | Fill the allowed sessions/messages with maximum-size text; record peak RSS and retained heap |
 
-The alpha permits 16 sessions, each bounded by 128 messages and 1 MiB of text. Stored message bodies are therefore bounded by 16 MiB. That is a payload bound, not a process RSS guarantee. Metadata, in-flight JSON parsing, copies, responses, and the runtime consume additional memory. Measure the complete process before expanding defaults or adding files.
+The alpha permits 16 ordinary sessions, each bounded by 128 messages and 1 MiB of text, plus at most 64 retained collection requests with at most 16 KiB of input each. Stored text bodies are therefore bounded by 16 MiB + 1 MiB = 17 MiB. That is a payload bound, not a process RSS guarantee. Request metadata (including briefly retained terminal records), in-flight JSON parsing, copies, responses, and the runtime consume additional memory. Measure the complete process before expanding defaults or adding files.
 
 Incremental browser polling adds user-visible delay beyond API latency. Measure phone tap-to-computer display separately, including polling and network time. A fast handler alone does not establish a fast transfer experience.
 
@@ -28,7 +30,7 @@ Incremental browser polling adds user-visible delay beyond API latency. Measure 
 6. Exercise duplicate retries, concurrent closure/expiry, reconnect retrieval, and quota saturation. Confirm correctness after the load test.
 7. Save the command, raw data, and summary with the environment. Compare repeated runs on the same machine before attributing a change to code.
 
-When Go benchmarks exist, run `go test -run '^$' -bench . -benchmem -count 10 ./...` and compare distributions. An empty benchmark run is not a performance result. HTTP load, startup, and RSS need separate harnesses; no all-in-one benchmark harness is claimed in this alpha.
+For in-process Go benchmarks, run `go test -run '^$' -bench . -benchmem -count 10 ./...` and compare distributions. An empty benchmark run is not a performance result. The [compiled-program harness](../scripts/benchmark.py) separately measures startup, idle RSS, successful HTTP operations, pending-wait pressure, and ordinary-session capacity. Follow the commands and method in the [baseline record](performance-baseline.md); the harness does not measure browser, phone, or Agent execution performance.
 
 ## Gates before file transfer
 

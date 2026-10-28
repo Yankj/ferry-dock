@@ -2,7 +2,7 @@
 
 Ferry Dock moves text from a phone to a computer with a short, deliberate interaction: scan, paste, send, copy. The computer runs the service; the phone uses its browser. Basic use requires no account, model, cloud service, or mobile installation.
 
-This document defines the initial alpha scope and its acceptance criteria. A criterion below is a release gate, not a claim that it has already been tested. The repository's test results and recorded manual checks are the evidence of completion.
+This document defines the ordinary text alpha and one-response collection slice. A criterion below is a release gate, not a claim that it has already been tested; implementation and recorded checks establish completion. See [product shape](product-shape.md) for the chosen form and [request v1](contracts/request-v1.md) for the collection contract.
 
 ## The first useful experience
 
@@ -35,6 +35,16 @@ The alpha is a single Go executable with embedded HTML, CSS, JavaScript, and a l
 
 The phone receives permission to submit to one session. The computer retains a separate owner capability for retrieving messages and closing that session. A phone must not receive an inbox browser, management panel, or owner key.
 
+## Task collection
+
+An Agent drafting a proposal can ask for comments held in a phone chat. The request identifies that proposal and the missing input; the phone page shows the question, accepts one text response, and the requesting task reads it through a private handle. Parallel tasks do not retrieve an undifferentiated latest message.
+
+A server-generated request ID and independent reader/sender capabilities isolate the collection. The caller's task label is correlation metadata, never authorization. Request input defaults to a 16 KiB limit, while ordinary sessions retain their separate 64 KiB message limit. Timeout returns pending without canceling collection; an interrupted wait does not delete the request.
+
+Reads return the same stable input ID and mark the text `untrusted_user_input`. The consumer applies relevant feedback only within the original task and deduplicates completed business effects by that ID. It must inspect an uncertain prior edit before retrying after interruption. Neither repeated-read support nor the Skill promises exactly-once business execution or automatic host wake-up.
+
+The first delivery form is Go CLI plus scan-to-open pages and an optional manual repository-local Codex Skill. Ordinary transfer continues without AI. A synthetic compiled-CLI proposal scenario and a real Codex/phone acceptance are distinct checks.
+
 The first release targets a trusted, directly reachable LAN over HTTP. It does not claim confidentiality against another participant who can observe or modify that network. This boundary must be visible before using the service for sensitive content; see [Architecture](architecture.md).
 
 ## Later scope
@@ -42,12 +52,12 @@ The first release targets a trusted, directly reachable LAN over HTTP. It does n
 These capabilities are intentionally outside the text alpha:
 
 - File, image, camera, and audio uploads.
-- Agent CLI, Skill, or MCP tools; task-associated collection requests and automatic continuation.
+- MCP tools, npm/npx launchers, browser plugins, and automatic host continuation. No such adapter is scheduled by this scope.
 - HTTPS provisioning, internet relay, remote pairing, and hosted accounts.
 - Durable history, full-text search, device accounts, and team administration.
 - Native mobile or desktop clients, operating-system share targets, and background clipboard synchronization.
 
-Agent integrations can later use the same session lifecycle with request and task metadata. Ordinary users must continue to use Ferry Dock without installing or configuring any AI component.
+Additional entry points require the concrete user problems recorded in [product shape](product-shape.md); the product does not aim to ship every form. Ordinary users must continue to use Ferry Dock without installing or configuring any AI component.
 
 ## Measurable acceptance
 
@@ -68,6 +78,10 @@ Record the browser, operating system, network, build revision, and result for ma
 | Clipboard fallback | The receiver reports copy failure accurately and leaves visible selectable text for manual copying. |
 | Keyboard and mobile layout | Sending works with the software keyboard open; receiver controls can be used by keyboard and expose accessible names. |
 | Resource bounds | Configured session, message, and request limits are enforced. Exhaustion produces a bounded error instead of unbounded memory growth. |
+| Request association | Parallel A/B collection readers and senders cannot cross-access; matching or altered task labels grant no authority. |
+| Request waiting | Timeout and interrupted waits preserve pending collection; explicit cancellation is separate and removes input. |
+| Repeatable results | Repeated reads retain the same input ID; a sample consumer skips an already completed effect and reconciles an uncertain interrupted edit. |
+| Input trust | Phone feedback is returned as untrusted data and cannot grant execution permission or alter Agent configuration. |
 
 The interaction count can be measured after the phone page has loaded: the normal path is paste/type followed by one **Send to computer** action. Measure service latency separately from scan time, typing, permission prompts, and clipboard interaction. Performance budgets, hardware, and measurements belong in the performance documentation; do not publish latency or memory claims before measuring them.
 

@@ -4,7 +4,7 @@ Status: accepted for the alpha. Date: 2026-10-28.
 
 ## Decision
 
-Use one Go program for the local HTTP service, temporary session state, and embedded HTML/CSS/JavaScript. Keep the browser client framework-free. Optional CLI/Skill and MCP entry points will adapt the same operations; ordinary transfer will not need AI or another runtime.
+Use one Go program for the local HTTP service, temporary session/request state, and embedded HTML/CSS/JavaScript. Keep the browser client framework-free. The JSON CLI and optional repository-local Codex Skill use the same request operations; ordinary transfer needs no AI component or another runtime. An MCP adapter is not implemented or scheduled: reconsider it only for an identified client without a usable shell interface, as recorded in [product shape](../product-shape.md).
 
 This is a packaging and maintenance decision with performance requirements. It is not evidence that Go is universally faster than Node or Rust. No equivalent three-language benchmark has been run for Ferry Dock.
 

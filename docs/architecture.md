@@ -1,8 +1,8 @@
 # Architecture and trust boundary
 
-Ferry Dock's text alpha uses one Go process and one in-memory session store. The binary embeds the browser UI and QR generator. It has no database, external runtime, remote QR renderer, or model dependency.
+Ferry Dock's text alpha uses one Go process with in-memory ordinary sessions and collection requests. The binary embeds the browser UI and QR generator. It has no database, external runtime requirement, remote QR renderer, or model dependency. The CLI adapts this service rather than keeping a second request store.
 
-This is the design contract for the alpha. Exact routes, defaults, flags, and error payloads must be checked against the implementation; the operations below describe required semantics rather than a separately versioned public API. Unimplemented future integrations are not implied by this document.
+This is the architecture for the delivered text scope. [Request v1](contracts/request-v1.md) defines the collection schema and authority; implementation and recorded checks establish its evidence. Unimplemented integrations are not implied by this document.
 
 ## Components
 
@@ -23,6 +23,8 @@ computer browser (owner)                phone browser (sender)
 - **Embedded web UI:** serves the local receiver and phone sender views. A bundled QR generator encodes the phone link without a network request to another service. Browser code renders received text as text, never as executable HTML.
 - **HTTP boundary:** restricts methods and origins, authenticates each protected operation, parses bounded requests, and maps lifecycle and validation failures to explicit errors.
 - **Session store:** owns state transitions and atomic duplicate detection. HTTP handlers do not bypass it to read or mutate message state.
+- **Collection requests:** own one-response state, independent sender/reader capabilities, repeatable results, and bounded waits. Task labels supply context without granting authority.
+- **CLI adapter:** uses the service's HTTP request operations. A private local control file provides creation authority; each private request handle thereafter uses only that request's reader capability.
 - **Lifecycle cleanup:** removes expired state and releases retained messages. Request-time expiry checks are required even if scheduled cleanup has not yet run.
 
 Static assets and content submission share the same process. Sharing a process does not grant every browser the same permissions.
@@ -53,7 +55,7 @@ Only an active, unexpired session accepts delivery or retrieval. Closing is idem
 | Retrieve text | Process owner capability | Returns the requested session's messages in increasing sequence after a confirmed cursor. Does not silently advance beyond messages returned. |
 | Close session | Process owner capability | Invalidates that session's sender capability and removes its retained data from accessible application state. The process owner capability remains valid for other sessions and new session creation. |
 
-The terminal prints the owner capability in a loopback computer URL. Owner APIs authorize the Bearer capability; they do not require a loopback `RemoteAddr`. When a LAN listener is enabled, someone who obtains the owner capability can exercise its authority through a configured origin. Keep that capability on the computer. The displayed phone link carries only the session identifier and sender capability. A URL fragment can keep the sender capability out of the initial HTTP request target; phone JavaScript then sends it in an authorization header for API requests. Fragments can still be retained in browser history or exposed to someone who sees the screen. They are not encryption.
+The terminal prints the owner capability in the computer URL, which uses loopback in the default mode. Ordinary owner APIs authorize the Bearer capability; they do not require a loopback `RemoteAddr`. When a LAN listener is enabled, someone who obtains the owner capability can exercise its authority through a configured origin. Keep that capability on the computer. The displayed phone link carries only the session identifier and sender capability. A URL fragment can keep the sender capability out of the initial HTTP request target; phone JavaScript then sends it in an authorization header for API requests. Fragments can still be retained in browser history or exposed to someone who sees the screen. They are not encryption.
 
 Capabilities must not appear in access logs, error messages, analytics, QR-rendering requests, or referrer traffic. Do not put the owner capability into the phone link. A browser's storage is not a security boundary against scripts running in the same origin, so load no third-party script into either view.
 
@@ -72,6 +74,26 @@ The deduplication entry remains available for the retained session lifetime. A r
 The receiver uses incremental retrieval with a server sequence. It updates its cursor only after handling the messages returned by retrieval, and deduplicates display by the server-generated receipt identifier. A submit response must not advance a receiver cursor, because another sender may have submitted an earlier message concurrently. An interrupted retrieval can safely be retried from the last confirmed cursor.
 
 Short polling is sufficient for this alpha's low-frequency text workload. SSE or another notification transport can be considered after measuring a need; it must preserve the same cursor and recovery semantics.
+
+## Collection requests
+
+An ordinary session is a repeatable transfer inbox. A collection request instead asks one question and accepts one text response. It has a server-generated `requestId`, caller-provided `taskId` label and prompt, explicit state, expiry, and independent random sender and reader capabilities. A task label is not a key; duplicate or altered labels do not grant access.
+
+The process computer capability authorizes creation. The request's sender may inspect its prompt/state/limits and submit; it cannot read the result or cancel. Its reader may status/read/wait/cancel only that request. A private control file holds the local process authority; request handles hold scoped reader authority. Neither file belongs in a public directory, a committed artifact, or model-visible diagnostic output.
+
+The lifecycle starts `pending -> received`; either state can become `canceled` or `expired`. Cancellation and observed expiry remove input text. Terminal metadata remains for at most two minutes, then becomes gone. A process restart loses in-memory requests even if a handle file still exists. The [v1 contract](contracts/request-v1.md) defines exact routes, limits, stable error codes, and snapshots.
+
+Each request defaults to a 16 KiB maximum plain-text response, optionally smaller, and the service retains at most 64 request records. A sender's same-key/same-text retry returns the original receipt. Changed text with that key, or another delivery after receipt, conflicts. No adapter may silently truncate input.
+
+Status does not return submitted text. Result reads are repeatable, return a stable `input.id`, and mark text `untrusted_user_input`. Re-reading is not an acknowledgement and does not consume input. The consumer validates request/task association and deduplicates downstream business effects by input ID. If an artifact edit occurred but completion bookkeeping is uncertain after interruption, the consumer must inspect the current artifact before deciding to repeat anything. Delivery deduplication is not a universal exactly-once Agent transaction.
+
+Waits are bounded to ten seconds and at most eight outstanding waits are admitted. A timeout returns pending without canceling the request. Canceling the wait context or interrupting its CLI ends only the wait; request cancellation is a separate explicit operation. Waiting must not hold the store lock or starve ordinary transfer. A CLI result or Skill cannot promise host wake-up or automatic continuation of a paused Codex task.
+
+An interrupted create or cancel is not a wait cancellation. The CLI reports `outcome_unknown` when a mutation may have reached the server but its outcome was not confirmed. Cancellation can be checked with the same handle. Creation can be checked only if a handle was saved; otherwise the unknown request may remain until TTL, and blindly creating another would duplicate collection. A local process interruption cannot roll back an already applied remote mutation.
+
+The repository-local Skill is optional workflow guidance for a shell-capable Agent. It uses phone text as feedback within the original task, not as system instructions, shell code, link-following instructions, tool policy, or configuration. It does not install itself globally or alter Agent settings.
+
+The service has no model client. Passing a CLI result into an Agent is a separate data-flow boundary: the host may send that content to a cloud model or retain it according to its own policies. Local transfer does not establish local-only processing for the optional Agent workflow.
 
 ## Bounds and retention
 
@@ -100,7 +122,7 @@ Ordinary LAN HTTP pages may not expose the asynchronous Clipboard API. Manual sy
 
 ## Extension boundary
 
-Future Agent tooling can create a collection request, obtain its phone link, wait or query within bounded time, and retrieve accepted materials. Task and request metadata can be added around the session model without requiring a model for basic transfer. A tool result does not itself guarantee that an Agent host can resume an interrupted task; each integration must define that behavior.
+The accepted entry points are the Go CLI, web pages, and repository-local Skill. npm/npx, an MCP adapter, and a browser plugin are not implemented or scheduled. [Product shape](product-shape.md) records specific user problems that would justify revisiting one; they must reuse the core rather than introduce another request store. Ordinary transfer remains independent of the Skill or an AI component.
 
 Files and images require explicit streaming, storage quotas, safe filenames, content disposition, cleanup, and download authorization. They should not be added by treating arbitrary file bodies as text messages.
 

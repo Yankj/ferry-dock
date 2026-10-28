@@ -82,3 +82,41 @@ Chinese uses weight 600; English uses weight 500. The SVG contains no embedded o
 Standalone SVGs contain a descriptive title. In HTML, give meaningful brand images `alt="渡口 / Ferry Dock"`; use an empty alt when the same adjacent text already names the product. Do not use the mark alone to convey a session's connection, error, or success state.
 
 The original geometric artwork and these source files are distributed under the repository's [MIT license](../LICENSE). No font software or upstream logo artwork is bundled here. The project name is a product identifier; this document does not claim registered trademark status, exclusivity, or trademark clearance.
+
+
+## README banner
+
+The README banner uses the existing mark, product name, and one ordinary-transfer
+value statement: **From your phone. To your computer.** / **从手机，到电脑。**
+It does not claim Agent automation, encrypted transport, file support, or an
+unreleased installation method.
+
+- [banner.svg](banner.svg): editable, self-contained light artwork.
+- [banner-dark.svg](banner-dark.svg): the same composition for dark backgrounds.
+- [banner.png](banner.png): rendered light preview for image viewers and sharing.
+
+The artboard is 1280 × 400. English and Chinese names stay visible at a 320 px
+image width, and the two value lines are 14 px after that scale. The artwork uses
+system fonts, not downloaded or embedded font software. Exact font metrics may
+vary; the PNG records one export with the installed system-font fallback. The
+PNG and both 320 px light/dark checks have been visually inspected. These are
+brand graphics, not application screenshots.
+
+For a README, use the theme-aware SVGs and meaningful alternative text:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/banner-dark.svg">
+  <img src="brand/banner.svg" alt="Ferry Dock / 渡口 — From your phone. To your computer.">
+</picture>
+```
+
+Regenerate from the canonical geometric marks with the same optional renderer
+used for the brand sheet:
+
+```sh
+NODE_PATH=/tmp/ferry-dock-renderer/node_modules node scripts/render-banner.cjs
+```
+
+Pass `--qa` to also render 320 px light/dark checks and the full dark preview
+under `/tmp`; those temporary QA images are not distributed product assets.

@@ -1,5 +1,32 @@
 # Verification record
 
+## Collection-request slice, 2026-10-28
+
+The request core and JSON CLI were frozen at local source revision
+`5d3caff0833ff52e805a4a874e7f07d82e39c624`. On macOS arm64 with Go 1.27.3:
+
+- `go vet ./...` and `go test -race -cover ./...` passed. Core package coverage
+  was 88.9%; CLI unit coverage was 42.8%. These are package numbers, not total
+  product acceptance percentages.
+- The compiled program passed 12 ordinary-transfer HTTP checks and 27 synthetic
+  task-collection checks. The proposal scenario verifies request isolation,
+  bounded/repeatable waiting, stable input IDs, a sample consumer's duplicate
+  edit prevention, explicit cancellation and expiry. It is not an LLM run.
+- Ten dependency-free Node VM checks passed for request/ordinary sender UI
+  logic. A fake DOM is not a rendered browser or clipboard permission test.
+- Final CLI regression tests distinguish interrupted waits, interrupted reads,
+  unknown mutation outcomes, and oversized result rejection.
+- Windows amd64 and Linux amd64 binaries built with `CGO_ENABLED=0`. They were
+  cross-compiled, not executed on those platforms for this slice.
+
+See [claims and evidence](claims-evidence.md) for command-level audit and
+[the measured baseline](performance-baseline.md) for machine, raw data and limits.
+The CI workflow includes the new scenarios, but the earlier remote CI run below
+belongs to the prior text alpha and is not evidence for this local revision.
+Browser, physical Android/iOS and actual Codex-host acceptance remain **NOT_RUN**.
+
+## Earlier ordinary-transfer slice
+
 The transfer alpha has automated HTTP coverage and a compiled-program loopback
 smoke test. These checks do not establish phone-browser or real-device behaviour.
 

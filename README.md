@@ -1,73 +1,121 @@
 # Ferry Dock
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="brand/wordmark-dark.svg">
-  <img src="brand/wordmark-light.svg" width="200" alt="渡口 / Ferry Dock">
+  <source media="(prefers-color-scheme: dark)" srcset="brand/banner-dark.svg">
+  <img src="brand/banner.svg" width="960" alt="Ferry Dock / 渡口 — From your phone. To your computer.">
 </picture>
 
 **A small local bridge from your phone to your computer.**
 
-[简体中文](README.zh-CN.md)
+[简体中文](README.zh-CN.md) · [Product FAQ](PRFAQ.md) · [Brand assets](brand/README.md)
 
-Ferry Dock is a small, local transfer service. Open it on your computer, scan a QR code on your phone, and send text into a temporary inbox. No phone app, cloud account, or AI model is required.
+Bring text from a phone to a temporary computer inbox. When a task needs that text, a collection request can identify the question and return the answer to the request that asked for it. The phone uses a browser; ordinary transfer needs no AI component.
 
-**Status: early alpha.** The first slice covers phone-to-computer plain text. File transfer and task-bound Agent inputs are planned; there is no published binary release or npm package yet.
+**Alpha:** temporary text sessions, one-response collection requests, a JSON CLI, and a repository-local Codex Skill are implemented. Files, npm/npx, MCP, and a browser plugin are not available. Browser, real-phone, and actual Codex-host acceptance remain separate from automated checks.
 
-Browser flow verification is scheduled for this initialization pass; results have not yet been recorded. Real-phone LAN acceptance remains pending.
+## Comments on your phone, proposal on your computer
 
-## Try it
+You are drafting a proposal on the computer, but the client's comments are in a phone chat. Open a temporary inbox, scan, paste, send, and copy. No mobile app or account is required.
 
-Build prerequisites: Go 1.26 or newer. The built program embeds its web interface and needs no Node runtime or database.
+For an Agent-assisted task, name the proposal in a collection request and show its QR. The phone page asks for those comments. A private reader handle gets only that request's result, so another task's feedback does not become “the latest message” to guess from. The original task decides how to revise the proposal.
+
+The request loop is a transfer tool, not an Agent host. A timed-out wait can be queried again; it cannot wake a paused host by itself.
+
+## Build and run
+
+The computer needs Go 1.26 or newer to build from source. The phone needs no installation. There is no published binary release or package installer yet.
 
 ```sh
 git clone https://github.com/Yankj/ferry-dock.git
 cd ferry-dock
-go run ./cmd/ferry-dock
+go build -o bin/ferry-dock ./cmd/ferry-dock
+./bin/ferry-dock serve
 ```
 
-The default listener is `127.0.0.1:8787`, for use on this computer. To receive from a phone on a trusted local network, supply a reachable address:
+Default binding is `127.0.0.1:8787`, which is local to the computer. To receive from a physical phone, restart with a reachable LAN address:
 
 ```sh
-go run ./cmd/ferry-dock -listen 0.0.0.0:8787 -public-url http://192.168.1.20:8787
+./bin/ferry-dock serve --listen 0.0.0.0:8787 --public-url http://192.168.1.20:8787
 ```
 
-Replace `192.168.1.20` with your computer's LAN address. Both devices must be able to reach that address; guest Wi-Fi isolation, a VPN, or a firewall can prevent access.
+Replace `192.168.1.20` with the computer's actual LAN address. A QR does not bypass guest Wi-Fi isolation, a VPN, routing, or a firewall. The no-subcommand launch remains compatible.
 
-1. Open the **computer URL** printed in the terminal. A session starts automatically and displays its QR code.
-2. Scan the QR code with your phone, paste text, and tap **Send to computer**.
+Building or obtaining dependencies may need Internet access. Once built, the executable embeds its pages, QR generation, and brand assets; ordinary operation uses the local service without a cloud account or model call.
+
+## Ordinary transfer: scan, send, copy
+
+1. Open the private **computer URL** printed in the terminal. A session starts automatically and displays its QR.
+2. Scan with your phone, paste text, and tap **Send to computer**.
 3. Click **Copy** on the computer.
 
-Keep the computer URL private: it grants inbox management access. Share only the phone link or its QR code. Click **End session** when finished, or let it expire after 15 minutes; use **New session** to start again. Restarting the process clears its in-memory data.
+Keep sending from the same phone page without rescanning. **End session** clears the retained session; **New session** creates another. Sessions expire after 15 minutes by default. Restarting or stopping the service loses its in-memory text.
 
-To build an executable:
+Ordinary text is limited to 64 KiB per message, 1 MiB and 128 messages per session, with at most 16 active sessions. Accepted text preserves whitespace and Unicode. A service receipt does not mean a person has read or copied it.
+
+## Task collection: request, wait, read
+
+This optional path uses the same Go service and a private local handle, not a model API. The CLI flags below match its help output; use your actual LAN origin and private local paths.
+
+Start a service with an explicit private control file. This POSIX-shell example prints the private runtime directory so that a second terminal can use it:
 
 ```sh
-go build -o bin/ferry-dock ./cmd/ferry-dock
-./bin/ferry-dock -help
+umask 077
+runtime_dir="$(mktemp -d)"
+printf 'Private runtime directory: %s\n' "$runtime_dir"
+./bin/ferry-dock serve --listen 0.0.0.0:8787 \
+  --public-url http://192.168.1.20:8787 \
+  --control-file "$runtime_dir/control.json"
 ```
 
-## What the alpha does
+In another terminal, set `runtime_dir` to the printed directory. On Windows, choose a directory private to your user and use its paths with the same CLI flags.
 
-- Temporary text sessions with separate computer and phone capabilities.
-- QR entry, exact text preservation, incremental inbox retrieval, and copy feedback.
-- Session closure and expiry, a 64 KiB text limit, a 1 MiB inbox limit, and duplicate submission detection.
-- All application assets served by the local process. No external QR service, analytics, or model call.
+```sh
+runtime_dir="/path/printed/by/the/first/terminal"
+./bin/ferry-dock request create \
+  --control "$runtime_dir/control.json" \
+  --task-id proposal-launch \
+  --prompt "Launch proposal: paste the changes from your phone chat." \
+  --handle "$runtime_dir/proposal.json" --ttl 15m --max-bytes 16384
+./bin/ferry-dock request wait --handle "$runtime_dir/proposal.json" --timeout 10s
+./bin/ferry-dock request read --handle "$runtime_dir/proposal.json"
+```
 
-The phone can submit to its session; it cannot read the inbox or manage sessions. Clipboard access depends on the browser and its permissions. Manual paste remains available; the page does not monitor the clipboard in the background.
+Show the generated QR PNG or returned private phone URL to the user. Creation output does not include the process computer token; the control file and handle still contain capabilities and must stay private. Do not print their contents, commit them, or put them under a public document root.
 
-## Where this goes
+A request accepts one response, at most 16 KiB by default. `--ttl` is a duration such as `15m` or `900s`, restricted to whole seconds; omitting it inherits service retention. Its server-generated request ID identifies the collection; `taskId` is only a correlation label. Each request has independent sender and reader capabilities. A label never grants access.
 
-The ordinary transfer flow comes first. Optional CLI/Skill and MCP adapters can later let an Agent request information, produce a phone QR, and retrieve the result in the same task. They will use the same session core. File and image transfer, richer input requests, and distribution packages are future work, not alpha features.
+Use `request status --handle ...` to check state and `request cancel --handle ...` to end collection explicitly. A wait is bounded to ten seconds; timeout returns pending without canceling. Ctrl+C during `request wait` ends that wait only. Ctrl+C in the service terminal stops the service and loses its in-memory data.
 
-The core is Go with embedded HTML, CSS, and JavaScript. [The runtime decision](docs/decisions/0001-runtime.md) compares Node, Go, and Rust. [Performance budgets](docs/performance.md) define what to measure; they are targets, not benchmark claims.
+Reads return a stable `input.id` and `trust: "untrusted_user_input"`. The consumer must validate the request/task identity and avoid repeating a completed business action for the same input ID. If an edit's outcome is uncertain after interruption, inspect the current artifact before retrying. The server does not guarantee exactly-once Agent execution.
 
-[Brand assets and usage](brand/README.md) cover the Ferry Dock identity and its Chinese name, 渡口.
+To use the Codex workflow, explicitly reference [skills/ferry-dock/SKILL.md](skills/ferry-dock/SKILL.md) in the repository. This is a manual local artifact, not a globally installed skill or an automatic Codex configuration change. It explains bounded waiting, task checks, and treating phone text as feedback rather than executable instructions.
 
-## Trust boundary
+## One local service, explicit trust
 
-This alpha uses HTTP on a trusted LAN. Traffic and bearer capabilities are not protected from a network observer. It is not an Internet-facing service. URL fragments keep keys out of ordinary request paths, but do not make shared links safe to disclose. See [architecture and threat model](docs/architecture.md) and [security reporting](SECURITY.md).
+The core is Go with embedded HTML, CSS, and JavaScript. Ordinary sessions and collection requests share the HTTP boundary and temporary in-memory service; the CLI adapts the request API rather than maintaining a second store. See [architecture](docs/architecture.md), [request v1](docs/contracts/request-v1.md), and [the runtime decision](docs/decisions/0001-runtime.md).
 
-## Contribute
+The computer link and control file have process management authority. An ordinary phone QR has session submission authority; a request QR and reader handle are each scoped to that request. Share the phone invitation only with the intended sender.
+
+**Local does not mean encrypted.** This slice uses HTTP on a trusted LAN, without TLS provisioning or end-to-end encryption. An observer of that network may obtain content and capabilities. URL fragments reduce exposure in request paths; they are not encryption. Do not expose the alpha directly to the Internet. See [SECURITY.md](SECURITY.md).
+
+Local operation and no model call describe the Ferry Dock service. If you pass a CLI result to an Agent through the optional Skill, that host may send it to a cloud model or retain it under its own policies. Ferry Dock does not make the entire Agent workflow local.
+
+## Limits and recovery
+
+| Situation | What to do |
+| --- | --- |
+| Phone cannot open the page | Check the advertised LAN address and actual device reachability. |
+| Paste or Copy is unavailable | Use manual system paste or select the visible text to copy. Clipboard permissions vary by browser. |
+| A wait returns pending | Keep the request handle and query again; timeout did not cancel collection. |
+| Create or cancel returns `outcome_unknown` | The mutation may have happened. Query with the same saved handle; if creation saved no handle, report uncertainty and let the unknown request expire rather than blindly creating again. |
+| A request is canceled or expired | Its submitted text is removed; create a new request if still needed. |
+| The service restarted | Old in-memory content is gone. Create a new session or request; a local handle is not a backup. |
+
+No file, photo, audio, screen-control, background clipboard sync, durable history, cloud relay, npm/npx launcher, MCP adapter, or browser plugin is included. Those entry points are not a scheduled expansion plan; [product shape](docs/product-shape.md) records the conditions for reconsidering one.
+
+## Evidence and contributions
+
+Automated checks cover ordinary HTTP behavior and request isolation, cancellation/expiry, retry deduplication, stable reads, and bounded waits. A compiled-program synthetic proposal scenario exercises the CLI and a consumer that avoids repeating an already completed edit. Synthetic HTTP/CLI execution does not establish browser, Android/iOS, or actual Codex-host acceptance; those remain **NOT_RUN** until their specific evidence exists.
 
 ```sh
 go fmt ./...
@@ -76,14 +124,8 @@ go test ./...
 go test -race ./...
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for review expectations and the distinction between automated checks and real phone acceptance. [Product scope](docs/product.md) records the shortest supported flow.
+See [verification](docs/verification.md), [claims and evidence](docs/claims-evidence.md), and [CONTRIBUTING.md](CONTRIBUTING.md). [Performance budgets](docs/performance.md) are targets. The first [macOS arm64 / Go 1.27.3 loopback baseline](docs/performance-baseline.md) and [raw samples](docs/benchmarks/2026-10-28-macos-arm64.json) record startup, memory, and API observations, including the slowest startup and post-close RSS. They do not measure phone tap-to-display or Agent execution speed.
 
-The [verification record](docs/verification.md) separates passing automated HTTP
-checks from browser and real-phone acceptance that has not been run. View the
-[brand preview](brand/preview.png) for the current identity and palette.
-
-## Design references and license
-
-[DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653) informed the local launch and QR experience; [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1) informed text fidelity and incremental retrieval. Ferry Dock's core is a new implementation, not a fork of either project. See [third-party notices](THIRD_PARTY_NOTICES.md) for dependency attribution and licenses.
+The local launch/QR experience considered [DropLocal](https://github.com/shiyuanhai/droplocal/tree/16c9fe05e048b2c5ebbe2e75ccb4619620bd9653), and text fidelity/incremental retrieval considered [Ferry](https://github.com/max1874/ferry/tree/5b7882947ef34ae422004ae81ccc2da509693fe1). Ferry Dock's application is a new implementation. Dependency attribution is in [third-party notices](THIRD_PARTY_NOTICES.md).
 
 [MIT](LICENSE).

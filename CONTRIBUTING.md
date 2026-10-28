@@ -1,6 +1,6 @@
 # Contributing to Ferry Dock
 
-Small, reviewable contributions are welcome. For a new input type, transport, dependency, or persistent store, open an issue first so that the change can be evaluated against [product scope](docs/product.md).
+Small, reviewable contributions are welcome. For a new input type, transport, dependency, or persistent store, open an issue first so that the change can be evaluated against [product shape](docs/product-shape.md). The current form is a Go CLI, scan-to-open web pages, and an optional repository-local Codex Skill; additional entry points are not a scheduled expansion plan.
 
 ## Local checks
 
@@ -20,7 +20,15 @@ Keep formatting changes focused on the files you touch. Run the race detector on
 
 For protocol or state changes, test the behavior at its boundary: role separation, session closure and expiry, exact text bytes, duplicate retry behavior, ordering after reconnection, and limits under concurrent requests. Tests should catch a plausible regression rather than repeat implementation details.
 
+For collection requests, follow [request v1](docs/contracts/request-v1.md). Cover A/B request isolation for both reader and sender, labels that grant no authority, cancellation and expiry erasing input, repeatable reads with stable input IDs, and wait timeout/interruption without request cancellation. Keep ordinary-session regression coverage. A synthetic proposal consumer may demonstrate downstream deduplication; it must not claim a transaction guaranteeing exactly-once Agent execution.
+
+Test mutation uncertainty separately: interruption during create or explicit cancel must not be reported as proof that the operation did not execute. `outcome_unknown` recovery should use a saved handle when available, and must not blindly repeat creation without one.
+
+Keep [the repository-local Skill](skills/ferry-dock/SKILL.md), CLI help, README examples, PRFAQ, and claims-to-evidence record consistent with executed behavior. The Skill must not install itself globally, change Agent configuration, treat phone content as tool instructions, or claim to wake a host. A changed command example should be exercised with synthetic data and private runtime files before being documented as working.
+
 For UI changes, check keyboard access, a narrow phone viewport, empty/loading/error states, and copy/paste failure recovery. Real phone acceptance must identify OS, browser, network setup, and what was exercised. A browser emulator does not establish camera QR scanning or mobile clipboard compatibility.
+
+Record synthetic CLI/HTTP, browser, real-phone LAN, and actual Codex-host acceptance separately. Cross-platform builds do not establish real-device compatibility. Use `NOT_RUN` for checks the environment could not perform, rather than converting them into a pass.
 
 Performance changes need a reproducible workload, machine and toolchain details, before/after measurements, and an explanation of the tradeoff. Follow [the measurement plan](docs/performance.md); do not infer a speedup from the language or framework alone.
 

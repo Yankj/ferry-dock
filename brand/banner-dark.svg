@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="banner-title banner-desc">
+  <title id="banner-title">Ferry Dock / 渡口 — From your phone. To your computer.</title>
+  <desc id="banner-desc">A local text handoff. The two-shore geometric mark connects a phone and a computer without a boat illustration or interface mockup.</desc>
+  <rect width="1280" height="400" fill="#102321"/>
+  <g fill="#F0F6F2" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <svg x="72" y="62" width="64" height="64" viewBox="0 0 32 32" color="#F0F6F2" aria-hidden="true">
+  <title id="small-mark-title">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg>
+    <text x="160" y="122" font-size="76" font-weight="500" letter-spacing="-2.5">Ferry Dock</text>
+    <text x="590" y="120" font-size="64" font-weight="600" letter-spacing="1">渡口</text>
+    <text x="76" y="236" font-size="56" font-weight="500" letter-spacing="-1.2" fill="#76D6C6">From your phone.</text>
+    <text x="76" y="306" font-size="56" font-weight="500" letter-spacing="-1.2">To your computer.</text>
+    <svg x="920" y="62" width="272" height="272" viewBox="0 0 32 32" color="#F0F6F2" aria-hidden="true">
+  <title id="large-mark-title">渡口 / Ferry Dock</title>
+  <path fill="currentColor" d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+  <rect x="12" y="14" width="8" height="4" fill="currentColor"/>
+</svg>
+  </g>
+</svg>
