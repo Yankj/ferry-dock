@@ -1,0 +1,490 @@
+{
+  "status": "LOCAL_UNPUBLISHED",
+  "version": "0.1.0-alpha.4",
+  "source": {
+    "binaryCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+    "commit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+    "dirty": false,
+    "epoch": 1793277237,
+    "treeSha256": "99c66b906848ebdd23c56fdf2512ea6bb2fff6e69f07a99970243e634281fd59"
+  },
+  "nativeManifestSha256": "88134f5f08c2efffd145d5370599656b5ecd2a36d58ac878e5fd34699aa129d6",
+  "npmManifestSha256": "484040d74d327f4ddcc30f5b573a2e6286bf12b8116a23a7dee81e72231dcc42",
+  "native": {
+    "artifacts": [
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-darwin-arm64/ferry-dock",
+          "sha256": "022c181e307cc21ed021430cc9107080bee8d7350a7aee13102b6fb7ce26d015",
+          "size": 7387666
+        },
+        "binaryFormat": {
+          "cpu": "arm64",
+          "executableType": "EXECUTE",
+          "format": "Mach-O64",
+          "minimumOsHeader": "13.0.0"
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "86bd95ca6e571fb7bdf0408be4f30488e129b2e4ecb51c99ffe95d42233edab3"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz",
+        "goarch": "arm64",
+        "goos": "darwin",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "armv8.0",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "c7a6e598fb976ab56ac098b62a52dbe0867871396ee0c2d2b1ccc74c3dbd7988",
+        "signing": {
+          "adHoc": true,
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3341674
+      },
+      {
+        "binary": {
+          "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+          "sha256": "0b15cfcb6a2d8c0dacea7ef57c611f4201376da15d887d1c72a62b8d1f348be0",
+          "size": 7344896
+        },
+        "binaryFormat": {
+          "cpu": "arm64",
+          "executableType": "EXECUTE",
+          "format": "Mach-O64",
+          "minimumOsHeader": "13.0.0"
+        },
+        "contents": {
+          "count": 58,
+          "sha256": "dd4e2b3cf7a9245a5f0cbd4d7f3b1f60918613fcde26ed9cb1bb3c38685a7b18"
+        },
+        "defaultMode": "desktop",
+        "file": "ferry-dock-0.1.0-alpha.4-darwin-arm64-app.zip",
+        "goarch": "arm64",
+        "goos": "darwin",
+        "kind": "app",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "armv8.0",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "1c47bae9472a8034d05b7c2bc0c1f5408c49f55cb39ac20e5faed2ade39db364",
+        "signing": {
+          "adHoc": true,
+          "bundleSigned": true,
+          "bundleVerified": true,
+          "developerIdSigned": false,
+          "identifier": "io.github.yankj.ferry-dock",
+          "notarized": false,
+          "publisherSigned": false,
+          "resourceSealed": true,
+          "scope": "bundle",
+          "strictVerification": "PASS"
+        },
+        "size": 3349636
+      },
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-darwin-amd64/ferry-dock",
+          "sha256": "217d14c16caf090cf3b9defa10b0eca3d2f79d19351a72440580e57adb1619a5",
+          "size": 7969744
+        },
+        "binaryFormat": {
+          "cpu": "amd64",
+          "executableType": "EXECUTE",
+          "format": "Mach-O64",
+          "minimumOsHeader": "13.0.0"
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "72297fefaf042b6e663d148d4e8dd7d3842d2635967433b8f92245511eb46c16"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz",
+        "goarch": "amd64",
+        "goos": "darwin",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "x86-64-v1",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "b0b6c7828c904c7c9601e0ef790ed044fff741bba6213b24492df2965e67b69a",
+        "signing": {
+          "adHoc": false,
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3612931
+      },
+      {
+        "binary": {
+          "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+          "sha256": "f1dede7dd4eaccc84b183a9463cb108301e82f157ac2ce03f5ee01affce04592",
+          "size": 8032304
+        },
+        "binaryFormat": {
+          "cpu": "amd64",
+          "executableType": "EXECUTE",
+          "format": "Mach-O64",
+          "minimumOsHeader": "13.0.0"
+        },
+        "contents": {
+          "count": 58,
+          "sha256": "7ee7f3a0bac641864bf2d169483f8b925bf1a9aa841d99f5ba4b5ce3ba395b86"
+        },
+        "defaultMode": "desktop",
+        "file": "ferry-dock-0.1.0-alpha.4-darwin-amd64-app.zip",
+        "goarch": "amd64",
+        "goos": "darwin",
+        "kind": "app",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "x86-64-v1",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "61d220d48140dacbe0fae1804976e45762df5d38d2e5245188be6e063b8c6c22",
+        "signing": {
+          "adHoc": true,
+          "bundleSigned": true,
+          "bundleVerified": true,
+          "developerIdSigned": false,
+          "identifier": "io.github.yankj.ferry-dock",
+          "notarized": false,
+          "publisherSigned": false,
+          "resourceSealed": true,
+          "scope": "bundle",
+          "strictVerification": "PASS"
+        },
+        "size": 3726908
+      },
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-linux-amd64/ferry-dock",
+          "sha256": "5f9b8dffdfde657338417181c4342a6d47744e02f465b2ebe425c814fd901719",
+          "size": 7803004
+        },
+        "binaryFormat": {
+          "cpu": "amd64",
+          "dynamicSegment": false,
+          "executableType": "EXEC",
+          "format": "ELF64",
+          "interpreter": false,
+          "systemLibcRequired": false
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "4f53a043add7240f151e6e7da5c619fe14ca60f9cc622014657fe8e660eb5733"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz",
+        "goarch": "amd64",
+        "goos": "linux",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "x86-64-v1",
+          "linuxLibc": "not dynamically linked",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "59e9610804dd1a39d4ed64474b1611218e58a969b7a2d12c9646cb1146b83d0c",
+        "signing": {
+          "adHoc": "NOT_APPLICABLE",
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3567264
+      },
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-linux-arm64/ferry-dock",
+          "sha256": "253a03e1deb5e1f358d85f2a033ce680bc05731c03f4aa36d380764b76c87cb3",
+          "size": 7209084
+        },
+        "binaryFormat": {
+          "cpu": "arm64",
+          "dynamicSegment": false,
+          "executableType": "EXEC",
+          "format": "ELF64",
+          "interpreter": false,
+          "systemLibcRequired": false
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "377b8f28df5c3d4d2b8f0e0c01d5ea20cf409d2b13e6395538c6842b380593d1"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz",
+        "goarch": "arm64",
+        "goos": "linux",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "armv8.0",
+          "linuxLibc": "not dynamically linked",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "1de96a12ac3f380d0b45fa5b2959b02743931f2a08bf896d6341da85f7c1ce58",
+        "signing": {
+          "adHoc": "NOT_APPLICABLE",
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3240081
+      },
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-windows-amd64/ferry-dock.exe",
+          "sha256": "9247d784307e628b87364f69d146ac686d17d2daea376e04bf210a380b11aca7",
+          "size": 8030720
+        },
+        "binaryFormat": {
+          "cpu": "amd64",
+          "format": "PE32+",
+          "osVersionHeader": "10.0",
+          "subsystem": "WINDOWS_CUI",
+          "subsystemVersionHeader": "10.0"
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "380e900751258d05d807584c50debc30c3426e76fb524b63395bc78dbe8e4a73"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-windows-amd64.zip",
+        "goarch": "amd64",
+        "goos": "windows",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "x86-64-v1",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "6d74c32eebbd3c03440cd9c780b7ff172b29124c4fc9183c9b39910f1b99f502",
+        "signing": {
+          "adHoc": "NOT_APPLICABLE",
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3679228
+      },
+      {
+        "binary": {
+          "path": "ferry-dock-0.1.0-alpha.4-windows-arm64/ferry-dock.exe",
+          "sha256": "b5a5b8302be32c12c138e3f15e8688463943c571ff020179df203bf669b5778a",
+          "size": 7290368
+        },
+        "binaryFormat": {
+          "cpu": "arm64",
+          "format": "PE32+",
+          "osVersionHeader": "10.0",
+          "subsystem": "WINDOWS_CUI",
+          "subsystemVersionHeader": "10.0"
+        },
+        "contents": {
+          "count": 54,
+          "sha256": "594498f39e7bf63996e2fb6bb9f714521e3f8bb8dec2cc481f7952df96ee4480"
+        },
+        "defaultMode": "serve",
+        "file": "ferry-dock-0.1.0-alpha.4-windows-arm64.zip",
+        "goarch": "arm64",
+        "goos": "windows",
+        "kind": "cli",
+        "nativeValidation": "NOT_RUN",
+        "runtimeRequirements": {
+          "cpuBaseline": "armv8.0",
+          "linuxLibc": "NOT_APPLICABLE",
+          "minimumOsAcceptance": "NOT_RUN"
+        },
+        "sha256": "c5a45f57d6c01b57250fe887e965dcbbb59f456059c34011313e3889d2be8e4b",
+        "signing": {
+          "adHoc": "NOT_APPLICABLE",
+          "developerIdSigned": false,
+          "notarized": false,
+          "publisherSigned": false,
+          "scope": "executable"
+        },
+        "size": 3314564
+      }
+    ],
+    "build": {
+      "cgoEnabled": false,
+      "pgo": false,
+      "trimpath": true,
+      "vcsStamping": false
+    },
+    "product": "Ferry Dock",
+    "schema": 1,
+    "source": {
+      "binaryCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+      "commit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+      "dirty": false,
+      "epoch": 1793277237,
+      "treeSha256": "99c66b906848ebdd23c56fdf2512ea6bb2fff6e69f07a99970243e634281fd59"
+    },
+    "toolchain": {
+      "go": "go version go1.27.3 darwin/arm64",
+      "goamd64": "v1",
+      "goarm64": "v8.0",
+      "goenv": "off",
+      "goexperiment": "",
+      "python": "3.9.6",
+      "zlib": "1.2.12"
+    },
+    "version": "0.1.0-alpha.4"
+  },
+  "npm": {
+    "schemaVersion": 1,
+    "status": "LOCAL_UNPUBLISHED",
+    "version": "0.1.0-alpha.4",
+    "coreCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+    "entrySource": {
+      "commit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+      "dirty": false
+    },
+    "nativeManifestSha256": "88134f5f08c2efffd145d5370599656b5ecd2a36d58ac878e5fd34699aa129d6",
+    "packages": [
+      {
+        "target": "entry",
+        "name": "ferry-dock",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-0.1.0-alpha.4.tgz",
+        "size": 13599,
+        "sha256": "cdb848296b4596fb2bd78a3e8bc92a418afba19c4b809a997fde88535a990e4c",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "bin/ferry-dock.cjs",
+          "core.json",
+          "docs/contracts/request-v1.md",
+          "package.json",
+          "skills/ferry-dock/SKILL.md"
+        ]
+      },
+      {
+        "target": "darwin-arm64",
+        "name": "ferry-dock-darwin-arm64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz",
+        "size": 3130745,
+        "sha256": "aa865d6d3452eae29e38097b91e4b152ef12e1b71bb258c71f00ce5bab2134ce",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock",
+          "package.json"
+        ]
+      },
+      {
+        "target": "darwin-x64",
+        "name": "ferry-dock-darwin-x64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-darwin-x64-0.1.0-alpha.4.tgz",
+        "size": 3386155,
+        "sha256": "46a4a39729dc83e2b4ab2a13a41d09c676a1b4cb085c94dcb230e49fa9bfd6bc",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock",
+          "package.json"
+        ]
+      },
+      {
+        "target": "linux-arm64",
+        "name": "ferry-dock-linux-arm64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-linux-arm64-0.1.0-alpha.4.tgz",
+        "size": 3025798,
+        "sha256": "a78f9c70a3685e79b8dcafca829dcf94f6662a59a621adcda5e89e63931b214f",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock",
+          "package.json"
+        ]
+      },
+      {
+        "target": "linux-x64",
+        "name": "ferry-dock-linux-x64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-linux-x64-0.1.0-alpha.4.tgz",
+        "size": 3336495,
+        "sha256": "1a9fe2682012c6b502c81f9502287393d03204674d79593056814dffc2e1f1bf",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock",
+          "package.json"
+        ]
+      },
+      {
+        "target": "win32-arm64",
+        "name": "ferry-dock-win32-arm64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-win32-arm64-0.1.0-alpha.4.tgz",
+        "size": 3070496,
+        "sha256": "9ce86a4ce59bdf488b01644138d838292c073606be7c7c02f566ad6ec5d8de0f",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock.exe",
+          "package.json"
+        ]
+      },
+      {
+        "target": "win32-x64",
+        "name": "ferry-dock-win32-x64",
+        "version": "0.1.0-alpha.4",
+        "file": "ferry-dock-win32-x64-0.1.0-alpha.4.tgz",
+        "size": 3424567,
+        "sha256": "7b292b5aab1ffb01ca7272e70b3402a78f2ec3d6cdec1a55d50fa5ca7b5fc47b",
+        "files": [
+          "LICENSE",
+          "README.md",
+          "THIRD_PARTY_NOTICES.md",
+          "core.json",
+          "native/ferry-dock.exe",
+          "package.json"
+        ]
+      }
+    ]
+  },
+  "nativeReproductionOutputs": 10,
+  "npmReproductionOutputs": 9,
+  "notRun": [
+    "foreign platform native execution",
+    "remote CI for this batch",
+    "real browser and phone",
+    "downloaded Gatekeeper or SmartScreen trust",
+    "Windows ACL and console Ctrl+C"
+  ]
+}

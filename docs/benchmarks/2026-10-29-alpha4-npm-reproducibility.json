@@ -1,0 +1,52 @@
+{
+  "status": "PASS_BYTE_IDENTICAL",
+  "scope": "npm entry, six platform packages, manifest, checksums",
+  "sourceCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+  "outputs": [
+    {
+      "file": "SHA256SUMS",
+      "size": 817,
+      "sha256": "93408aedf3c0ca2ee7da52e9a69fe973179c725acc0f94fa1ebd1cf00a905bcb"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4.tgz",
+      "size": 13599,
+      "sha256": "cdb848296b4596fb2bd78a3e8bc92a418afba19c4b809a997fde88535a990e4c"
+    },
+    {
+      "file": "ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz",
+      "size": 3130745,
+      "sha256": "aa865d6d3452eae29e38097b91e4b152ef12e1b71bb258c71f00ce5bab2134ce"
+    },
+    {
+      "file": "ferry-dock-darwin-x64-0.1.0-alpha.4.tgz",
+      "size": 3386155,
+      "sha256": "46a4a39729dc83e2b4ab2a13a41d09c676a1b4cb085c94dcb230e49fa9bfd6bc"
+    },
+    {
+      "file": "ferry-dock-linux-arm64-0.1.0-alpha.4.tgz",
+      "size": 3025798,
+      "sha256": "a78f9c70a3685e79b8dcafca829dcf94f6662a59a621adcda5e89e63931b214f"
+    },
+    {
+      "file": "ferry-dock-linux-x64-0.1.0-alpha.4.tgz",
+      "size": 3336495,
+      "sha256": "1a9fe2682012c6b502c81f9502287393d03204674d79593056814dffc2e1f1bf"
+    },
+    {
+      "file": "ferry-dock-win32-arm64-0.1.0-alpha.4.tgz",
+      "size": 3070496,
+      "sha256": "9ce86a4ce59bdf488b01644138d838292c073606be7c7c02f566ad6ec5d8de0f"
+    },
+    {
+      "file": "ferry-dock-win32-x64-0.1.0-alpha.4.tgz",
+      "size": 3424567,
+      "sha256": "7b292b5aab1ffb01ca7272e70b3402a78f2ec3d6cdec1a55d50fa5ca7b5fc47b"
+    },
+    {
+      "file": "npm-manifest.json",
+      "size": 3591,
+      "sha256": "484040d74d327f4ddcc30f5b573a2e6286bf12b8116a23a7dee81e72231dcc42"
+    }
+  ]
+}

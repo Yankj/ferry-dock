@@ -86,12 +86,33 @@ make the candidate a trusted, ready-to-distribute Mac app. See
 
 | Native target | CLI archive | npm platform package candidate | Public download | Alpha.4 build / native status |
 | --- | --- | --- | --- | --- |
-| macOS arm64 | `ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz` | `ferry-dock-darwin-arm64` | Alpha.2 CLI only, linked above | Validation in progress; not yet accepted here |
-| macOS amd64 | `ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz` | `ferry-dock-darwin-x64` | None | Validation in progress; native amd64 NOT_RUN |
-| Linux amd64 | `ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz` | `ferry-dock-linux-x64` | None | Validation in progress; native NOT_RUN |
-| Linux arm64 | `ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz` | `ferry-dock-linux-arm64` | None | Validation in progress; native NOT_RUN |
-| Windows amd64 | `ferry-dock-0.1.0-alpha.4-windows-amd64.zip` | `ferry-dock-win32-x64` | None | Validation in progress; native NOT_RUN |
-| Windows arm64 | `ferry-dock-0.1.0-alpha.4-windows-arm64.zip` | `ferry-dock-win32-arm64` | None | Validation in progress; native NOT_RUN |
+| macOS arm64 | `ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz` | `ferry-dock-darwin-arm64` | Alpha.2 CLI only, linked above | Built/inspected; scoped native PASS |
+| macOS amd64 | `ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz` | `ferry-dock-darwin-x64` | None | Built/inspected; native amd64 NOT_RUN |
+| Linux amd64 | `ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz` | `ferry-dock-linux-x64` | None | Built/inspected; native NOT_RUN |
+| Linux arm64 | `ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz` | `ferry-dock-linux-arm64` | None | Built/inspected; native NOT_RUN |
+| Windows amd64 | `ferry-dock-0.1.0-alpha.4-windows-amd64.zip` | `ferry-dock-win32-x64` | None | Built/inspected; native NOT_RUN |
+| Windows arm64 | `ferry-dock-0.1.0-alpha.4-windows-arm64.zip` | `ferry-dock-win32-arm64` | None | Built/inspected; native NOT_RUN |
+
+The formal local build is clean source `b14aa42133c3a5c00032aa4e2affe873c46a84be`, Go 1.27.3, with `CGO_ENABLED=0`, `GOAMD64=v1` and `GOARM64=v8.0`. The [artifact inventory](benchmarks/2026-10-29-alpha4-artifacts.json) records exact binary/archive sizes, SHA-256, source/toolchain and format fields. Native output is `dist/native/0.1.0-alpha.4/`; npm output is `dist/npm-final/0.1.0-alpha.4/`. These are generated local paths, not public URLs or guaranteed source-checkout files.
+
+| Target | CLI archive bytes | Matching npm platform TGZ bytes |
+| --- | ---: | ---: |
+| macOS arm64 | 3,341,674 | 3,130,745 |
+| macOS amd64 | 3,612,931 | 3,386,155 |
+| Linux amd64 | 3,567,264 | 3,336,495 |
+| Linux arm64 | 3,240,081 | 3,025,798 |
+| Windows amd64 | 3,679,228 | 3,424,567 |
+| Windows arm64 | 3,314,564 | 3,070,496 |
+
+The thin npm entry is **13,599 bytes**; an installation needs it plus one matching native package, rather than every platform binary. Optional sealed Mac App ZIPs are 3,349,636 bytes (arm64) and 3,726,908 bytes (amd64), outside the six-CLI matrix. They remain unsigned-publisher test artifacts, not trusted App downloads.
+
+[Native validation](benchmarks/2026-10-29-alpha4-native-validation.json) passed all eight archive/binary/metadata/layout/allowlist checks, both complete Mac App signatures and the scoped Mac arm64 native lifecycle. The latter used Chinese/space paths, private state, loopback and `--no-open`, with no Go/Node in PATH; it exercised ordinary Unicode text, request isolation/timeout/submission/retry/read/cancel/expiry, reuse, Quit, stale/unknown-port safety and owned cleanup. The [App seal regression](benchmarks/2026-10-29-alpha4-app-signature-validation.json) also passed baseline verification and rejected changed Info.plist, changed resources and a missing resource seal. None of this is downloaded-file or GUI acceptance.
+
+[Npm validation](benchmarks/2026-10-29-alpha4-npm-validation.json) passed **181 assertions** on Mac arm64, Node 22.17.1/npm 10.9.2: local dual-TGZ installation/exec offline with scripts disabled, omitted/missing optional dependency diagnostics, version/corruption/missing/executable guards, literal argv/stdio/exits, POSIX signals and actual PTY Ctrl+C canceling only a wait, plus ordinary/request/retry/no-browser lifecycle and cleanup. Six-platform dispatch/spawn guards were VM checks; other-platform npm execution remains NOT_RUN.
+
+The [actual alpha.2 → alpha.4 upgrade test](benchmarks/2026-10-29-alpha4-upgrade-validation.json) passed 15 checks: alpha.4 refused a running legacy instance without changing its state or stopping it, a separate private alpha.4 instance worked, and both owned test services quit cleanly. Same-input second builds matched **all ten native outputs** and **all nine npm outputs** byte-for-byte: [native comparison](benchmarks/2026-10-29-alpha4-native-reproducibility.json), [npm comparison](benchmarks/2026-10-29-alpha4-npm-reproducibility.json). This is scoped to the recorded clean source/toolchain, not arbitrary reproducibility.
+
+The artifacts and bundled documentation remain fixed at `b14aa42`; this post-build attestation does not rebuild them. Manifest `nativeValidation: NOT_RUN` describes generation time; subsequent scoped native results are in the separate receipts. All five other OS/CPU native targets, minimum upstream OS versions, OS-default state directory, Windows ACL/interactive console Ctrl+C, default-browser/OS download trust, physical-phone LAN/QR and actual Codex-host acceptance remain uncompleted as applicable. The 13 configured CI jobs have **not run for this batch**; a workflow definition is not remote test evidence.
 
 Go `amd64` is Node/npm `x64`; Go `windows` is Node/npm `win32`. The native archive is chosen for the intended OS/CPU. The npm entry selects for the **running Node process**; hardware alone does not determine a Rosetta or emulation process architecture. A successful selection is not an emulation/runtime acceptance result.
 
@@ -112,7 +133,7 @@ These are packaging constraints and upstream requirements, **not a tested produc
 
 ## npm packaging preview: local only
 
-The alpha.4 design has one thin entry candidate, `ferry-dock@0.1.0-alpha.4`, and six native platform candidates from the matrix, each pinned as an **exact same-version optional dependency**. It reuses the matching Go CLI, not another backend. Names are not reserved or published, and no public registry `npx` command is available.
+The locally built alpha.4 candidate has one thin entry, `ferry-dock@0.1.0-alpha.4`, and six native platform candidates from the matrix, each pinned as an **exact same-version optional dependency**. It reuses the matching Go CLI, not another backend. Names are not reserved or published, and no public registry `npx` command is available.
 
 The entry requires a supported Node.js 22+ runtime. It resolves only the platform package for its Node process, verifies matching package/core version, binary size and SHA-256, then spawns the executable without a shell. No arguments supply `desktop`; explicit arguments are preserved. Platform packages carry the binaries directly. There are no install lifecycle scripts, custom postinstall downloads or startup fetches. A future npm registry install would still download the npm packages normally; no network-free installation from a registry is promised.
 

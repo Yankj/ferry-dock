@@ -1,0 +1,34 @@
+{
+  "archiveCount": 8,
+  "checks": 5191,
+  "host": {
+    "arch": "arm64",
+    "os": "darwin",
+    "python": "3.9.6"
+  },
+  "manifestSha256": "88134f5f08c2efffd145d5370599656b5ecd2a36d58ac878e5fd34699aa129d6",
+  "nativeAppSignature": "PASS",
+  "nativeLifecycle": "PASS",
+  "nativeTarget": "darwin/arm64",
+  "notRun": [
+    "actual phone/LAN/QR/clipboard/browser",
+    "actual Codex host",
+    "downloaded OS trust/first launch",
+    "minimum upstream OS versions",
+    "OS-default runtime directory",
+    "other OS/CPU native execution"
+  ],
+  "requiredCliTargets": true,
+  "schemaVersion": 1,
+  "source": {
+    "binaryCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+    "commit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+    "dirty": false,
+    "epoch": 1793277237,
+    "treeSha256": "99c66b906848ebdd23c56fdf2512ea6bb2fff6e69f07a99970243e634281fd59"
+  },
+  "status": "PASS_NATIVE",
+  "version": "0.1.0-alpha.4",
+  "windowsAclAudit": "NOT_RUN",
+  "windowsConsoleCtrlC": "NOT_RUN"
+}

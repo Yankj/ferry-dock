@@ -1,19 +1,34 @@
 # Verification record
 
-## Alpha.4 cross-platform packaging
+## Alpha.4 cross-platform packaging, 2026-10-29
 
-Alpha.4 is an **unpublished local candidate** for six native CLI targets and a thin npm entry with six exact-version native packages. The [distribution matrix](distribution.md#alpha4-platform-matrix) separates published availability, binary/archive inspection and actual OS/CPU execution. New checks below must identify their source and exact outputs; old alpha.2 npm/Go or alpha.3 App results do not validate this revision.
+Alpha.4 is an **unpublished local candidate** built from clean source `b14aa42133c3a5c00032aa4e2affe873c46a84be`. It provides six native CLI targets, two optional sealed Mac App archives, and a thin npm entry with six exact-version native packages. The [artifact inventory](benchmarks/2026-10-29-alpha4-artifacts.json) and [distribution matrix](distribution.md#alpha4-platform-matrix) separate actual publication, binary/archive inspection and OS/CPU execution. The public download remains the frozen alpha.2 Mac arm64 CLI; no new registry identity, tag or Release is asserted.
 
-Current alpha.4 validation is in progress. No passing native result is asserted here yet. The six-runner workflow is a test definition until a matching pushed commit has actually run; native Windows/Linux/Intel Mac and their default-browser/console/OS-trust acceptance remain NOT_RUN. Real phones and an actual Codex host are also NOT_RUN.
+| Executed check | Exact scope and result |
+| --- | --- |
+| Native package contract | [Native receipt](benchmarks/2026-10-29-alpha4-native-validation.json): eight archives passed size/SHA-256, executable header, metadata, content allowlist, modes/layout and credential-pattern checks. Two Mac App complete-bundle strict verifications passed after archive round-trip. Header/architecture inspection is not foreign native execution. |
+| Linux linkage / target headers | Both Linux ELF64 artifacts have no interpreter or dynamic segment and require no system libc linkage. Darwin Mach-O headers record macOS 13.0.0; Windows PE32+ headers record console subsystem and OS/subsystem 10.0. These are inspected build fields, not minimum-OS acceptance. CPU baselines are x86-64-v1 and armv8.0. |
+| Native Mac arm64 lifecycle | The same native receipt records PASS with private HOME/state, Chinese/space extraction path, no Go/Node in PATH, numeric loopback and `--no-open`: ordinary exact Unicode text, request A/B isolation, timeout then submission, retry deduplication, stable read, explicit cancel, expiry, reuse/Quit, stale control/unknown-port safety and owned cleanup. This does not exercise Finder, OS-default runtime directory or automatic browser opening. |
+| App resource seal | [Signature receipt](benchmarks/2026-10-29-alpha4-app-signature-validation.json): system-extracted arm64 App baseline passed strict verification; modified Info.plist, modified icon/resource and removed resource seal each failed. No signing or security-attribute removal occurred in this regression. Ad-hoc resource integrity is not Developer ID/notarization or Gatekeeper acceptance. |
+| npm local installation and execution | [Npm receipt](benchmarks/2026-10-29-alpha4-npm-validation.json): **181 assertions passed** with Mac arm64 / Node 22.17.1 / npm 10.9.2, offline local dual-TGZ install/exec with scripts disabled, exact package allowlists/version/hash binding, no entry binary, optional-package omission, missing/version/corruption/executable guards, literal Unicode/space/shell-metacharacter argv, JSON/stdout/stderr/exits, and owned no-browser desktop/request/ordinary cleanup. |
+| npm cancellation | The npm receipt records POSIX SIGINT/SIGTERM and actual owned PTY Ctrl+C ending only a wait with structured cancellation; the business request remained pending. Bounded timeout, later submission, same-receipt retry and stable read also passed. Six-platform dispatch and spawn semantics were VM checks. Windows console interruption and foreign native behavior are NOT_RUN. |
+| Legacy service update | [Upgrade receipt](benchmarks/2026-10-29-alpha4-upgrade-validation.json): **15 checks passed** using the real frozen alpha.2 binary and new alpha.4 binary. Legacy metadata refused reuse, original state and running service survived, a separate private alpha.4 instance reported the right identity, both owned services quit and removed control/socket state. No shared user service was stopped. |
+| Same-input reproduction | [Native receipt](benchmarks/2026-10-29-alpha4-native-reproducibility.json): eight archives + manifest + checksum file, **ten outputs**, byte-identical in two builds. [Npm receipt](benchmarks/2026-10-29-alpha4-npm-reproducibility.json): entry + six platform TGZs + manifest + checksum file, **nine outputs**, byte-identical. Scope is the same recorded source/toolchain, not arbitrary environments. |
+| Core regression | The implementation lead recorded exit-zero formatting, `go vet ./...`, full `go test -race -cover ./...`, six executable-format fixtures, 12 HTTP assertions, 27 synthetic request assertions, 11 UI VM checks and the served-script/HTTP run on Mac. These do not establish a real phone or Agent host. |
+| Remote native CI | Six OS/CPU native packaging/npm jobs, six Go matrix jobs and one packaging job are configured: **13 jobs, NOT_RUN for this batch** pending authorized push. Actual Windows/Linux/Intel Mac execution must be read from a run of its own commit. |
 
-The intended local reproduction, from a matching clean checkout and cached dependencies, is:
+The source package is immutable at `b14aa42`; this later evidence update does not rewrite its bundled documentation or hashes. Manifest generation-time `nativeValidation: NOT_RUN` stays unchanged; subsequent scoped validation is represented by these separate receipts. Old alpha.2 npm/Go and alpha.3 App evidence below retain their own source/artifact identities.
+
+To reproduce CLI-only packaging from a matching clean checkout with cached dependencies:
 
 ```sh
-python3 scripts/package.py --all --cli-only --version 0.1.0-alpha.4 --go /absolute/path/go --offline
-python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.4 --require-cli-targets --native-target darwin/arm64 --receipt /absolute/path/native-validation.json
+python3 scripts/package.py --all --cli-only --version 0.1.0-alpha.4 --out dist/native --go /absolute/path/go --offline
+python3 scripts/smoke-package.py --dist dist/native/0.1.0-alpha.4 --require-cli-targets --native-target darwin/arm64 --receipt /absolute/path/native-validation.json
 ```
 
-Use only the target matching the **actual runner** for a native pass. `--archive-only` checks foreign artifacts without executing them. Native smoke uses private state/loopback and `--no-open`; it is not Finder, default-browser, real-phone LAN/QR or downloaded-file acceptance. The optional Mac App remains a separately sealed packaging choice, with Developer ID/notarization requirements unchanged.
+For the full eight-archive Mac build, omit `--cli-only`; the host must provide the supported complete-bundle ad-hoc signing tool. The contributor requires Python/Go; recipients do not. Use a fresh output destination because the builder refuses overwrite. Only select a native target matching the actual runner. `--archive-only` inspects foreign artifacts without executing them. The local npm builder takes that six-CLI `dist` directory and exact-source clean entry metadata; its own manifest/checksums inventory all seven TGZs separately.
+
+**NOT_RUN:** native Mac amd64, Linux amd64/arm64, Windows amd64/arm64, minimum supported OS/kernel versions, Windows ACL and interactive console Ctrl+C, OS-default state discovery, Finder/default-browser opening, browser/ChatGPT downloaded quarantine/Gatekeeper/SmartScreen first launch, physical phone/LAN/QR/clipboard and actual Codex host. No Developer ID signing/notarization, npm publication or new Release occurred. No startup/performance measurement is newly claimed.
 
 ## App signature incident and alpha.3 correction
 

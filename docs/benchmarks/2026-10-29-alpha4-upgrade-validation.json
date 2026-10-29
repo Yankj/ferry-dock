@@ -1,0 +1,30 @@
+{
+  "status": "PASS_LOCAL",
+  "host": "darwin/arm64",
+  "oldVersion": "0.1.0-alpha.2",
+  "newVersion": "0.1.0-alpha.4",
+  "sourceCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+  "checks": [
+    "verified old-cli binary identity",
+    "verified new-cli binary identity",
+    "old alpha2 private desktop starts",
+    "alpha4 rejects legacy service metadata",
+    "failed upgrade preserves old state and emits no ready JSON",
+    "old service still running after mismatch",
+    "separate alpha4 state may run independently",
+    "independent instance reports alpha4 version",
+    "both owned versions remain available",
+    "authenticated Quit accepted",
+    "owned control removed",
+    "owned socket closed",
+    "authenticated Quit accepted",
+    "owned control removed",
+    "owned socket closed"
+  ],
+  "notRun": [
+    "real browser opening",
+    "physical phone",
+    "foreign OS",
+    "downloaded OS trust"
+  ]
+}

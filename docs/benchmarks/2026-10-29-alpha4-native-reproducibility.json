@@ -1,0 +1,57 @@
+{
+  "status": "PASS_BYTE_IDENTICAL",
+  "scope": "eight native archives, manifest, checksums",
+  "sourceCommit": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+  "outputs": [
+    {
+      "file": "SHA256SUMS",
+      "size": 964,
+      "sha256": "bff970fed100af9bce392fa428a95a38b3a908729039e5f3482b09027465b6b7"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-darwin-amd64-app.zip",
+      "size": 3726908,
+      "sha256": "61d220d48140dacbe0fae1804976e45762df5d38d2e5245188be6e063b8c6c22"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz",
+      "size": 3612931,
+      "sha256": "b0b6c7828c904c7c9601e0ef790ed044fff741bba6213b24492df2965e67b69a"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-darwin-arm64-app.zip",
+      "size": 3349636,
+      "sha256": "1c47bae9472a8034d05b7c2bc0c1f5408c49f55cb39ac20e5faed2ade39db364"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz",
+      "size": 3341674,
+      "sha256": "c7a6e598fb976ab56ac098b62a52dbe0867871396ee0c2d2b1ccc74c3dbd7988"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz",
+      "size": 3567264,
+      "sha256": "59e9610804dd1a39d4ed64474b1611218e58a969b7a2d12c9646cb1146b83d0c"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz",
+      "size": 3240081,
+      "sha256": "1de96a12ac3f380d0b45fa5b2959b02743931f2a08bf896d6341da85f7c1ce58"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-windows-amd64.zip",
+      "size": 3679228,
+      "sha256": "6d74c32eebbd3c03440cd9c780b7ff172b29124c4fc9183c9b39910f1b99f502"
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.4-windows-arm64.zip",
+      "size": 3314564,
+      "sha256": "c5a45f57d6c01b57250fe887e965dcbbb59f456059c34011313e3889d2be8e4b"
+    },
+    {
+      "file": "manifest.json",
+      "size": 10494,
+      "sha256": "88134f5f08c2efffd145d5370599656b5ecd2a36d58ac878e5fd34699aa129d6"
+    }
+  ]
+}

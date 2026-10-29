@@ -135,8 +135,18 @@ jobs:
       - name: Check native process and service identity tests
         run: go test ./internal/desktop ./internal/relay
       - name: Validate native archives and owned service lifecycle
-        run: python scripts/smoke-package.py --dist dist/native/0.1.0-alpha.4 --require-cli-targets --native-target ${{ matrix.native-target }}
+        run: python scripts/smoke-package.py --dist dist/native/0.1.0-alpha.4 --require-cli-targets --native-target ${{ matrix.native-target }} --receipt bin/native-preview.json
       - name: Verify Node runs as the intended native architecture
         run: node -e "const target=(process.platform==='win32'?'windows':process.platform)+'-'+(process.arch==='x64'?'amd64':process.arch);if(target!=='${{ matrix.target }}')throw new Error('Node architecture does not match the native test target')"
       - name: Check offline npm install, platform selection and lifecycle
-        run: python scripts/smoke-npm.py --dist dist/npm/0.1.0-alpha.4
+        run: python scripts/smoke-npm.py --dist dist/npm/0.1.0-alpha.4 --receipt bin/npm-preview.json
+      - name: Preserve capability-free validation receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: validation-${{ matrix.target }}
+          path: |
+            bin/native-preview.json
+            bin/npm-preview.json
+          if-no-files-found: warn
+          retention-days: 7
