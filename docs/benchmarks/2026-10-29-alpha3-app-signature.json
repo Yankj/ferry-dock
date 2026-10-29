@@ -1,0 +1,35 @@
+{
+  "status": "PASS_LOCAL",
+  "archive": "ferry-dock-0.1.0-alpha.3-darwin-arm64-app.zip",
+  "archiveSha256": "654ab5a7e0b9aa585b2245b4b1b5cb0146e63c031ccb0ea63778562d95b5849f",
+  "checks": {
+    "original": {
+      "exitCode": 0,
+      "diagnostic": "<App>: valid on disk\n<App>: satisfies its Designated Requirement"
+    },
+    "changedInfo": {
+      "exitCode": 1,
+      "diagnostic": "<App>: invalid Info.plist (plist or signature have been modified)\nIn architecture: arm64"
+    },
+    "changedResource": {
+      "exitCode": 1,
+      "diagnostic": "file modified: /private<App>/Contents/Resources/FerryDock.icns\n<App>: a sealed resource is missing or invalid"
+    },
+    "missingResourceSeal": {
+      "exitCode": 1,
+      "diagnostic": "<App>: invalid resource directory (directory or signature have been modified)"
+    },
+    "legacy": {
+      "exitCode": 1,
+      "diagnostic": "<App>: code has no resources but signature indicates they must be present"
+    }
+  },
+  "noSigningPerformed": true,
+  "noSecurityAttributesRemoved": true,
+  "notRun": [
+    "Gatekeeper or publisher trust acceptance",
+    "Finder launch",
+    "browser/phone/Agent interaction",
+    "Developer ID signing or notarization"
+  ]
+}

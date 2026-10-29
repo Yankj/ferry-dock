@@ -12,6 +12,14 @@ alpha.3. A new local ad-hoc bundle signature still does not establish Developer
 ID identity, notarization or Gatekeeper acceptance. Public alpha.2 CLI and local
 npm/Go-install evidence remain scoped to standalone executables.
 
+Alpha.3 clean source `269af8e` passed [both complete App ZIP signature checks and
+the Mac arm64 packaged lifecycle](benchmarks/2026-10-29-alpha3-native-validation.json),
+[system-extraction/tamper rejection](benchmarks/2026-10-29-alpha3-app-signature.json)
+and [same-input rebuild comparison](benchmarks/2026-10-29-alpha3-reproducibility.json).
+These establish the corrected bundle integrity, not publisher trust. A read-only
+query listed no valid signing identity; Developer ID use/notarization and real
+downloaded first launch remain separate, uncompleted gates.
+
 ## npm implementation and Go-user installation
 
 | Claim | Evidence | Status and boundary |

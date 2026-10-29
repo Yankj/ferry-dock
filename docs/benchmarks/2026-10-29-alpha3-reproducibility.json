@@ -1,0 +1,43 @@
+{
+  "status": "PASS_LOCAL",
+  "sourceCommit": "269af8e11e1b0099c6308d9d82887d31c58a4152",
+  "files": [
+    {
+      "file": "SHA256SUMS",
+      "bytes": 526,
+      "sha256": "1cfa2b307d31747cbe5fcd801e1c6884988e57973bc27ac9ee27eb912b5ef5b7",
+      "byteIdentical": true
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.3-darwin-amd64-app.zip",
+      "bytes": 3713741,
+      "sha256": "a03c96408662c5f1e91e0f056b1f334ccb379274299197f80b6e62932eeb21d9",
+      "byteIdentical": true
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.3-darwin-amd64.tar.gz",
+      "bytes": 3604149,
+      "sha256": "121b260d78692fa98c25b9d87004e4dcbf08790b31ce5255120598632414c295",
+      "byteIdentical": true
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.3-darwin-arm64-app.zip",
+      "bytes": 3336619,
+      "sha256": "654ab5a7e0b9aa585b2245b4b1b5cb0146e63c031ccb0ea63778562d95b5849f",
+      "byteIdentical": true
+    },
+    {
+      "file": "ferry-dock-0.1.0-alpha.3-darwin-arm64.tar.gz",
+      "bytes": 3334500,
+      "sha256": "9059ebfea8f9310d2500b497fffafe3e136e23b1c746c39d8d6e34add060709d",
+      "byteIdentical": true
+    },
+    {
+      "file": "manifest.json",
+      "bytes": 3834,
+      "sha256": "321954b784c98efe39c9850b63f0d118ead4876fa934f1c5560a3592424ffa6f",
+      "byteIdentical": true
+    }
+  ],
+  "scope": "two local macOS builds from the same clean source/toolchain; no publisher signing or notarization"
+}

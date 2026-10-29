@@ -67,6 +67,25 @@ downloaded-file first launch remains unaccepted until the separately authorized
 publisher-signing/notarization and real first-launch checks are completed.
 It must not be described as a trusted, ready-to-distribute Mac application.
 
+## Executed correction checks
+
+The fixed build is pinned to clean `269af8e11e1b0099c6308d9d82887d31c58a4152`.
+Both complete Mac App ZIPs passed strict bundle validation after reconstruction;
+the arm64 App additionally passed real system `ditto` extraction and three
+negative checks: modified Info.plist, changed icon resource and deleted resource
+seal were all rejected. The original alpha.2 contrast still produced the exact
+resource-signature error. The isolated arm64 runtime/CLI/lifecycle/safety checks
+also passed, and two same-input builds matched across all six output files.
+See [verification and receipts](verification.md#app-signature-incident-and-alpha3-correction).
+
+The new arm64 App ZIP is 3,336,619 bytes, SHA-256
+`654ab5a7e0b9aa585b2245b4b1b5cb0146e63c031ccb0ea63778562d95b5849f`.
+Old artifacts are retained, and the public alpha.2 CLI release was not changed.
+No valid signing identity was listed by the read-only local query; no credential
+was created or used. No publisher-signing, notarization or downloaded first-launch
+pass is claimed. The source and these evidence records remain local pending a
+separate public-push decision.
+
 Apple distinguishes resource sealing, signature validity and trust policy in
 [TN2206](https://developer.apple.com/library/archive/technotes/tn2206/_index.html).
 Publisher distribution additionally follows [Apple's notarization guidance](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).

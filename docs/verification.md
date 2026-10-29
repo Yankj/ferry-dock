@@ -19,6 +19,26 @@ are recorded after the frozen build; the bundled documentation can therefore
 predate those later evidence records. No Developer ID signing, notarization or
 Gatekeeper pass is inferred from an ad-hoc resource seal.
 
+Clean source `269af8e11e1b0099c6308d9d82887d31c58a4152` produced four macOS
+archives: CLI and App for arm64 and amd64. The [artifact manifest](benchmarks/2026-10-29-alpha3-artifacts.json)
+and [completed package check](benchmarks/2026-10-29-alpha3-native-validation.json)
+record hashes/layout and both complete App strict-signature passes, followed by
+the isolated Mac arm64 lifecycle/CLI/reuse/Quit/safety/cleanup pass. No browser
+was opened. The [system-ditto regression](benchmarks/2026-10-29-alpha3-app-signature.json)
+passed for the new arm64 App; altering Info.plist, a resource or the seal was
+rejected, while the original alpha.2 comparison reproduced its signature error.
+Two builds of the same source/toolchain produced [six identical outputs](benchmarks/2026-10-29-alpha3-reproducibility.json).
+The arm64 App ZIP is 3,336,619 bytes, SHA-256
+`654ab5a7e0b9aa585b2245b4b1b5cb0146e63c031ccb0ea63778562d95b5849f`.
+It is a new private structural-test artifact, not a replacement public release.
+
+A read-only signing-identity query listed zero valid code-signing identities;
+no private key was used. Developer ID/notarization and normal downloaded-file
+first-launch acceptance are still outstanding, so the test ZIP must not be
+presented as a trusted ready-to-distribute application. No original archive,
+user download, quarantine attribute or security setting was changed. Remote CI
+for these local commits is NOT_RUN; no new public push was authorized.
+
 ## Local npm entry and fixed-tag Go install, 2026-10-29
 
 The npm entry is implemented and locally tested, **not published to a registry**.

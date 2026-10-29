@@ -1,0 +1,36 @@
+{
+  "status": "PASS_LOCAL",
+  "sourceCommit": "269af8e11e1b0099c6308d9d82887d31c58a4152",
+  "version": "0.1.0-alpha.3",
+  "command": "python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.3",
+  "exitCode": 0,
+  "archiveCount": 4,
+  "completeAppBundlesStrictlyVerified": 2,
+  "observedPasses": [
+    "archive and binary SHA/size/target headers/metadata/permissions/layout",
+    "both full App bundles reconstructed from ZIP pass codesign --verify --deep --strict",
+    "Mac arm64 app default-mode flags, Chinese/space extraction path, private HOME and PATH=/nonexistent",
+    "version/readiness/packaged CLI request creation and cancellation",
+    "verified instance reuse, authenticated Quit, stale state recovery",
+    "occupied-port and unknown-service preservation",
+    "owned process/socket/control/private-file cleanup"
+  ],
+  "signing": {
+    "adHocCompleteBundles": true,
+    "developerIdSigned": false,
+    "notarized": false,
+    "validCodeSigningIdentitiesListed": 0,
+    "privateKeyUsed": false
+  },
+  "notRun": [
+    "Finder zero-argument launch",
+    "default cache discovery and automatic browser opening",
+    "browser/ChatGPT download Gatekeeper first launch",
+    "physical phone/LAN/QR scan",
+    "actual Codex host",
+    "Intel native execution",
+    "remote CI of local unpushed changes"
+  ],
+  "originalFrozenAssetsReplaced": false,
+  "securityAttributesRemoved": false
+}

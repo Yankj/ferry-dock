@@ -6,7 +6,7 @@
 
 This online guide is newer than the frozen `a351555` package documentation. The archive has not been rewritten: its bundled documentation predates public release and may describe downloads as unavailable. Use this guide for current download steps; the executable interface is unchanged.
 
-**Do not use the old alpha.1/alpha.2 App previews.** A complete-bundle signature defect has been reproduced, despite passing ZIP integrity and direct-executable tests. Those App launch recommendations are withdrawn. A corrected alpha.3 bundle is under private structural test; it is not a public download or a Gatekeeper acceptance result. The published alpha.2 native CLI is outside that App envelope, with its existing unsigned-download limits.
+**Do not use the old alpha.1/alpha.2 App previews.** A complete-bundle signature defect has been reproduced, despite passing ZIP integrity and direct-executable tests. Those App launch recommendations are withdrawn. The corrected alpha.3 bundle passed local complete-bundle, archive round-trip and tamper checks; it remains a private candidate, not a public download or a Gatekeeper acceptance result. [Repair evidence](packaging-incident.md). The published alpha.2 native CLI is outside that App envelope, with its existing unsigned-download limits.
 
 ## Choose the shortest path
 
@@ -137,7 +137,7 @@ details](distribution.md#go-install-from-the-fixed-tag).
 
 These alternatives are **not uploaded in this prerelease**. They are useful only if you separately received a matching local preview; a platform label is not a public download link or native acceptance result.
 
-The historical alpha.1/alpha.2 macOS App ZIPs are not recommended launchers: complete-bundle strict signature verification failed even though archive integrity and direct-executable checks passed. Do not follow their bundled “extract and open” steps. The private alpha.3 repair must validate the completed bundle before and after archiving; an ad-hoc structural pass still would not establish Developer ID identity, notarization, browser-download Gatekeeper acceptance, Finder or automatic browser opening. No old archive is overwritten, and no protection-bypass procedure is provided.
+The historical alpha.1/alpha.2 macOS App ZIPs are not recommended launchers: complete-bundle strict signature verification failed even though archive integrity and direct-executable checks passed. Do not follow their bundled “extract and open” steps. The private alpha.3 repair passed completed-bundle verification before and after archiving, expected failures for modified Info.plist/resource/deleted seal, and scoped Mac arm64 no-browser lifecycle checks. These ad-hoc structural checks do not establish Developer ID identity, notarization, browser-download Gatekeeper acceptance, Finder or automatic browser opening. No old archive is overwritten, and no protection-bypass procedure is provided.
 
 Other native CLI archives have an outer platform/version folder. From inside that folder, macOS/Linux use:
 

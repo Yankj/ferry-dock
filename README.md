@@ -17,7 +17,7 @@ Client comments are in a phone chat; the proposal is on your computer. Or an err
 
 The guides here are newer than the frozen `a351555` package documentation; existing alpha.2 archives have not been replaced.
 
-**Old App bundles: stop using the alpha.1/alpha.2 `.app` previews.** A complete-bundle signature defect has been reproduced; their ZIP integrity and direct-executable checks did not validate that envelope. They are no longer recommended launchers. The public alpha.2 native CLI is outside this App envelope, but still has the unsigned-download limits below. A corrected alpha.3 App is being prepared for private structural testing, not public distribution or a promise of Gatekeeper acceptance.
+**Old App bundles: stop using the alpha.1/alpha.2 `.app` previews.** A complete-bundle signature defect has been reproduced; their ZIP integrity and direct-executable checks did not validate that envelope. They are no longer recommended launchers. The public alpha.2 native CLI is outside this App envelope, but still has the unsigned-download limits below. The corrected alpha.3 App has passed local complete-bundle, archive round-trip and tamper checks. It is a private candidate, not a public download or a Gatekeeper acceptance result. [Repair evidence](docs/packaging-incident.md).
 
 ## Choose your path
 

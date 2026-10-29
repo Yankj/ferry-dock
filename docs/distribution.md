@@ -48,14 +48,37 @@ re-downloading identical ZIP bytes will repair it. The native CLI has no App
 resource envelope; that distinction does not make its unsigned downloaded-file
 trust or Gatekeeper acceptance a pass.
 
-The alpha.3 repair is under private structural test: finish staging every App
-resource, ad-hoc sign the completed bundle, strictly verify it, archive those
-sealed bytes, then extract and verify again. A local ad-hoc pass is separate
-from Developer ID publisher identity, Apple notarization and browser-download
-Gatekeeper acceptance. No old tag/Release/archive is overwritten, no new App
-Release is published, and no quarantine removal or OS-protection bypass is part
-of the repair. Final candidate results will be recorded separately rather than
-inherited from the old archive/runtime checks.
+The alpha.3 repair finishes staging every App resource, ad-hoc signs the
+completed bundle, strictly verifies it, archives those sealed bytes, then
+extracts and verifies again. The formal private candidate passed these
+structural checks; its results are separate from the old archive/runtime
+checks. No old tag/Release/archive is overwritten, no new App Release is
+published, and no quarantine removal or OS-protection bypass is part of the
+repair. See the [incident and correction](packaging-incident.md).
+
+## Alpha.3 private structural fix
+
+Version `0.1.0-alpha.3` was built from clean source
+`269af8e11e1b0099c6308d9d82887d31c58a4152` as a **private local candidate**.
+The Apple Silicon App archive is
+`dist/0.1.0-alpha.3/ferry-dock-0.1.0-alpha.3-darwin-arm64-app.zip`,
+**3,336,619 bytes**, SHA-256
+`654ab5a7e0b9aa585b2245b4b1b5cb0146e63c031ccb0ea63778562d95b5849f`.
+This local path is not a public download link, GitHub Release or new tag.
+
+| Formal alpha.3 check | Actual scope/result |
+| --- | --- |
+| Complete App signatures | Both Darwin architectures passed strict complete-bundle verification after ZIP round-trip. `_CodeSignature/CodeResources` is included and executable hashes are recorded after signing. |
+| System extraction and tamper regression | `ditto`-extracted arm64 baseline passed. Changing Info.plist, changing a resource or deleting the seal each failed verification as expected. The retained alpha.2 contrast still failed with its original missing-resources error. |
+| Mac arm64 native runtime | Private HOME, `PATH=/nonexistent`, `--no-open`, private state and loopback lifecycle/CLI/reuse/Quit, stale/occupied/unknown-service safety and owned cleanup passed. No GUI or default-browser launch was inferred. |
+| Same-input rebuild | Two complete builds from the same clean source/toolchain produced identical bytes for four Darwin archives, the manifest and checksums: six outputs. |
+| Publisher and downloaded-first-launch acceptance | No Developer ID identity or Apple notarization. Gatekeeper, real browser/ChatGPT download first launch, Finder, automatic browser opening, phone and Codex-host acceptance remain unaccepted. |
+
+The archive and its bundled documentation remain fixed at `269af8e`; this
+post-build evidence update does not rewrite them. Complete local ad-hoc
+verification fixes the reproduced resource-envelope defect, but does **not**
+make the candidate a trusted, ready-to-distribute Mac app. See
+[verification](verification.md) for the exact receipts and remaining gates.
 
 ## npm packaging preview: local only
 
@@ -239,11 +262,11 @@ reproducibility and incident evidence; do not try permission/quarantine changes
 as a repair.
 
 The alpha.3 App is a private repair candidate, not a published release. Its
-structural signature, archive round-trip and runtime results must be recorded
-for its own exact bytes before distribution. Even complete local ad-hoc
-verification would not establish Developer ID/notarization or a trusted browser
-download's first launch. Use the public native CLI route for the current
-published package, with its separate unsigned-executable limitations.
+formal structural signature, archive round-trip, tamper and scoped Mac arm64
+no-browser runtime checks passed for the exact bytes above. Complete local
+ad-hoc verification still does not establish Developer ID/notarization or a
+trusted browser download's first launch. Use the public native CLI route for
+the current published package, with its separate unsigned-executable limitations.
 
 The intended future App remains a small container for the same Go launcher,
 not a new backend, registration flow or installer. That architectural goal is
@@ -294,7 +317,7 @@ The script refuses existing output directories. Dirty trees require explicit `--
 
 `manifest.json` records source/dirty state, toolchain, target, binary path/hash, archive hash, and signature metadata. `SHA256SUMS` covers generated archives and the manifest. A checksum checks bytes against the supplied record; it does not replace trusted distribution or publisher signing.
 
-The packaging script performs no Developer ID signing, Apple notarization, upload, registry publication, or security-setting change. The arm64 executable's linker ad-hoc signature is not verified publisher identity, and the app bundle is not Developer ID signed or notarized. [Apple's Gatekeeper signing guidance](https://developer.apple.com/developer-id/) describes publisher signing and notarization as separate checks. Windows previews are publisher-unsigned; [Microsoft's SmartScreen overview](https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/) describes downloaded app reputation checks. Local package tests do not establish downloaded-file acceptance; disabling protections is not part of this preview.
+The packaging script performs no Developer ID signing, Apple notarization, upload, registry publication, or security-setting change. The corrected alpha.3 App is ad-hoc signed as a complete bundle; the frozen alpha.2 CLI's linker ad-hoc signature is separate. Neither supplies verified publisher identity or Apple notarization. [Apple's Gatekeeper signing guidance](https://developer.apple.com/developer-id/) describes publisher signing and notarization as separate checks. Windows previews are publisher-unsigned; [Microsoft's SmartScreen overview](https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/) describes downloaded app reputation checks. Local package tests do not establish downloaded-file acceptance; disabling protections is not part of this preview.
 
 ## Alpha.1 validation record
 
