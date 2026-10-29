@@ -1,0 +1,121 @@
+{
+  "artifact": {
+    "binarySha256": "f378f647a32cf57f1565892b06014202d6174721573d0150c460bc3726248dc8",
+    "file": "ferry-dock-0.1.0-alpha.1-darwin-arm64-app.zip",
+    "goarch": "arm64",
+    "goos": "darwin",
+    "kind": "app",
+    "version": {
+      "arch": "arm64",
+      "commit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+      "defaultMode": "desktop",
+      "os": "darwin",
+      "version": "0.1.0-alpha.1"
+    }
+  },
+  "createdAt": "2026-10-29T03:26:03.392774+00:00",
+  "environment": {
+    "HOME": "private temporary directory",
+    "PATH": "/nonexistent",
+    "backgroundLoad": "User desktop/background processes uncontrolled; all project builds and tests paused",
+    "cpu": "Apple M4 Pro",
+    "listen": "127.0.0.1:0",
+    "logicalCpuCount": 14,
+    "machine": "arm64",
+    "powerMode": "NOT_MEASURED",
+    "python": "3.9.6",
+    "ramBytes": 25769803776,
+    "release": "27.0.0",
+    "runtimeOverrides": {},
+    "stateDirectory": "new private directory per measured sample",
+    "system": "Darwin"
+  },
+  "errors": [],
+  "finishedAt": "2026-10-29T03:26:08.782707+00:00",
+  "limitations": [
+    "Fresh processes and private states; filesystem/OS caches were not flushed and this is not an OS cold-boot measurement",
+    "Explicit numeric loopback listener excludes LAN address discovery and real phone/network latency",
+    "Browser opening/rendering, QR scanning, Finder zero-argument entry, default cache-directory discovery and downloaded Gatekeeper acceptance are not part of this timing",
+    "Local machine observational sample, not a cross-platform performance ranking or confidence bound"
+  ],
+  "manifest": {
+    "build": {
+      "cgoEnabled": false,
+      "pgo": false,
+      "trimpath": true,
+      "vcsStamping": false
+    },
+    "path": "0.1.0-alpha.1/manifest.json",
+    "sha256": "0ba39f9b5d86b74f1e3833a0c9cf35c7bea07bf93bc8c2200fe111d812a33559",
+    "source": {
+      "binaryCommit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+      "commit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+      "dirty": false,
+      "epoch": 1793244007,
+      "treeSha256": "b7b55304df608d504fd9b506408eb8133e23d5e583fd12106f0a506489ce2eed"
+    },
+    "toolchain": {
+      "go": "go version go1.27.3 darwin/arm64",
+      "goamd64": "v1",
+      "goarm64": "v8.0",
+      "goenv": "off",
+      "goexperiment": "",
+      "python": "3.9.6",
+      "zlib": "1.2.12"
+    },
+    "version": "0.1.0-alpha.1"
+  },
+  "measurement": {
+    "allInstancesUnique": true,
+    "allSamplesQuitAndCleaned": true,
+    "binarySha256After": "f378f647a32cf57f1565892b06014202d6174721573d0150c460bc3726248dc8",
+    "command": "packaged-app --no-open --state-dir NEW_PRIVATE_DIR --listen 127.0.0.1:0",
+    "completedSamples": 20,
+    "definition": "Elapsed immediately before invoking the packaged app with --no-open until CLI exit zero, private control state read, and authenticated HTTP desktop instance identity validated",
+    "maxMs": 98.025084,
+    "minMs": 73.107708,
+    "p50Ms": 82.281292,
+    "p95Ms": 85.2245,
+    "percentileMethod": "nearest rank: sorted[ceil(p*n)-1]",
+    "requestedSamples": 20,
+    "samplesMs": [
+      84.303625,
+      82.567208,
+      83.822334,
+      83.450375,
+      82.740542,
+      80.514584,
+      73.107708,
+      82.281292,
+      98.025084,
+      79.222167,
+      74.381208,
+      80.656084,
+      85.2245,
+      81.315542,
+      83.352584,
+      80.424292,
+      80.727584,
+      83.756166,
+      82.301291,
+      79.406292
+    ]
+  },
+  "packageSmoke": {
+    "command": "python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.1 --require-all",
+    "exitCode": 0,
+    "stderrLines": [],
+    "stdoutLines": [
+      "PASS PACKAGE: all 8 archive hashes, binary hashes/target headers, metadata, permissions, and layouts verified.",
+      "PASS PACKAGE_NATIVE: app default-mode flag dispatch, Chinese/space path + private HOME + PATH=/nonexistent, version metadata, readiness, CLI compatibility, reuse, quit, and stale recovery.",
+      "PASS PACKAGE_SAFETY: explicit occupied port fails without taking it over; unknown recorded service and private state remain untouched.",
+      "PASS PACKAGE_CLEANUP: verified owned processes stopped; private extracted/runtime files removed.",
+      "NOT_RUN: Finder double-click, browser rendering, real phone/LAN, downloaded Gatekeeper acceptance, notarization, Windows/Linux native runtime and Windows clean PATH.",
+      "NOT_RUN: zero-argument Finder app launch and OS-default cache-directory discovery; lifecycle uses app --no-open --state-dir.",
+      "Local archives only: no installation, global Agent configuration, security-setting change, or publication occurred."
+    ]
+  },
+  "schema": 1,
+  "smokeScriptSha256": "53c72519ea3b48097f137531d80060d564a4fb5d9d8da82a7c301e1ac6ce8191",
+  "status": "success"
+}

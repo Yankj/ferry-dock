@@ -25,12 +25,12 @@
       <p>On your phone, scan the QR code on that page.</p>
     </section>
     <section id="receiver" hidden>
-      <div class="intro"><div><p class="eyebrow">A small local bridge</p><h1>From your phone.<br>Ready here.</h1></div><p>Scan, send, then copy.</p></div>
+      <div class="intro"><div><p class="eyebrow">A small local bridge</p><h1>Phone to computer.</h1></div><p>Scan. Send. Continue.</p></div>
       <div class="workspace">
         <div class="pairing">
           <div id="invite" hidden>
             <img id="qr" width="280" height="280" alt="Scan to open this session on your phone">
-            <p class="pair-title">Scan with your phone</p>
+            <p class="pair-title">Scan to connect</p>
             <p id="expires" class="quiet"></p>
             <div class="actions"><button id="copy-link" class="secondary">Copy link</button><button id="close" class="plain">End session</button></div>
             <a id="send-link" class="small-link" target="_blank" rel="noreferrer">Open send page</a>
@@ -38,25 +38,25 @@
           <button id="create">New session</button>
         </div>
         <div class="inbox">
-          <div class="inbox-heading"><h2>Received text</h2><span id="count" class="quiet">0</span></div>
-          <p id="empty" class="empty">Text from your phone will appear here.<br>Keep both devices on the same Wi-Fi.</p>
+          <div class="inbox-heading"><h2>Your inbox</h2><span id="count" class="quiet" aria-label="Message count">0</span></div>
+          <p id="empty" class="empty">Ready when you are.<br>Text sent from your phone appears here.</p>
           <div id="messages"></div>
         </div>
       </div>
       <p id="receiver-status" role="status" aria-live="polite"></p>
-      <div id="desktop-controls" hidden><p id="desktop-network" class="quiet"></p><button id="quit-app" class="plain">Quit Ferry Dock</button><p class="footnote">Closing this browser tab keeps Ferry Dock running. Quit clears every session and request.</p></div>
+      <div id="desktop-controls" class="desktop-controls" hidden><p id="desktop-network" class="quiet"></p><button id="quit-app" class="plain">Quit Ferry Dock</button><p class="footnote">Closing this browser tab keeps Ferry Dock running. Quit clears every session and request.</p></div>
       <p class="footnote">Temporary session. Text is cleared when you end it or it expires.</p>
     </section>
     <section id="sender" hidden>
-      <h1 id="sender-title">Send to your computer.</h1>
-      <p id="sender-lead" class="lead">Paste your text. We’ll carry it across.</p>
+      <h1 id="sender-title">Send text.</h1>
+      <p id="sender-lead" class="lead">To the computer you scanned.</p>
       <div id="request-context" hidden>
         <p id="request-task" class="request-task" hidden></p>
         <p id="request-prompt" class="request-prompt"></p>
       </div>
       <form id="send-form">
         <div class="field-heading"><label for="text">Your text</label><button id="paste" class="plain" type="button" hidden>Paste</button></div>
-        <textarea id="text" rows="9" placeholder="Paste or type here…" autocomplete="off" spellcheck="false" required></textarea>
+        <textarea id="text" rows="7" placeholder="Paste or type here…" autocomplete="off" spellcheck="false" required></textarea>
         <div class="field-footer"><span id="bytes" class="quiet">0 / 64 KiB</span><span class="quiet">Text only</span></div>
         <button id="send" type="submit">Send to computer</button>
       </form>

@@ -11,7 +11,7 @@
 
 Bring phone text into a temporary computer inbox, or into the task that asked for it. Open the computer page, scan, paste, and send. Ordinary transfer needs no AI component or phone app.
 
-**Local preview:** `0.1.0-alpha.1` packages are being validated locally. The intended user path is a prebuilt macOS app or native CLI archive, without Git, Go, or Node installation. There is **no published GitHub Release or public download URL yet**; local package evidence and availability are recorded in [distribution](docs/distribution.md). Source building is for contributors.
+**Current preview: `0.1.0-alpha.2` is being prepared.** Its black, white, and gray interface uses translucent layers while preserving the existing transfer/request contract. Safari desktop-light send/receive and the **Copied** label passed; dark/phone-size GUI checks are blocked by an interactive authentication boundary, and actual system paste was not repeated. Final package acceptance is pending. The user path is prebuilt, without Git, Go, or Node installation. There is **no published GitHub Release or public binary download URL yet**. [Verification](docs/verification.md) and [distribution](docs/distribution.md) separate current evidence from the historical alpha.1 snapshot; source builds are for contributors.
 
 ## Comments on your phone, proposal on your computer
 
@@ -117,7 +117,7 @@ Files, photos, audio, remote phone control, continuous clipboard sync, durable h
 
 ## Evidence and contributing
 
-Real Safari 27.0.1 loopback checks passed for ordinary transfer, actual system copy/paste, task submission and repeat-read flow, a 390×844 responsive-layout sample, and UI Quit. A fresh-binary follow-up passed same-tab A→B invitation switching without cross-request delivery. This is desktop-browser evidence, not Finder/default-browser auto-opening, physical-phone/LAN/QR-scan, Gatekeeper, or actual Codex-host acceptance. Those remain **NOT_RUN**. Final packaged-artifact validation is separate in [distribution](docs/distribution.md), [verification](docs/verification.md), and [claims/evidence](docs/claims-evidence.md).
+For the historical alpha.1 revision, real Safari 27.0.1 loopback checks passed ordinary transfer, actual system copy/paste, task submission and repeat-read flow, a 390×844 responsive-layout sample, UI Quit, and fresh-binary same-tab A→B switching without cross-delivery. Its eight archives passed structural/hash checks and a second build produced identical bytes for all ten output files. Mac arm64 packaged app flag-dispatch/lifecycle/CLI/safety/cleanup checks passed with `--no-open` and private state; this is not zero-argument Finder launch. These results do not accept the pending alpha.2 visual revision. [Distribution](docs/distribution.md), [verification](docs/verification.md), and [claims/evidence](docs/claims-evidence.md) link the receipts. Finder/default-cache discovery, default-browser auto-opening, physical-phone/LAN/QR, Gatekeeper, actual Codex-host and Windows/Linux native acceptance remain **NOT_RUN**.
 
 The [earlier macOS arm64 / Go 1.27.3 loopback baseline](docs/performance-baseline.md) and [raw samples](docs/benchmarks/2026-10-28-macos-arm64.json) measure a specific prior CLI/core binary, not app launch, browser opening, mobile interaction, or Agent speed. [Budgets](docs/performance.md) remain engineering targets.
 

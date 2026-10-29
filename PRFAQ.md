@@ -6,7 +6,9 @@ Ferry Dock lets a person bring text from a phone into a computer inbox or the ta
 
 In the task flow, an Agent working on a proposal asks for the comments held in a phone chat. The phone page names that proposal and asks for the missing text. The user pastes and sends. Only the request's reader can retrieve the result, and the original task uses the feedback to revise the proposal.
 
-**Delivery status:** the text/request core and JSON CLI are implemented. Version `0.1.0-alpha.1` adds a local prebuilt macOS app/native-CLI preview; final archive validation is pending. Actual Safari 27.0.1 loopback UI checks have passed within the scope recorded in [verification](docs/verification.md), including a fresh-binary same-tab invitation-switch check. Finder/default-browser auto-opening, Gatekeeper, real-phone/LAN/QR scan, and actual Codex-host acceptance remain `NOT_RUN`. There is no published GitHub Release or public binary download URL.
+**Current status:** `0.1.0-alpha.2` is being prepared with a black, white, and gray interface and translucent visual layers. Transfer/request semantics are unchanged. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI acceptance is blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed; final package acceptance is pending. [Verification](docs/verification.md) records the exact scopes. There is no published GitHub Release or public binary download URL.
+
+**Historical preview evidence:** eight local `0.1.0-alpha.1` archives from clean source `3d6fca8` passed archive checks and same-input rebuild comparison. Mac arm64 packaged lifecycle/CLI/safety checks passed with `--no-open` and private state; Safari 27.0.1 has separate scoped UI passes. Its app ZIP is 3,274,113 bytes. These results belong to that fixed snapshot, not the pending alpha.2 revision. Finder/default-cache discovery, default-browser auto-opening, Gatekeeper, real-phone/LAN/QR, actual Codex-host and Windows/Linux native acceptance remain `NOT_RUN`. [Distribution](docs/distribution.md) identifies the artifacts and receipts.
 
 ## Who is it for?
 
@@ -68,7 +70,7 @@ Desktop listener overrides are limited to `127.0.0.1:PORT` or `0.0.0.0:PORT`, wi
 
 ## Is the preview signed, notarized, or accepted by Gatekeeper?
 
-The packaging script performs no Developer ID signing or Apple notarization. A linker ad-hoc signature is not publisher identity. Local bundle/version/HTTP or Safari loopback checks do not prove downloaded-file first launch, Finder/default-browser auto-opening, or Gatekeeper acceptance. The project does not provide a procedure to disable those protections. Artifact hashes, signature metadata, and actual acceptance scopes belong in [distribution](docs/distribution.md) and the verification record.
+The packaging script performs no Developer ID signing or Apple notarization. A linker ad-hoc signature is not publisher identity. Local bundle/version/HTTP or Safari loopback checks do not prove downloaded-file first launch, Finder/default-browser auto-opening, or Gatekeeper acceptance. [Apple's signing and notarization guidance](https://developer.apple.com/developer-id/) describes those separate checks. Windows previews are also publisher-unsigned; [Microsoft's SmartScreen overview](https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/) describes download/app reputation checks. No bypass procedure is provided. Artifact hashes and observed acceptance scopes are in [distribution](docs/distribution.md).
 
 ## What exactly is a collection request?
 
@@ -130,4 +132,4 @@ The collection slice must pass request isolation, limits, expiry/cancellation, r
 
 Synthetic execution must be labeled as such. Recorded Safari loopback acceptance includes real copy/paste and the specific UI cases in [verification](docs/verification.md). It is not physical-phone QR/LAN, Finder/default-browser auto-opening, or actual Codex-host acceptance; those stay `NOT_RUN` until their own evidence exists.
 
-Packaging additionally needs checks against the actual archives: version/commit/architecture, bundled binary and documents, checksums, native executable behavior, desktop start/reopen/quit, CLI use of the desktop control file, and cleanup. Generating a `.app` is not all of those checks, and a local preview is not public distribution.
+The historical alpha.1 local archives passed target/header/hash/layout/metadata checks, and Mac arm64 passed packaged app flag-dispatch, readiness, CLI compatibility, reuse, quit, stale/unknown-service safety and cleanup checks. A second full build matched all eight archives, manifest and checksums byte-for-byte. Those receipts are pinned to `3d6fca8`; later documentation/UI changes do not rebuild the packages. Alpha.2 requires its own visual and package evidence. Generating or testing a local `.app` is still not public distribution or Finder/Gatekeeper/phone acceptance.

@@ -1,0 +1,207 @@
+{
+  "artifacts": [
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-darwin-arm64/ferry-dock",
+        "sha256": "06d0a024ea5cd0aa40fa278bb58c4fd4eecee98b76354e8bd7d6d23f4ec4b682",
+        "size": 7387650
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-arm64.tar.gz",
+      "goarch": "arm64",
+      "goos": "darwin",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "56bbc9de69292c577cbacba3c4a2e96722c20df4459488d547d8dfd7dfdefc0f",
+      "signing": {
+        "adHoc": true,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3245614
+    },
+    {
+      "binary": {
+        "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+        "sha256": "f378f647a32cf57f1565892b06014202d6174721573d0150c460bc3726248dc8",
+        "size": 7387650
+      },
+      "defaultMode": "desktop",
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-arm64-app.zip",
+      "goarch": "arm64",
+      "goos": "darwin",
+      "kind": "app",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0",
+      "signing": {
+        "adHoc": true,
+        "bundleSigned": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3274113
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-darwin-amd64/ferry-dock",
+        "sha256": "fa02a43594e47323555f3f4a6d720a9a622ed7cefe9006548e17f3adcc1ead08",
+        "size": 7965616
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-amd64.tar.gz",
+      "goarch": "amd64",
+      "goos": "darwin",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "6d9ead1368694c5d051d0c44ff794d2dd286875ae9e5602d35633205ff751aa2",
+      "signing": {
+        "adHoc": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3516139
+    },
+    {
+      "binary": {
+        "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+        "sha256": "e823d0e03725c57080ddc94af50e8932b6ef8eb5110f94c70b48c2f291937d1e",
+        "size": 7965616
+      },
+      "defaultMode": "desktop",
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-amd64-app.zip",
+      "goarch": "amd64",
+      "goos": "darwin",
+      "kind": "app",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "46c77ac6b514daa5b0248ad72211f3cbd3746a27ab620ae8bd562d1f561eb38e",
+      "signing": {
+        "adHoc": false,
+        "bundleSigned": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3544548
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-linux-amd64/ferry-dock",
+        "sha256": "4361ffa29df90f641706180731f97e931f01d42425c30e93f489ce4e8258e0be",
+        "size": 7803004
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-linux-amd64.tar.gz",
+      "goarch": "amd64",
+      "goos": "linux",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "1cca42f0f41e9264fa7b681ecb70e78fdec8cebef42d35833ff545ddb5fc4904",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3469990
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-linux-arm64/ferry-dock",
+        "sha256": "a7208d2980b354ae548e1fa782f1a94a890a16fbec11651168bf81a5829c155d",
+        "size": 7209084
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-linux-arm64.tar.gz",
+      "goarch": "arm64",
+      "goos": "linux",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "846425aee682bbbaedf183946594161c5a62fa8609396f9b527782edc9b522e8",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3142368
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-windows-amd64/ferry-dock.exe",
+        "sha256": "aba3a82a255ac0e50abd2156ddb5e03824b7b0e4944429d5f0cc1376d4ea2ea3",
+        "size": 8026112
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-windows-amd64.zip",
+      "goarch": "amd64",
+      "goos": "windows",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "fc0f7839182422401fa5ef25fbf8a27dec0c2a47729214fc7fc951586c94941e",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3565167
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.1-windows-arm64/ferry-dock.exe",
+        "sha256": "faf954750d9cfe13e6d300a82606d101bb1f3488c051ce5bb837da1b1abbfcc0",
+        "size": 7286272
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.1-windows-arm64.zip",
+      "goarch": "arm64",
+      "goos": "windows",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "5dc55189edad0f1178cae858e095217e3a82090afedd6d966820fc680798a748",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3200038
+    }
+  ],
+  "build": {
+    "cgoEnabled": false,
+    "pgo": false,
+    "trimpath": true,
+    "vcsStamping": false
+  },
+  "product": "Ferry Dock",
+  "schema": 1,
+  "source": {
+    "binaryCommit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+    "commit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+    "dirty": false,
+    "epoch": 1793244007,
+    "treeSha256": "b7b55304df608d504fd9b506408eb8133e23d5e583fd12106f0a506489ce2eed"
+  },
+  "toolchain": {
+    "go": "go version go1.27.3 darwin/arm64",
+    "goamd64": "v1",
+    "goarm64": "v8.0",
+    "goenv": "off",
+    "goexperiment": "",
+    "python": "3.9.6",
+    "zlib": "1.2.12"
+  },
+  "version": "0.1.0-alpha.1"
+}

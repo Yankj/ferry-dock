@@ -4,11 +4,28 @@ Ferry Dock's user path is a prebuilt macOS app or native CLI archive. Git, Go, a
 
 ## Availability
 
-Version `0.1.0-alpha.1` is a **local packaging preview**. Package generation and validation are in progress for this revision. No GitHub Release, public artifact URL, package registry upload, or installer has been published by this work. Do not construct a download link from the version label.
+Current preview `0.1.0-alpha.2` is being prepared with the black, white, and gray visual revision. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks are blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed, while final artifacts, native package checks and rebuild evidence remain pending. [Verification](verification.md) preserves these scopes. The transfer/request API and install form remain unchanged. No alpha.1 byte size, hash, readiness timing, or pass is a claim about alpha.2. No public binary download has been published.
+
+## Frozen alpha.1 artifact snapshot
+
+Version `0.1.0-alpha.1` is a **verified historical local preview** frozen at clean source `3d6fca8c843281b9ab2806966fc2661e3cccbe52`. The eight archives passed package checks; a second complete build using the same source/toolchain produced identical bytes for all eight archives, the manifest, and checksums. This fixed snapshot predates the next visual revision. Later documentation or UI changes do not change these files or inherit their results. No GitHub Release, public artifact URL, package registry upload, or installer has been published. Do not construct a download link from the version label.
 
 The `.app` is Ferry Dock itself. First use is ZIP extraction → open → QR; later use is open → QR. There is no installation wizard, registration, login item, or additional Go/Node platform to install.
 
-The packaging script writes local outputs under `dist/0.1.0-alpha.1/` by default, with `manifest.json` and `SHA256SUMS`. These are generated build outputs, not files a public source checkout can assume are present. Final artifact names and observed validation will be recorded here after the local package checks finish.
+The packaging script wrote local outputs under `dist/0.1.0-alpha.1/`, with `manifest.json` and `SHA256SUMS`. These are generated build outputs, not files a public source checkout can assume are present. The committed [artifact manifest](benchmarks/2026-10-29-artifacts.json) records their sizes, target/binary/archive hashes, toolchain, and signing metadata:
+
+| Local archive | Bytes |
+| --- | ---: |
+| `ferry-dock-0.1.0-alpha.1-darwin-arm64.tar.gz` | 3,245,614 |
+| `ferry-dock-0.1.0-alpha.1-darwin-arm64-app.zip` | 3,274,113 |
+| `ferry-dock-0.1.0-alpha.1-darwin-amd64.tar.gz` | 3,516,139 |
+| `ferry-dock-0.1.0-alpha.1-darwin-amd64-app.zip` | 3,544,548 |
+| `ferry-dock-0.1.0-alpha.1-linux-amd64.tar.gz` | 3,469,990 |
+| `ferry-dock-0.1.0-alpha.1-linux-arm64.tar.gz` | 3,142,368 |
+| `ferry-dock-0.1.0-alpha.1-windows-amd64.zip` | 3,565,167 |
+| `ferry-dock-0.1.0-alpha.1-windows-arm64.zip` | 3,200,038 |
+
+Apple Silicon app ZIP SHA-256: `5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0`. These names identify local files, not download links. The manifest's `nativeValidation: NOT_RUN` fields are generation-time metadata; subsequent scoped validation is recorded in the separate [desktop receipt](benchmarks/2026-10-29-desktop-preview.json), without rewriting the original manifest.
 
 ## macOS preview recipients
 
@@ -68,11 +85,15 @@ The script refuses existing output directories. Dirty trees require explicit `--
 
 `manifest.json` records source/dirty state, toolchain, target, binary path/hash, archive hash, and signature metadata. `SHA256SUMS` covers generated archives and the manifest. A checksum checks bytes against the supplied record; it does not replace trusted distribution or publisher signing.
 
-The packaging script performs no Developer ID signing, Apple notarization, upload, registry publication, or security-setting change. Any Go-linker ad-hoc signature is not a verified publisher identity. Do not claim that a locally generated app will pass downloaded-file Gatekeeper checks, or instruct users to disable protections to run this preview.
+The packaging script performs no Developer ID signing, Apple notarization, upload, registry publication, or security-setting change. The arm64 executable's linker ad-hoc signature is not verified publisher identity, and the app bundle is not Developer ID signed or notarized. [Apple's Gatekeeper signing guidance](https://developer.apple.com/developer-id/) describes publisher signing and notarization as separate checks. Windows previews are publisher-unsigned; [Microsoft's SmartScreen overview](https://learn.microsoft.com/en-us/windows/security/operating-system-security/virus-and-threat-protection/microsoft-defender-smartscreen/) describes downloaded app reputation checks. Local package tests do not establish downloaded-file acceptance; disabling protections is not part of this preview.
 
-## Validation record
+## Alpha.1 validation record
 
-Final archive/native package validation is pending. Record hashes, embedded version/commit/architecture, native executable checks, desktop start/reopen/quit, CLI collection through the same control file, and cleanup against the actual final artifacts before marking them passed.
+The [desktop receipt](benchmarks/2026-10-29-desktop-preview.json) records exit-zero `smoke-package.py --require-all`: all eight archive/binary hashes, target headers, metadata, permissions, and layouts passed. Mac arm64 native checks passed app default-mode flag dispatch, Chinese/space extraction path, private HOME with `PATH=/nonexistent`, version/readiness, CLI compatibility, reuse, Quit, stale recovery, occupied/unknown-service safety, and owned cleanup. The app executable was invoked with `--no-open --state-dir ... --listen 127.0.0.1:0`, without a `desktop` subcommand. This verifies flag dispatch, not zero-argument Finder/default-cache launch.
+
+The [rebuild receipt](benchmarks/2026-10-29-reproducibility.json) records all ten outputs byte-identical across two complete builds from the same clean source and toolchain into different directories. It is not a claim about arbitrary toolchains or build environments.
+
+On Apple M4 Pro / Darwin arm64 with Go 1.27.3, 20 fresh app processes with fresh private state reached authenticated loopback readiness at p50 **82.281 ms**, p95 **85.225 ms**, maximum **98.025 ms**, with no recorded errors; every instance was quit and cleaned. Timing starts before invocation and ends after exit-zero, control read, and authenticated instance validation. OS/filesystem caches were not flushed. The explicit loopback/no-open test excludes LAN discovery, browser rendering, Finder, Gatekeeper, phone interaction and Agent execution; it is not an OS cold-start or cross-platform ranking.
 
 Safari 27.0.1 loopback UI acceptance is separately recorded in [verification](verification.md): real ordinary copy/paste, task submission and later same-handle reading after a wait timeout, received-page locking, a 390×844 layout sample, ended-page states, UI Quit, and fresh-binary same-tab A→B invitation switching. It does not establish Finder/no-argument default-cache launch, default-browser auto-opening, downloaded-file Gatekeeper, physical-phone/LAN/QR, other native platforms, or actual Codex-host acceptance. Those remain **NOT_RUN**. Ended-page tests are not an actual in-flight network-failure test.
 

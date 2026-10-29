@@ -11,7 +11,7 @@
 
 把手机文字送到电脑临时收件箱，或准确交回发起收集的任务。打开电脑页面，手机扫码、粘贴、发送。普通传输不需要 AI，也不用安装手机 App。
 
-**本地预览：** `0.1.0-alpha.1` 安装产物正在本地验证。默认用户路径是预构建 macOS 应用或原生 CLI，无需安装 Git、Go 或 Node。**目前没有发布 GitHub Release 或公开下载链接**；本地产物及验证状态见[分发说明](docs/distribution.md)。源码构建只面向开发者。
+**当前预览：正在准备 `0.1.0-alpha.2`。** 黑白灰界面以透明层次组织内容，传输和请求接口保持不变。实际 Safari 浅色桌面收发及 **Copied** 标签已通过；深色／手机尺寸 GUI 检查因认证交互边界受阻，新版尚未重做系统粘贴检查，正式产物验收仍待完成。默认使用预构建应用或 CLI，无需安装 Git、Go 或 Node。**目前没有发布 GitHub Release 或原生包的公开下载链接**；[验证记录](docs/verification.md)与[分发说明](docs/distribution.md)区分当前结果和历史 alpha.1 快照。源码构建只面向开发者。
 
 ## 意见在手机，提案在电脑
 
@@ -117,7 +117,7 @@ runtime_dir="$(mktemp -d)"
 
 ## 验证与贡献
 
-实际 Safari 27.0.1 的 loopback 检查已通过普通收发、系统真实复制粘贴、任务提交与后续读取、390×844 响应布局样本及 UI Quit；新二进制复核也通过同标签页 A→B 邀请切换，未串投。这些是电脑浏览器证据，不代表 Finder／默认浏览器自动打开、手机局域网／扫码、Gatekeeper 或实际 Codex 宿主验收，后者仍为 **NOT_RUN**。最终安装产物验证单独记录在[分发说明](docs/distribution.md)、[验证记录](docs/verification.md)及[主张／证据](docs/claims-evidence.md)中。
+历史 alpha.1 修订在实际 Safari 27.0.1 的 loopback 检查中，通过普通收发、系统真实复制粘贴、任务提交与读取、390×844 布局样本、UI Quit，以及新二进制同标签页 A→B 切换不串投。其八个归档通过结构／哈希检查，两次完整构建的十个输出文件逐字节一致；Mac arm64 应用包通过 `--no-open`、私有状态目录下的默认参数分派、生命周期、CLI、安全与清理检查，这不等于 Finder 零参数首启。上述结果不代表 alpha.2 视觉修订已验收。收据见[分发说明](docs/distribution.md)、[验证记录](docs/verification.md)及[主张／证据](docs/claims-evidence.md)。Finder／默认缓存发现、默认浏览器自动打开、手机局域网／扫码、Gatekeeper、实际 Codex 宿主及 Windows/Linux 本机验收仍为 **NOT_RUN**。
 
 [此前 macOS arm64／Go 1.27.3 loopback 基线](docs/performance-baseline.md)与[原始样本](docs/benchmarks/2026-10-28-macos-arm64.json)测的是特定旧 CLI／核心二进制，不代表应用启动、浏览器打开、手机操作或 Agent 速度。[预算](docs/performance.md)仍是工程目标。
 

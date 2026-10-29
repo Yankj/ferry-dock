@@ -1,0 +1,86 @@
+{
+  "checkedAt": "2026-10-29T03:23:57.181699+00:00",
+  "files": [
+    {
+      "bytesIdentical": true,
+      "file": "SHA256SUMS",
+      "sha256": "16e8cc1489151cd52cc3b9285ca205f9a9b48e4edf2cbcdd41b4c6094991248f",
+      "size": 964
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-amd64-app.zip",
+      "sha256": "46c77ac6b514daa5b0248ad72211f3cbd3746a27ab620ae8bd562d1f561eb38e",
+      "size": 3544548
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-amd64.tar.gz",
+      "sha256": "6d9ead1368694c5d051d0c44ff794d2dd286875ae9e5602d35633205ff751aa2",
+      "size": 3516139
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-arm64-app.zip",
+      "sha256": "5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0",
+      "size": 3274113
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-darwin-arm64.tar.gz",
+      "sha256": "56bbc9de69292c577cbacba3c4a2e96722c20df4459488d547d8dfd7dfdefc0f",
+      "size": 3245614
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-linux-amd64.tar.gz",
+      "sha256": "1cca42f0f41e9264fa7b681ecb70e78fdec8cebef42d35833ff545ddb5fc4904",
+      "size": 3469990
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-linux-arm64.tar.gz",
+      "sha256": "846425aee682bbbaedf183946594161c5a62fa8609396f9b527782edc9b522e8",
+      "size": 3142368
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-windows-amd64.zip",
+      "sha256": "fc0f7839182422401fa5ef25fbf8a27dec0c2a47729214fc7fc951586c94941e",
+      "size": 3565167
+    },
+    {
+      "bytesIdentical": true,
+      "file": "ferry-dock-0.1.0-alpha.1-windows-arm64.zip",
+      "sha256": "5dc55189edad0f1178cae858e095217e3a82090afedd6d966820fc680798a748",
+      "size": 3200038
+    },
+    {
+      "bytesIdentical": true,
+      "file": "manifest.json",
+      "sha256": "0ba39f9b5d86b74f1e3833a0c9cf35c7bea07bf93bc8c2200fe111d812a33559",
+      "size": 6395
+    }
+  ],
+  "result": "PASS",
+  "schema": 1,
+  "scope": "two complete builds from the same clean source/toolchain into different output directories",
+  "source": {
+    "binaryCommit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+    "commit": "3d6fca8c843281b9ab2806966fc2661e3cccbe52",
+    "dirty": false,
+    "epoch": 1793244007,
+    "treeSha256": "b7b55304df608d504fd9b506408eb8133e23d5e583fd12106f0a506489ce2eed"
+  },
+  "toolchain": {
+    "go": "go version go1.27.3 darwin/arm64",
+    "goamd64": "v1",
+    "goarm64": "v8.0",
+    "goenv": "off",
+    "goexperiment": "",
+    "python": "3.9.6",
+    "zlib": "1.2.12"
+  },
+  "version": "0.1.0-alpha.1",
+  "privacyNote": "Absolute local output directories omitted in this committed evidence copy; original receipt retained beside local build outputs."
+}

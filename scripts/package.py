@@ -189,7 +189,7 @@ def png_icon(size, polygons, ink):
     scale = size / 1024
     margin, radius = 32 * scale, 208 * scale
     mark_scale, mark_offset = 22 * scale, 160 * scale
-    background = bytes.fromhex("F7F8F4")
+    background = bytes.fromhex("F5F5F5")
     rows = bytearray()
 
     def interval(row, left, right, color):
@@ -282,16 +282,21 @@ Source, usage, and security information: https://github.com/Yankj/ferry-dock
 
 In this directory, run:
   {command} version
-  {command} serve
+  {command} desktop
 
-Open the private computer URL printed by the service. The default listener is
-127.0.0.1:8787 and cannot receive from a physical phone. To allow a phone on a
-trusted LAN, use your computer's actual reachable LAN address, for example:
+Desktop mode opens your browser and selects a free local port. Scan its QR
+with your phone, paste text, and send. Both devices need a reachable trusted
+LAN. Address detection is best effort; a QR cannot fix network isolation.
+Use Quit Ferry Dock in the browser to stop its owned service and clear data.
+Closing the browser tab keeps that service running; desktop can reopen it.
+
+Advanced/headless: serve runs in the foreground. To select a phone-reachable
+origin explicitly, use your computer's actual LAN address, for example:
   {command} serve --listen 0.0.0.0:8787 --public-url http://192.168.1.20:8787
 
 A QR does not bypass a firewall, guest Wi-Fi isolation, VPN, or routing.
-HTTP is not encrypted. Stop the service with Ctrl+C. Content is in memory and
-is lost at shutdown. Keep the private computer link and reader handles private.
+HTTP is not encrypted. Stop foreground serve with Ctrl+C. Content is in memory
+and is lost at shutdown. Keep computer links and reader handles private.
 Files and automatic Agent-host wake-up are not provided by this alpha.
 
 This archive is a portable developer alpha, not an installer. Publisher signing
@@ -319,7 +324,7 @@ def documentation():
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", default="0.1.0-alpha.1", help="artifact/product version (default: %(default)s)")
+    parser.add_argument("--version", default="0.1.0-alpha.2", help="artifact/product version (default: %(default)s)")
     parser.add_argument("--target", action="append", choices=TARGETS, help="repeat for a subset (default: both Darwin architectures)")
     parser.add_argument("--all", action="store_true", help="build all six targets, including both macOS apps")
     parser.add_argument("--out", type=Path, default=ROOT / "dist", help="output parent; creates a new version directory")

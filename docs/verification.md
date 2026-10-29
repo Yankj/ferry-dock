@@ -1,13 +1,35 @@
 # Verification record
 
-## Local packaging preview, 2026-10-29
+## Current alpha.2 visual revision
+
+Version `0.1.0-alpha.2` is being prepared with black, white, and gray styling and
+translucent UI layers. Transfer/request contracts and the one-Go-core install
+form are unchanged. QR backgrounds and quiet zones remain opaque. The
+implementation lead recorded the following current-revision results:
+
+| Alpha.2 check | Status and scope |
+| --- | --- |
+| Actual Safari desktop light | RECORDED_PASS: the black/white/gray desktop UI rendered; synthetic ordinary text sent through the UI appeared as one received item, and clicking Copy showed **Copied**. Actual OS paste was not repeated for this revision. |
+| Local screenshot | An original CUA JPEG was saved at ignored `bin/previews/desktop-light.jpg`. It is a local evidence file, not a published image or package asset. The pictured QR was revoked by the later service shutdown. |
+| Dark and phone-size GUI | BLOCKED at an unsupported interactive authentication boundary. GUI work paused without a retry or bypass; neither rendering mode is recorded as passed. |
+| Owned-service cleanup | RECORDED_PASS: API Quit returned 202, the socket closed, the control file was removed, and the owned QA files were cleaned. This was not the alpha.1 UI Quit case or zero-argument Finder acceptance. |
+| Automated regression | RECORDED_PASS: Go tests, 12 compiled-program HTTP checks, 27 synthetic request checks, 11 UI VM checks, and SCRIPT_HTTP. These do not replace rendered mobile/dark UI or physical-phone/Agent-host acceptance. |
+| Contrast | [Calculated source contrast](ui-contrast.md), not a pass for actual dark-mode browser rendering. |
+| Final artifacts | Archive/native/reproducible-build checks are **pending** for alpha.2; alpha.1 receipts below do not establish them. |
+
+The complete alpha.1 Safari/system-copy-paste observations below remain historical
+evidence for that revision, not a substitute for the unexecuted alpha.2 cases.
+
+## Historical local packaging preview, 2026-10-29
 
 Version `0.1.0-alpha.1` changes the user installation path to prebuilt macOS app
 and native CLI archives; source builds are for contributors. It builds the same
 `cmd/ferry-dock`, with desktop as the app's no-argument default, not another
-backend. Final archive/native-package validation is pending; actual Safari
-loopback acceptance is recorded separately below. No GitHub Release or public
-artifact URL has been published.
+backend. The immutable artifact source is clean commit
+`3d6fca8c843281b9ab2806966fc2661e3cccbe52`; its final package checks passed.
+This historical snapshot predates the next visual revision, which requires its
+own acceptance. Actual Safari loopback acceptance is recorded separately below.
+No GitHub Release or public artifact URL has been published.
 
 The desktop contract is a short-lived launcher, one owned background Go service,
 private owner/instance verification on reopen, browser opening, and explicit
@@ -15,9 +37,35 @@ private owner/instance verification on reopen, browser opening, and explicit
 service running. Default state is in the OS user cache under
 `ferry-dock/runtime`; requests can reuse that private control file.
 
-The package record must identify source/dirty state, target architecture,
-embedded `version` output, binary/archive hashes, bundled docs/Skill, and actual
-start/reopen/quit/request/cleanup results before recording a package pass.
+The [artifact manifest](benchmarks/2026-10-29-artifacts.json) identifies clean
+source, all eight targets, embedded metadata, sizes, binary/archive hashes,
+toolchain and signing state. Its `nativeValidation: NOT_RUN` fields were written
+at generation time; the separate later
+[desktop receipt](benchmarks/2026-10-29-desktop-preview.json) records completed
+validation without rewriting that original manifest.
+
+| Package check | Observed result at source `3d6fca8` |
+| --- | --- |
+| All eight archives | PASS: archive/binary hashes, Mach-O/ELF/PE target headers, metadata, permissions and layouts, including bundled docs/Skill. |
+| Mac arm64 packaged executable | PASS: default-mode flag dispatch without a `desktop` subcommand, Chinese/space extraction path, private HOME and `PATH=/nonexistent`, version/readiness, CLI compatibility, reuse, Quit and stale recovery. Invocation used `--no-open --state-dir ... --listen 127.0.0.1:0`; this was not zero-argument Finder launch or default cache discovery. |
+| Service safety and cleanup | PASS: an occupied explicit port was not taken over; unknown recorded service/private state remained untouched; verified owned processes stopped and private extracted/runtime files were removed. |
+| Same-input rebuild | PASS: [two complete builds](benchmarks/2026-10-29-reproducibility.json) from the same clean source/toolchain into different directories produced identical bytes for all eight archives, `manifest.json`, and `SHA256SUMS`. No arbitrary cross-toolchain guarantee is inferred. |
+
+The Apple Silicon app ZIP is **3,274,113 bytes**, SHA-256
+`5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0`.
+Later evidence-document commits do not rebuild this snapshot.
+
+The same receipt records **20 fresh process/private-state readiness samples**
+on Apple M4 Pro, Darwin 27 arm64, 24 GiB RAM, Go 1.27.3: p50 **82.281 ms**,
+p95 **85.225 ms**, maximum **98.025 ms**, zero recorded errors, unique instances
+and successful Quit/cleanup for every sample. Timing begins immediately before
+invoking the packaged app and ends after launcher exit-zero, private control
+read, and authenticated HTTP instance validation. `--no-open`, an explicit
+`127.0.0.1:0` listener, private HOME/state and `PATH=/nonexistent` were used.
+OS/filesystem caches were not flushed; background desktop load was uncontrolled.
+This excludes LAN discovery, browser opening/rendering, phone/QR, OS trust prompts
+and Agent execution, and is not an OS cold-boot measurement or platform ranking.
+
 Publisher signing, notarization, downloaded-file Gatekeeper, Finder/no-argument
 default-cache launch, default-browser auto-opening, real-phone LAN/QR scan, and
 actual Codex-host workflows remain **NOT_RUN**. A Safari page opened explicitly
@@ -25,8 +73,9 @@ for the tests below is not the default-browser launch chain.
 
 See [distribution](distribution.md) and [packaging claims](claims-evidence.md).
 The older results below are preserved with their source/binary identities. They
-do not establish app launch, a downloaded package's first-use experience, or a
-new performance baseline for this packaging change.
+do not establish the packaged launch results above or a downloaded package's
+first-use experience. The older core-startup baseline and this app-readiness
+measurement have different definitions and must not be compared as one metric.
 
 ## Actual Safari loopback acceptance, 2026-10-29
 
@@ -50,7 +99,7 @@ tree passed `go vet ./...`, `go test -race -cover ./...`, the 12-check ordinary
 HTTP smoke, 27-check synthetic request scenario, and SCRIPT_HTTP integration.
 Recorded unit coverage was relay 88.4%, CLI 41.3%, desktop 21.1%; these package
 figures are not product or UI acceptance percentages. The final package record
-will separately identify its clean source and artifact identities.
+above separately identifies its clean source and artifact identities.
 
 Remaining UI/device gates include Finder/default-cache first launch, automatic
 system-browser opening, physical-phone LAN/QR scan, other browsers, actual

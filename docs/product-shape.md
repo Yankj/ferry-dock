@@ -25,7 +25,9 @@ A second task can request different text at the same time. Its reader and sender
 
 The current product is **one Go core + prebuilt macOS app/native CLI + scan-to-open web pages + an optional local Codex Skill**. The app is a Go launcher for the existing browser UI, compiled from the same command with `DefaultMode=desktop`; it is not another backend or a separate Swift/Electron UI. State and transfer semantics remain shared.
 
-Version `0.1.0-alpha.1` is a local packaging preview under validation. No GitHub Release or public artifact URL has been published. [Distribution](distribution.md) separates actual local artifacts from public availability and native/first-launch acceptance.
+Current preview `0.1.0-alpha.2` is being prepared with a black, white, and gray interface and translucent layers. Transfer/request semantics and the one-core product shape remain unchanged. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks are blocked by an interactive authentication boundary, and final package acceptance is pending. QR codes keep an opaque background and quiet zone; transparency is for surrounding UI layers, not the scan surface. [Contrast calculations](ui-contrast.md) are distinct from real dark-mode rendering.
+
+Version `0.1.0-alpha.1` remains a verified historical local packaging snapshot of clean source `3d6fca8`, with archive/rebuild checks and scoped Mac arm64 lifecycle evidence. Those results do not accept alpha.2. No GitHub Release or public artifact URL has been published. [Distribution](distribution.md) separates local artifacts from public availability and Finder/first-launch acceptance.
 
 For users, the `.app` is Ferry Dock itself: first ZIP extraction → open → QR, then open → QR on later use. It adds no installation wizard, registration, login item, or additional desktop platform/runtime.
 

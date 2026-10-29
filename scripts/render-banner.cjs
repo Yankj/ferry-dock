@@ -15,9 +15,9 @@ function mark(file, x, y, size, id) {
 }
 
 function banner(dark) {
-  const canvas = dark ? '#102321' : '#F7F8F4';
-  const ink = dark ? '#F0F6F2' : '#142D29';
-  const accent = dark ? '#76D6C6' : '#0B6159';
+  const canvas = dark ? '#111111' : '#F5F5F5';
+  const ink = dark ? '#F3F3F3' : '#171717';
+  const accent = dark ? '#F3F3F3' : '#171717';
   const logo = dark ? 'logo-dark.svg' : 'logo-light.svg';
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="banner-title banner-desc">
   <title id="banner-title">Ferry Dock / 渡口 — From your phone. To your computer.</title>

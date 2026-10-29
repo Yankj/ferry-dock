@@ -22,16 +22,19 @@ NODE_PATH=/tmp/ferry-dock-renderer/node_modules node scripts/render-brand.cjs
 The script uses installed system fonts; exported letter shapes can vary by system.
 The transfer executable itself remains a Go binary and does not need Node or resvg.
 
-Computed WCAG contrast ratios for the UI palette: primary text on canvas 13.70:1
-(light) / 14.92:1 (dark); secondary text 5.89:1 / 8.65:1; primary button text
-7.32:1 / 9.50:1. These are colour calculations, not an accessibility certification.
+Computed WCAG contrast ratios for the neutral UI palette: primary text on canvas
+16.44:1 (light) / 17.02:1 (dark); secondary text 5.59:1 / 8.13:1;
+primary button text 17.93:1 / 16.16:1. These are colour calculations,
+not an accessibility certification. QR images keep an opaque white background
+and their original quiet zone in both themes; no alpha, filters, or rounded
+cropping are applied to the code.
 
 ## Assets
 
 | File | Use |
 | --- | --- |
-| `logo-light.svg` | Standalone mark for light backgrounds, `#142D29`. |
-| `logo-dark.svg` | Standalone mark for dark backgrounds, `#F0F6F2`. |
+| `logo-light.svg` | Standalone mark for light backgrounds, `#171717`. |
+| `logo-dark.svg` | Standalone mark for dark backgrounds, `#F3F3F3`. |
 | `logo-mono.svg` | One-colour mark using `currentColor`; defaults to black when loaded as a standalone image. |
 | `wordmark-light.svg` | Bilingual lockup for light backgrounds; Chinese primary, English secondary. |
 | `wordmark-dark.svg` | Bilingual lockup for dark backgrounds. |
@@ -55,14 +58,19 @@ The favicon is the same silhouette expressed directly on a `16 × 16` grid: 2 px
 
 | Role | Light | Dark |
 | --- | --- | --- |
-| Canvas | `#F7F8F4` | `#102321` |
-| Surface | `#FFFFFF` | `#17312D` |
-| Primary text / mark | `#142D29` | `#F0F6F2` |
-| Secondary text | `#52645E` | `#ADC1BA` |
-| Accent | `#0B6159` | `#76D6C6` |
-| Border | `#D6DFD8` | `#35534C` |
+| Canvas | `#F5F5F5` | `#111111` |
+| Surface | `#FFFFFF` | `#191919` |
+| Primary text / mark | `#171717` | `#F3F3F3` |
+| Secondary text | `#626262` | `#AAAAAA` |
+| Primary action | `#171717` | `#F3F3F3` |
+| Border | `rgba(17,17,17,.12)` | `rgba(255,255,255,.14)` |
 
-Use primary text colour for the normal logo. Reserve the deep teal accent for a primary action, a selection, or a small supporting detail. Keep large surfaces calm. Avoid gradients, glow, shadows inside the logo, and colour treatments that weaken its silhouette. On photography or busy backgrounds, place the mark on a solid approved surface with clear space.
+Border swatches in the previews show the alpha colour composited over its
+corresponding canvas (`#DADADA` light / `#323232` dark). Keep the alpha token
+in the UI; these soft separators do not replace the stronger input boundary
+or keyboard focus outline.
+
+Use primary text colour for the normal logo. Use a black-on-light or white-on-dark primary action. Keep the canvas and panels neutral, with subtle alpha borders separating groups. Do not reduce the opacity of a whole control to indicate that it is disabled; use independent label and surface colours. Avoid gradients, glow, shadows inside the logo, and colour treatments that weaken its silhouette. On photography or busy backgrounds, place the mark on a solid approved surface with clear space.
 
 ## Typography and naming
 

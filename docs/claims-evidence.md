@@ -1,11 +1,32 @@
 # Claims and evidence
 
-## Local packaging preview, 2026-10-29
+## Current alpha.2 visual revision
 
-The next delivery uses one Go command for both native CLI archives and the macOS
-app, with `DefaultMode=desktop` for the app. Version `0.1.0-alpha.1` is a local
-preview, not a published GitHub Release. Final artifact validation is pending;
-actual Safari loopback S1–S6 observations are recorded in
+Version `0.1.0-alpha.2` is being prepared. Its black, white, and gray styling and
+translucent layers do not change the transfer/request contract or introduce a
+second backend. QR backgrounds and quiet zones remain opaque.
+
+| Current-revision claim | Evidence | Status and limit |
+| --- | --- | --- |
+| Desktop-light ordinary transfer renders and completes the UI path. | Implementation lead's actual Safari run in [verification](verification.md); original ignored CUA JPEG `bin/previews/desktop-light.jpg`. | RECORDED_PASS for rendering, synthetic UI text send → one received item → Copy label **Copied**. Actual OS paste was not repeated; the JPEG is not a public asset. |
+| Dark/phone-size GUI acceptance is complete. | GUI work paused at an unsupported interactive authentication boundary. | BLOCKED, no retry/bypass and no pass inferred. [Calculated contrast](ui-contrast.md) is source evidence, not actual dark-browser rendering. |
+| The owned alpha.2 QA service was stopped. | Implementation lead's API Quit/cleanup in verification. | RECORDED_PASS: HTTP 202, socket closed, control removed, own QA files cleaned. The screenshot QR is revoked; this is not a new UI Quit or Finder/default-cache pass. |
+| Automated regression remains passing. | Implementation lead's Go tests and compiled/script checks in verification. | RECORDED_PASS: 12 HTTP / 27 synthetic request / 11 UI VM / SCRIPT_HTTP. No physical-phone, real Codex-host, OS paste, dark-mode or phone-size pass is inferred. |
+| Final alpha.2 packages have passed archive/native/rebuild acceptance. | Final artifact receipts not yet available. | Pending. No alpha.2 size, hash, readiness timing, or public download is claimed. Alpha.1 results below do not accept the new artifacts. |
+
+## Historical local packaging preview, 2026-10-29
+
+The packaged delivery uses one Go command for both native CLI archives and the
+macOS app, with `DefaultMode=desktop` for the app. Version `0.1.0-alpha.1` is a
+verified historical local preview from clean source
+`3d6fca8c843281b9ab2806966fc2661e3cccbe52`, not a published GitHub Release.
+It predates the next visual revision; newer sources need their own evidence.
+The [manifest](benchmarks/2026-10-29-artifacts.json),
+[package/native/readiness receipt](benchmarks/2026-10-29-desktop-preview.json),
+and [same-input rebuild receipt](benchmarks/2026-10-29-reproducibility.json)
+record the completed checks. Manifest `nativeValidation` fields describe
+generation-time state; the later receipt records scoped native results without
+rewriting it. Actual Safari loopback S1–S6 observations are recorded in
 [verification](verification.md). They do not establish Finder/default-cache,
 default-browser auto-opening, Gatekeeper, physical-phone/LAN/QR, or real
 Codex-host acceptance. [Distribution](distribution.md) records final artifact
@@ -13,14 +34,17 @@ evidence separately. Earlier executions keep their source/binary identities.
 
 | Packaging/runtime claim | Source or evidence | Current status and limit |
 | --- | --- | --- |
-| Preview users can run a prebuilt app/CLI without installing Git, Go, or Node. | [Same Go command](../cmd/ferry-dock/main.go), [build metadata](../internal/buildinfo/version.go), [packager](../scripts/package.py). | SOURCE_REVIEWED for runtime design. Actual archives/native execution are pending; packagers still need developer tools. |
-| The macOS app is the same Go executable with desktop as its no-argument default, not a Swift/Node backend. | `DefaultMode` dispatch in [main.go](../cmd/ferry-dock/main.go), linker flags and bundle executable in [package.py](../scripts/package.py). | SOURCE_REVIEWED. App path is `Ferry Dock.app/Contents/MacOS/ferry-dock`; native launch and Finder/browser acceptance are separate. |
-| Native archives and app Resources include docs and a manual local Skill. | `documentation()` and archive entries in [package.py](../scripts/package.py); [Skill path resolution](../skills/ferry-dock/SKILL.md). | SOURCE_REVIEWED. No global Skill, PATH, login item, or Agent configuration is installed. Inspect actual archives before recording an artifact pass. |
+| Preview users can run a prebuilt app/CLI without installing Git, Go, or Node. | [Same Go command](../cmd/ferry-dock/main.go), [build metadata](../internal/buildinfo/version.go), [packager](../scripts/package.py), desktop receipt. | RECORDED_PASS for Mac arm64 packaged app/CLI with private HOME and `PATH=/nonexistent`. All eight archives passed structural checks; other targets' native execution remains NOT_RUN. Packagers still need developer tools. |
+| The macOS app is the same Go executable with desktop as its no-argument default, not a Swift/Node backend. | `DefaultMode` dispatch in [main.go](../cmd/ferry-dock/main.go), linker flags and bundle executable in [package.py](../scripts/package.py), desktop receipt. | RECORDED_PASS for Mac arm64 default-mode flag dispatch without a `desktop` subcommand. App path is `Ferry Dock.app/Contents/MacOS/ferry-dock`; zero-argument Finder/browser acceptance is separate and NOT_RUN. |
+| Native archives and app Resources include docs and a manual local Skill. | `documentation()` and archive entries in [package.py](../scripts/package.py); [Skill path resolution](../skills/ferry-dock/SKILL.md); desktop receipt. | RECORDED_PASS for all eight archive layouts. No global Skill, PATH, login item, or Agent configuration was installed by these checks; actual Codex-host use is NOT_RUN. |
 | The launcher starts/reopens its own background Go service, opens the browser, and exits. Closing the browser does not quit. | `Run`, detached child, private readiness and `openBrowser` in [desktop.go](../internal/desktop/desktop.go); desktop controls in [app.js](../internal/relay/web/app.js). | SOURCE_REVIEWED for launch. Safari UI Quit has RECORDED_PASS S5; automatic default-browser opening and Finder/default-cache launch remain NOT_RUN. |
-| Relaunch verifies the owner capability/instance ID and serializes startup instead of taking over an unknown service. | Startup lock, `readState`, `existing`, and `verify` in [desktop.go](../internal/desktop/desktop.go). | SOURCE_REVIEWED; concurrency, stale/unknown-service and reuse tests are pending in this packaging record. |
+| Relaunch verifies the owner capability/instance ID and serializes startup instead of taking over an unknown service. | Startup lock, `readState`, `existing`, and `verify` in [desktop.go](../internal/desktop/desktop.go); desktop receipt. | RECORDED_PASS for Mac arm64 reuse, stale recovery, occupied-port rejection and unknown-service/private-state preservation. Startup serialization is source-reviewed; this is not a blanket concurrency or other-platform pass. |
 | Default desktop LAN mode listens on all IPv4 interfaces at a free port, advertises an eligible private IPv4, and falls back visibly to a loopback listener when ambiguous/unavailable. | `lanAddress`, `primaryInterface`, `runService` and [desktop network UI](../internal/relay/web/app.js). | SOURCE_REVIEWED. Selection controls the advertised URL; this is not phone reachability or LAN acceptance. Reused instances retain their configuration; foreground `serve` retains its loopback default. |
-| Quit is an owner/loopback-authenticated operation and clears the service's in-memory sessions/requests. | Desktop handlers in [server.go](../internal/relay/server.go), `DesktopConfig.Quit`, `runService`, and Safari S5. | RECORDED_PASS for actual Safari click → stopped message, socket refusal and owned control-file cleanup. Final package checks remain separate; private cache/startup.log may remain. |
-| `version` returns version, commit, OS, architecture and default mode without a model/network call. | `buildinfo.Current` and command dispatch in [cli.go](../cmd/ferry-dock/cli.go). | SOURCE_REVIEWED; actual archive identities pending. A version label is not Release publication or publisher identity. |
+| Quit is an owner/loopback-authenticated operation and clears the service's in-memory sessions/requests. | Desktop handlers in [server.go](../internal/relay/server.go), `DesktopConfig.Quit`, `runService`, desktop receipt, and Safari S5. | RECORDED_PASS for actual Safari click → stopped message, socket refusal and owned control-file cleanup, plus Mac arm64 packaged lifecycle/cleanup. Private cache/startup.log may remain; secure erasure is not promised. |
+| `version` returns version, commit, OS, architecture and default mode without a model/network call. | `buildinfo.Current` and command dispatch in [cli.go](../cmd/ferry-dock/cli.go), artifact manifest and desktop receipt. | RECORDED_PASS for Mac arm64 app/CLI output and all-target archive metadata; SOURCE_REVIEWED for no model/network call. A version label is not Release publication or publisher identity. |
+| The eight local archives have recorded identities and a same-input rebuild result. | Artifact manifest and rebuild receipt above. | RECORDED_PASS: all eight archive/binary hashes, target headers, metadata, permissions and layouts; two complete builds matched all ten outputs byte-for-byte. Scope is the same clean source/toolchain, not arbitrary build environments. |
+| The Apple Silicon app ZIP is 3,274,113 bytes. | `darwin-arm64-app.zip` entry in the artifact manifest, SHA-256 `5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0`. | RECORDED_PASS for the fixed alpha.1 artifact. Later documentation/UI changes do not rebuild it or inherit its checks. |
+| Packaged app readiness has a measured local baseline. | Desktop receipt: 20 fresh process/private-state samples, Apple M4 Pro / Darwin arm64 / Go 1.27.3, `--no-open --state-dir ... --listen 127.0.0.1:0`. | RECORDED_MEASUREMENT: p50 82.281 ms, p95 85.225 ms, maximum 98.025 ms; zero recorded errors, every instance quit/cleaned. Definition includes launcher exit-zero, control read and authenticated HTTP instance validation. Caches were not flushed; excludes browser/Finder/default-cache/Gatekeeper/LAN discovery/phone/Agent, not OS cold boot or a platform ranking. |
 | Local artifacts have public Release/download URLs. | Packaging has no upload/publication step. | NOT_PUBLISHED. Do not fabricate links or call a generated local archive a public release. |
 | Local app generation proves Developer ID signing, Apple notarization or Gatekeeper/Finder acceptance. | Packager performs no publisher signing or notarization; signature metadata is recorded separately. | Unsupported. Ad-hoc linker signing is not verified publisher identity. Finder/default-browser auto-opening/quarantine/Gatekeeper remain NOT_RUN; separate Safari UI evidence does not establish them. |
 | Earlier HTTP/CLI tests and performance results validate the new app's launch/first-use experience. | Historic source/binary records below and [prior baseline](performance-baseline.md). | Unsupported. Preserve those scopes; new packaging/native/UI results need their own evidence. |
@@ -205,9 +229,10 @@ paste secret control/handle contents into a prompt or a public log.
 
 ## Remaining acceptance gates
 
-1. E8 completed the final CLI check for the earlier `5d3caff` freeze. The new
-   desktop/packaging runtime requires its own affected regression and artifact
-   checks; it is not recertified by E8 or the prior performance run.
+1. E8 completed the final CLI check for the earlier `5d3caff` freeze. The later
+   alpha.1 desktop/package checks above have their own clean `3d6fca8` identities;
+   they are not recertified by E8 or the prior core-startup baseline. The next
+   visual revision needs separate artifact/UI evidence.
 2. Preserve the scope of Safari S1–S6; keep Finder/default-cache/default-browser
    auto-opening, Android/iOS LAN/QR and real Codex-host acceptance NOT_RUN until
    their own evidence exists.

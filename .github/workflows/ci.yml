@@ -22,6 +22,8 @@ jobs:
         go: ['1.26.x', '1.27.x']
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
+    env:
+      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.2'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -49,7 +51,7 @@ jobs:
         run: node scripts/smoke-ui.cjs --binary ./ferry-dock${{ runner.os == 'Windows' && '.exe' || '' }}
       - name: Package local macOS previews
         if: runner.os == 'macOS' && matrix.go == '1.27.x'
-        run: python3 scripts/package.py --offline
+        run: python3 scripts/package.py --version "$FERRY_DOCK_PREVIEW_VERSION" --offline
       - name: Check native packaged lifecycle
         if: runner.os == 'macOS' && matrix.go == '1.27.x'
-        run: python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.1
+        run: python3 scripts/smoke-package.py --dist "dist/$FERRY_DOCK_PREVIEW_VERSION"
