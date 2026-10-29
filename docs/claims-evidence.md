@@ -1,5 +1,19 @@
 # Claims and evidence
 
+## Current usage instructions
+
+The [English](usage.md) and [Chinese](usage.zh-CN.md) guides and README scenario
+illustration describe current executable operations, while preserving the frozen
+alpha.2 archive/documentation snapshot. See the [usage audit](verification.md#repository-usage-guide-check-2026-10-29)
+and its [30-check receipt](benchmarks/2026-10-29-usage-validation.json).
+
+| Instruction | Implementation / evidence | Status and boundary |
+| --- | --- | --- |
+| Fresh computer page creates the ordinary QR without an initial New session click. | Final `present()` and `create.click()` in [app.js](../internal/relay/web/app.js); existing served-script/HTTP checks. | SOURCE_REVIEWED and existing SCRIPT_HTTP pass. This does not establish Finder/default-browser launch or physical scanning. |
+| Task creation writes a separate PNG; the user/Agent must display it. | `qrPath` output in [cli.go](../cmd/ferry-dock/cli.go); guide command audit. | PASS_LOCAL for saved PNG and request commands; image-viewer `open` is NOT_RUN. No automatic QR display or ordinary-inbox delivery is implied. |
+| The documented request can time out, then receive/read through the same handle. | Both guide POSIX blocks against frozen `a351555` native CLI; usage receipt. | PASS_LOCAL: two real ten-second pending waits, synthetic HTTP submissions, exact text/trust and stable input ID, cancel and own-service cleanup. No phone or Agent host was used. |
+| Bundled Skill can be read manually using its actual path. | Package layout receipts, [Skill](../skills/ferry-dock/SKILL.md), source-reviewed prompt paths. | SOURCE_REVIEWED instructions. No automatic discovery, installation, image display, host wake-up or executed Codex-host prompt is asserted. |
+
 ## Current alpha.2 preview
 
 Version `0.1.0-alpha.2` is a verified local packaging snapshot of clean source
@@ -223,7 +237,7 @@ paste secret control/handle contents into a prompt or a public log.
 | Actual desktop Safari copy/paste and scoped request UI | Safari 27.0.1 private window, real system clipboard, request/read/reload, one RDM viewport, ended-page states, UI Quit, fresh-binary same-tab A→B change. | RECORDED_PASS S1–S6. No blanket permission/fallback, in-flight outage, default-browser auto-open, Finder, or other-browser pass is inferred. |
 | Real Android Chrome and iOS Safari LAN scan/send | Record device, OS/browser, network reachability, QR, request prompt, submit, retry, expiry and isolation. | NOT_RUN. |
 | A real Codex task manually loads the repository Skill and continues the same proposal | Record the actual host's tool/image/wait behavior and resulting artifact. | NOT_RUN. The Skill file and synthetic harness are not substitutes. |
-| Cross-compilation or CI across operating systems | [Verification](verification.md) records final `CGO_ENABLED=0` Windows/Linux amd64 builds. | RECORDED_PASS for cross-builds reported by the implementation worker. Native Windows/Linux execution and remote CI of this collection slice are NOT_RUN; earlier text-alpha CI does not apply to this revision. |
+| Cross-compilation or CI across operating systems | [Verification](verification.md) records final `CGO_ENABLED=0` Windows/Linux amd64 builds. Current workflow results are available in [GitHub Actions](https://github.com/Yankj/ferry-dock/actions/workflows/ci.yml). | RECORDED_PASS for the historical cross-builds. Match CI to its own commit; build/unit/synthetic CI success does not establish native desktop first-launch, real-phone or Agent-host acceptance. Earlier text-alpha CI does not validate later revisions. |
 
 ## Performance and security wording
 

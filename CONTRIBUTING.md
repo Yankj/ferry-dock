@@ -4,7 +4,7 @@ Small, reviewable contributions are welcome. For a new input type, transport, de
 
 ## Local checks
 
-Use Go 1.26 or newer. There is no frontend build step. These examples use a POSIX shell; on Windows, use the `.exe` build/invocation form in [the README](README.md#build-and-run).
+Use Go 1.26 or newer. There is no frontend build step. These examples use a POSIX shell; on Windows, use the `.exe` build/invocation form in [the README contributor instructions](README.md#evidence-and-contributing).
 
 ```sh
 go fmt ./...

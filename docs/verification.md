@@ -1,5 +1,36 @@
 # Verification record
 
+## Repository usage-guide check, 2026-10-29
+
+The English and Chinese [guides](usage.md) were added after the frozen alpha.2
+package snapshot. They do not replace those archives or claim an executed Agent
+host prompt. The [sanitized command receipt](benchmarks/2026-10-29-usage-validation.json)
+records 30 local assertions against the existing Mac arm64 prebuilt CLI from
+`a351555ccd1615795bc2a6c10dd7e97a633a074f`:
+
+- Both guides' actual POSIX create/wait/status/read/cancel blocks executed. Only
+  the established control path was replaced with this test's private path; the
+  macOS `open` image-viewer command was omitted and remains NOT_RUN.
+- Each language completed a real ten-second pending wait, then a synthetic HTTP
+  phone submission, same-handle wait/read, exact Unicode and trust-marker checks,
+  stable repeat-read ID, and explicit cancellation. The test's own desktop service
+  ran with `--no-open --state-dir PRIVATE --listen 127.0.0.1:0`; authenticated Quit
+  returned 202 and its control file was removed.
+- All 21 repository Markdown documents passed 236 local image/link/anchor checks
+  and all 29 POSIX shell blocks passed `sh -n`. Windows examples are syntax
+  references, not a native execution pass. The scene illustration was inspected
+  at full size and 320 px; it is not a browser screenshot.
+- `go vet ./...`, `go test -race -cover ./...`, 12 HTTP, 27 synthetic request,
+  11 VM and SCRIPT_HTTP checks passed locally. The first restricted-sandbox test
+  could not bind its temporary listener; the authorized loopback run passed.
+  A first tutorial harness expected an explicit null input for a pending read;
+  the API omits that optional field, so the harness was corrected before passing.
+
+No new GUI, Finder/default-browser, Gatekeeper, real phone/LAN/QR, Windows/Linux
+native app, or actual Codex-host acceptance was performed. Those scopes remain
+separate below. This repository's guides and illustration are newer than the
+documentation bundled in the immutable alpha.2 preview.
+
 ## Current alpha.2 preview
 
 Version `0.1.0-alpha.2` is a local preview frozen at clean source

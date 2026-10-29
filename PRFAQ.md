@@ -2,6 +2,10 @@
 
 **A small local bridge from your phone to your computer.**
 
+[English usage & prompts](docs/usage.md) · [中文使用指南与 Prompt](docs/usage.zh-CN.md)
+
+<img src="brand/scenario.svg" width="800" alt="Phone text to a computer inbox, or a task response read by the same requesting Agent task.">
+
 Ferry Dock lets a person bring text from a phone into a computer inbox or the task that asked for it. The computer runs one small Go service; the phone scans a QR and uses a browser. Ordinary transfer needs no account, mobile app, cloud service, or AI model.
 
 In the task flow, an Agent working on a proposal asks for the comments held in a phone chat. The phone page names that proposal and asks for the missing text. The user pastes and sends. Only the request's reader can retrieve the result, and the original task uses the feedback to revise the proposal.
@@ -21,6 +25,16 @@ It also serves an Agent that can call a local CLI and has a concrete reason to r
 Moving text is easy in isolation; moving it with the right context can involve switching to a chat or notes app, sending to oneself, locating the message on the computer, and explaining where it belongs. Ferry Dock provides a direct scan, paste, send path, followed by copying or continuing the requesting task. This describes its interaction, not a measured speed advantage over those alternatives.
 
 Task collection adds a specific prompt, a request identity, bounded waiting, and a result accessible through that request's capability. It does not make an Agent responsible for deciding everything on the phone.
+
+For example, paste a client's phone-chat edits into a launch-proposal request; the computer task reads that feedback and revises the proposal. Or send a copied error message into the coding task that requested it. These are text handoffs: the app does not inspect chats, extract text from screenshots, control the phone, or grant the Agent new instructions or permissions.
+
+## What is the simplest way to start?
+
+For a recipient of the local macOS preview: extract the matching app ZIP, open `Ferry Dock.app`, then scan the computer page's QR, paste text, and send. The page automatically creates a session after successful loading; there is no initial New session click. Copy on the computer and paste into the destination app. Reopening a verified running instance reuses it. The exact button for stopping the service is **Quit Ferry Dock**; closing the tab does not stop it.
+
+This is the intended launch path, not a claim of verified Finder/default-browser/Gatekeeper first launch. Packages have not been published as a public Release, and the preview lacks publisher signing/notarization. The [usage guide](docs/usage.md) separates the app, portable CLI, and manual Skill paths, with prerequisites, commands, expected results, stopping, and English/Chinese prompts. Source checkout/build is a contributor path.
+
+Task collection adds one explicit action: `request create` saves a QR PNG and returns its path; it does not display it. The user opens that PNG, or a capable Agent displays it in the requesting conversation. The ordinary inbox QR does not become that request's QR.
 
 ## Why not use messaging, AirDrop, or another local transfer tool?
 
@@ -91,6 +105,8 @@ Stopping or restarting the service loses in-memory content. A control file or re
 The CLI wait is at most ten seconds. Timeout returns `pending` without canceling collection. The Agent can do other authorized work and query again. Interrupting a wait also ends only that wait; canceling the request is a distinct operation.
 
 Nothing here promises that a paused Codex host will automatically wake up. The repository Skill describes a workflow; it is not a host event mechanism.
+
+To use it manually, give a shell-capable Agent the readable absolute path to the bundled `skills/ferry-dock/SKILL.md`, the executable path, and the established private control-file path. This does not register a Skill globally or assert host auto-discovery. If a wait returns pending and the host stops, ask that same conversation to continue using its saved handle. The [copyable prompts](docs/usage.md#4-let-codex-follow-the-local-skill-manually) specify identity checks, untrusted-data handling and repeated-read deduplication. Actual Codex-host acceptance is still `NOT_RUN`.
 
 ## Does interrupting any CLI command mean nothing happened?
 

@@ -128,3 +128,15 @@ NODE_PATH=/tmp/ferry-dock-renderer/node_modules node scripts/render-banner.cjs
 
 Pass `--qa` to also render 320 px light/dark checks and the full dark preview
 under `/tmp`; those temporary QA images are not distributed product assets.
+
+## Product scenario
+
+[scenario.svg](scenario.svg) and [scenario.png](scenario.png) explain two text
+handoffs: phone text to a computer inbox, and a phone response read by its
+requesting Agent task. They are product illustrations, not interface screenshots
+or a promise of automatic Agent wake-up. The 1040 × 432 artwork and 320 px export
+have been visually checked. Render with the existing optional resvg dependency:
+
+```sh
+NODE_PATH=/tmp/ferry-dock-renderer/node_modules node brand/render-scenario.cjs
+```

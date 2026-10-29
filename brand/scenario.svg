@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="432" viewBox="0 0 1040 432" role="img" aria-labelledby="scenario-title scenario-desc">
+  <title id="scenario-title">Phone text. Computer work.</title>
+  <desc id="scenario-desc">Two ways to hand off text locally. Send any phone text and copy it on your computer. Or reply to an Agent's collection request so the Agent can read the feedback in that specific task. The Agent queries the request; this does not automatically wake its host. Text only.</desc>
+  <rect width="1040" height="432" rx="16" fill="#F5F5F5"/>
+  <g font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" fill="#171717">
+    <text x="40" y="62" font-size="44" font-weight="500" letter-spacing="-1.2">Phone text. Computer work.</text>
+    <g transform="translate(40 98)">
+      <rect width="960" height="138" rx="12" fill="#FFFFFF" stroke="#171717" stroke-opacity=".12"/>
+      <g transform="translate(26 28)" fill="none" stroke="#626262" stroke-width="3.5">
+        <rect width="48" height="80" rx="9"/>
+        <path d="M17 9h14M18 70h12M11 27h26M11 38h26M11 49h18" stroke-linecap="round"/>
+      </g>
+      <text x="100" y="61" font-size="27" fill="#626262">Phone</text>
+      <text x="100" y="105" font-size="42" font-weight="500" letter-spacing="-.8">Any text</text>
+      <g transform="translate(397 53)" fill="#171717" aria-hidden="true">
+        <path d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+        <rect x="12" y="14" width="8" height="4"/>
+      </g>
+      <path d="M445 69h54m-10-10 10 10-10 10" stroke="#626262" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(539 39)" stroke="#626262" stroke-width="3.5" fill="none" stroke-linejoin="round">
+        <rect width="74" height="48" rx="4"/>
+        <path d="M37 48v15M20 63h34" stroke-linecap="round"/>
+      </g>
+      <text x="642" y="61" font-size="27" fill="#626262">Computer</text>
+      <text x="642" y="105" font-size="42" font-weight="500" letter-spacing="-.8">Copy &amp; use</text>
+    </g>
+    <g transform="translate(40 254)">
+      <rect width="960" height="138" rx="12" fill="#FFFFFF" stroke="#171717" stroke-opacity=".12"/>
+      <g transform="translate(26 28)" fill="none" stroke="#626262" stroke-width="3.5">
+        <rect width="48" height="80" rx="9"/>
+        <path d="M17 9h14M18 70h12M11 27h26M11 38h26M11 49h18" stroke-linecap="round"/>
+      </g>
+      <text x="100" y="61" font-size="27" fill="#626262">Phone</text>
+      <text x="100" y="105" font-size="42" font-weight="500" letter-spacing="-.8">Task reply</text>
+      <g transform="translate(397 53)" fill="#171717" aria-hidden="true">
+        <path d="M4 4h12v4H8v20H4V4Zm24 24H16v-4h8V4h4v24Z"/>
+        <rect x="12" y="14" width="8" height="4"/>
+      </g>
+      <path d="M445 69h54m-10-10 10 10-10 10" stroke="#626262" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(539 39)" stroke="#626262" stroke-width="3.5" fill="none" stroke-linejoin="round">
+        <rect width="74" height="48" rx="4"/>
+        <path d="M37 48v15M20 63h34M14 15h46M14 26h30" stroke-linecap="round"/>
+      </g>
+      <text x="642" y="61" font-size="27" fill="#626262">Agent reads it</text>
+      <text x="642" y="105" font-size="42" font-weight="500" letter-spacing="-.8">Same task</text>
+    </g>
+  </g>
+</svg>
