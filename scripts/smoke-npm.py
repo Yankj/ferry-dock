@@ -256,7 +256,12 @@ def main():
                 skips.append('Windows real console Ctrl+C/CTRL_BREAK: needs interactive console; bounded wait and explicit request cancel tested')
             fragment=parse_qs(urlsplit(created['sendUrl']).fragment)
             text='  npm phone → same task\n客户：增加两周试点。  '
-            check(api('POST','/api/requests/'+fragment['request'][0]+'/input',fragment['key'][0],{'idempotencyKey':'npm-one','text':text})[0]==201,'synthetic sender submission')
+            input_route='/api/requests/'+fragment['request'][0]+'/input'
+            delivery={'idempotencyKey':'npm-input-one','text':text}
+            delivered_code,delivered=api('POST',input_route,fragment['key'][0],delivery)
+            check(delivered_code==201,'synthetic sender submission')
+            duplicate_code,duplicate=api('POST',input_route,fragment['key'][0],delivery)
+            check(duplicate_code==200 and duplicate['id']==delivered['id'],'duplicate sender retry returns the same receipt without another input')
             read=json.loads(cli('request','read','--handle',handle).stdout);repeat=json.loads(cli('request','read','--handle',handle).stdout)
             check(read['input']['text']==text and read['input']['trust']=='untrusted_user_input' and read['input']['id']==repeat['input']['id'],'request exact untrusted text and stable repeated read')
             canceled_handle=private/'cancel.json'
