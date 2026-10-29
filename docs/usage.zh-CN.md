@@ -60,6 +60,62 @@ shasum -a 256 -c SHA256SUMS
 我想用渡口普通模式，把手机聊天里的一段文字粘到电脑提案中。请指导我下载 Apple Silicon CLI 测试版、解压、运行 ferry-dock desktop、扫码、粘贴、发送，再在电脑 Copy。不要创建 Agent 请求，不要安装开发工具，也不要假设你能访问我的手机或剪贴板。出现 Local only 或系统信任提示阻止运行时，说明具体阻塞。
 ```
 
+## Node 用户：仅本地包
+
+可选 npm 入口已实现并完成本地测试，但**尚未发布到 npm**。候选名 `ferry-dock`
+不是已确认的 registry 身份，因此这里不提供公开 `npx ferry-dock` 命令。TGZ 也不是
+GitHub Release 的三个下载项之一；没有拿到该文件时，请用上方原生包，不要猜包名。
+
+当前仅支持 **Apple Silicon Mac 上的 arm64 Node.js 22+**，Rosetta 下的 x64 Node
+不在允许范围；请使用受支持的 Node LTS。已有核验后的本地
+`ferry-dock-0.1.0-alpha.2.tgz` 时，替换绝对路径，安装到一个新目录，不做全局安装：
+
+```sh
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+cd ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
+
+npm 包装入口无参数时选择 `desktop`；明确传入 `version`、`desktop`、`serve` 或
+`request ...` 时，保持同一内置 Go 核心的参数语义。版本为原生 alpha.2／a351555；
+JSON 中的 `defaultMode` 仍描述原生程序的 `serve` 默认值，包装器会明确补入
+`desktop`。包没有运行时依赖、可选依赖下载、生命周期脚本或运行时二进制下载。
+
+手动 Skill 位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。执行下方
+请求示例时，将 `ferry_bin` 设为 `node_modules/ferry-dock/native/ferry-dock` 的
+绝对路径，向 Agent 提供真实 Skill 路径。不会全局安装 Skill、MCP 或 Agent 配置。
+服务可能复用已运行但版本未被此 alpha 核验的实例；启动提示不代表版本检测。
+不要为了升级包退出其他任务共享的服务。
+
+Mac arm64／Node 22.17.1／npm 10.9.2 通过了 79 项本地断言，包含禁用脚本的
+离线安装／exec、参数／退出处理、真实信号及 PTY 中断等待、私有 loopback 服务
+生命周期／复用／清理。无参数映射与不支持平台拒绝是 VM 检查；默认浏览器、公开
+registry `npx`、其他系统、真机及实际 Codex 宿主未验。此入口不会消除 macOS 签名、
+Gatekeeper 或 HTTP 信任边界。[打包与制品详情](distribution.md#npm-packaging-preview-local-only)。
+
+## Go 用户：固定源码标签
+
+已有 Go 1.26+ 和网络时，可在 POSIX shell 中将标签对应命令安装到本地目录，
+不用克隆源码仓库或更改全局 PATH：
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+go version -m ./ferry-dock-bin/ferry-dock
+./ferry-dock-bin/ferry-dock desktop
+```
+
+模块行应包含 `github.com/Yankj/ferry-dock` 和 `v0.1.0-alpha.2`。与预编译包不同，
+该源码标签没有发行链接元数据，实测 `ferry-dock version` 显示 `dev`／`unknown`。
+Mac arm64／Go 1.27.3 已通过全新安装和 31 项私有 loopback 断言，包含普通传输、
+指定请求接续、复用及清理。这次检查没有覆盖 Go 1.26 本机、浏览器打开、真机或
+Codex 宿主。源码安装需要 Go 工具链与网络，不承诺离线可用。
+
+`go install` 只安装可执行文件，不附带 Skill 或本文档。执行下方请求命令时，
+将 `ferry_bin` 设为已安装程序的真实绝对路径。可选手动 Skill 需另行取得
+[仓库中的文件](../skills/ferry-dock/SKILL.md)，再向 Agent 提供可读路径；不会全局注册。
+[源码和构建详情](distribution.md#go-install-from-the-fixed-tag)。
+
 ## 2. 其他本地预览入口
 
 以下形态**未上传到本次预发布**，仅供另外拿到对应本地预览包的人使用；平台名称不是公开下载链接，也不是本机验收证明。
@@ -164,8 +220,11 @@ Skill 是一份 Markdown 工作流，不是已安装的集成，也不会唤醒�
 | 使用形态 | Skill 路径 |
 | --- | --- |
 | 解压后的 CLI 包 | 包根目录下 `skills/ferry-dock/SKILL.md` |
+| 安装到本地目录的 npm 包 | 该目录下 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md` |
 | Mac 应用 | `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md` |
 | 开发者源码仓库 | `skills/ferry-dock/SKILL.md` |
+
+`go install` 只提供命令；使用该源码安装路径时，可选 Skill 文件需另行取得。
 
 在已授权本地 shell／文件访问的 Codex 任务中，提供 Skill、可执行文件、控制文件的**绝对路径**，明确让它读取。若宿主支持本地文件引用，也可手动附上这份文件。这里不假设自动发现、斜杠命令或已有宿主配置，不需要也不会全局安装。没有本地 shell／文件／图片访问能力的宿主，不能原样使用这条流程。
 
@@ -198,5 +257,5 @@ Skill 是一份 Markdown 工作流，不是已安装的集成，也不会唤醒�
 - 使用手机可达的可信局域网。HTTP 文本与权限密钥未加密，不要把预览服务暴露到公网。
 - 普通会话每条最多 64 KiB，请求响应默认最多 16 KiB；没有文件、图片或语音上传。
 - 数据保存在内存。到期、取消及服务退出会清除相应文字；重启后不能靠句柄恢复。
-- 当前没有公开 `npx` 命令、MCP 服务、浏览器插件或要安装的手机 App。
+- npm 入口是本地包预览，不是公开 registry `npx` 命令；当前不提供 MCP、浏览器插件、Homebrew 分发或手机 App。
 - [验证记录](verification.md)分别列出实际 Safari、HTTP／CLI、打包检查和未验真机／系统／宿主路径；[分发说明](distribution.md)解释网络选择、未签名预览及启动故障。

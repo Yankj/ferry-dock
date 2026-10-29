@@ -60,6 +60,77 @@ Optional prompt for ordinary-transfer help; no Skill is needed:
 I want to move text from a phone chat into my desktop proposal using Ferry Dock's ordinary mode. Guide me through downloading the Apple Silicon CLI testing release, extracting it, running ferry-dock desktop, scanning, pasting, sending, then Copy on the computer. Do not create an Agent request, install developer tools, or assume access to my phone or clipboard. If the page says Local only or an OS trust prompt prevents opening, tell me the actual blocker.
 ```
 
+## Node users: local package only
+
+The optional npm entry is implemented and locally tested, but **not published
+to npm**. The candidate name `ferry-dock` is not a confirmed registry identity;
+no public `npx ferry-dock` recipe is provided. The local TGZ is not one of the
+three GitHub Release assets. If you do not already have it, use the native
+download above rather than guessing a registry package.
+
+This preview supports **macOS Apple Silicon with arm64 Node.js 22+**; an x64
+Node process under Rosetta is outside its allowlist. Use a supported Node LTS.
+Given a verified local `ferry-dock-0.1.0-alpha.2.tgz`, replace the absolute path
+below and install into a new directory, without a global installation:
+
+```sh
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+cd ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
+
+No arguments select `desktop` in this npm wrapper. Explicit `version`,
+`desktop`, `serve` or `request ...` arguments go to the same bundled Go core
+unchanged. Its version is the native alpha.2/a351555 identity; `defaultMode`
+still describes the native executable's `serve` default, while the wrapper
+explicitly supplies `desktop`. The package has no runtime dependencies,
+optional dependency downloads, lifecycle scripts or runtime binary fetches.
+
+The manual Skill is at
+`node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. For the request examples
+below, use an absolute `ferry_bin` pointing to
+`node_modules/ferry-dock/native/ferry-dock`, and give the Agent the actual
+Skill path. The wrapper does not install a Skill, MCP or Agent configuration
+globally. The service may reuse an already running instance whose version is
+not attested by this alpha; the startup warning is not version detection.
+Do not quit a service shared by other tasks just to upgrade a package.
+
+Node 22.17.1/npm 10.9.2 on Mac arm64 passed 79 local assertions, including
+offline install/exec with scripts disabled, argument/exit handling, real
+signal/PTY wait interruption and private-loopback lifecycle/reuse/cleanup.
+No-argument mapping and unsupported-platform guards were VM checks; automatic
+browser opening, public-registry `npx`, other systems, phone and actual Codex
+host were not exercised. The npm entry does not remove macOS signing,
+Gatekeeper or HTTP trust limits. [Packaging and artifact details](distribution.md#npm-packaging-preview-local-only).
+
+## Go users: fixed source tag
+
+With Go 1.26+ and network access, a POSIX shell can install the tagged command
+into a local directory without cloning the repository or changing global PATH:
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+go version -m ./ferry-dock-bin/ferry-dock
+./ferry-dock-bin/ferry-dock desktop
+```
+
+The module line should identify `github.com/Yankj/ferry-dock`
+`v0.1.0-alpha.2`. Unlike the prebuilt archive, the source tag has no release
+linker metadata: `ferry-dock version` reports `dev` / `unknown` in the tested
+build. Go 1.27.3 on Mac arm64 passed fresh installation and 31 private-loopback
+assertions, including ordinary transfer, scoped request continuation, reuse
+and cleanup. Go 1.26 native, browser opening, real phone and Codex-host use
+were not exercised by that check. Source installation needs the Go toolchain
+and network; offline installation is not promised.
+
+`go install` installs the executable only, not the Skill or these documents.
+For request commands below, set `ferry_bin` to the installed executable's
+absolute path. If you want the optional manual Skill, obtain the
+[repository Skill](../skills/ferry-dock/SKILL.md) separately and give the Agent
+its actual readable path. Nothing is registered globally. [Source and build
+details](distribution.md#go-install-from-the-fixed-tag).
+
 ## 2. Other local preview entry points
 
 These alternatives are **not uploaded in this prerelease**. They are useful only if you separately received a matching local preview; a platform label is not a public download link or native acceptance result.
@@ -164,8 +235,12 @@ The Skill is a Markdown workflow, not an installed integration or wake-up mechan
 | Where you got Ferry Dock | Skill path |
 | --- | --- |
 | Extracted CLI package | `skills/ferry-dock/SKILL.md` under the package root |
+| Local npm package installed in a directory | `node_modules/ferry-dock/skills/ferry-dock/SKILL.md` under that directory |
 | Mac app | `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md` |
 | Source checkout, for contributors | `skills/ferry-dock/SKILL.md` |
+
+`go install` provides only the command; acquire the optional Skill file
+separately if using that source-install route.
 
 In a Codex task that has authorized local shell/file access, provide the **absolute** Skill, executable, and control-file paths and explicitly ask it to read the file. You may attach the file through a host-supported file reference instead. This guide does not claim automatic discovery, slash-command availability or host configuration. No global installation is required or performed. A host without local shell/file/image access cannot use this workflow as written.
 
@@ -198,5 +273,5 @@ Actual Codex-host execution is **NOT_RUN**. A CLI/Safari simulation is not proof
 - Use a trusted reachable LAN. HTTP text and bearer capabilities are not encrypted; do not expose this preview to the Internet.
 - Ordinary text is limited to 64 KiB per message; request responses default to at most 16 KiB. No file, image or audio upload exists.
 - State is in memory. Expiry, cancellation and service shutdown clear relevant text; restarting cannot recover it from a handle.
-- There is no public `npx` command, MCP server, browser extension or installable phone app in this preview.
+- The npm entry is a local package preview, not a public registry `npx` command. MCP, browser extensions, Homebrew distribution and an installable phone app are not provided.
 - [Verification](verification.md) separates real Safari, HTTP/CLI, package checks, and untested phone/OS/host paths. [Distribution](distribution.md) explains network selection, unsigned previews and startup failure cases.

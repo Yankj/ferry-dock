@@ -1,5 +1,53 @@
 # Verification record
 
+## Local npm entry and fixed-tag Go install, 2026-10-29
+
+The npm entry is implemented and locally tested, **not published to a registry**.
+Candidate `ferry-dock@0.1.0-alpha.2` is not a reserved package name or ownership
+claim. It contains the exact released Mac arm64 Go executable from `a351555`,
+with a small Node 22+ entry that maps no arguments to `desktop`. Explicit
+arguments retain the native interface. The [npm receipt](benchmarks/2026-10-29-npm-validation.json)
+records **79 passing assertions** using existing Node 22.17.1 / npm 10.9.2 on
+Mac arm64, without changing global tools or configuration:
+
+- Offline local pack/install/exec with installation scripts disabled; private
+  empty npm configuration, HOME, cache and installation prefix. Nine allowlisted
+  files, executable modes and pinned binary hash matched; repacking preserved
+  every packaged file byte. No install hook, dependency or runtime binary download.
+- Literal Unicode, spaces, quotes and shell metacharacter arguments; JSON stdout
+  and numeric exit codes. Missing, changed and unexecutable binaries failed clearly.
+- Real SIGINT/SIGTERM to the known wrapper child and Ctrl+C through an owned
+  controlling PTY ended request waiting with `wait_canceled` / 130 while leaving
+  the collection pending. Ordinary text, request response, read, reuse warning,
+  authenticated Quit, control cleanup and socket closure passed.
+- No-argument `desktop` mapping and unsupported OS/CPU/old-Node rejection were
+  VM checks. Actual default-browser opening, other-platform installation/signals,
+  public registry `npx`, phone/LAN/QR and actual Codex host were not exercised.
+
+The tested local tarball is **3,139,752 bytes**, SHA-256
+`5a50504b7d726fa1fa80a31d9aae776db6e57c1b02a8daa635d1dfd6fedfc680`.
+The wrapper's desktop notice does not detect a running backend's version:
+current Go startup verifies instance authority and may reuse an older service.
+It never automatically stops a shared service to upgrade it. npm publication
+still needs a confirmed owner/namespace and authenticated publishing flow;
+the selected environment's safe `npm whoami` returned `ENEEDAUTH`.
+
+The [Go-install receipt](benchmarks/2026-10-29-go-install-validation.json) records
+**31 passing assertions** after real
+`go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2` with Go
+1.27.3, fresh private GOBIN/module/build caches, the public Go proxy and checksum
+service. `go version -m` and module origin establish tag `v0.1.0-alpha.2` and
+source `a351555`. The command's own `version` reports `dev` / `unknown`, because
+this source-install path omits the release packager's linker metadata.
+Isolated `--no-open` startup/reuse, ordinary Unicode text, scoped request
+create/wait/read/cancel, stable input ID, Quit and cleanup passed without
+developer tools on the runtime PATH. The default build used CGO; a second
+`CGO_ENABLED=0 CC=/nonexistent` install/version/help check passed without repeating
+the full runtime suite. Cached source reinstall with `GOPROXY=off` attempted a
+deprecation lookup and failed, so offline source installation is not promised.
+Native Go 1.26, other OS/CPU source installation, GUI/phone/host acceptance remain
+NOT_RUN. All services created by these checks were stopped.
+
 ## Published CLI download check, 2026-10-29
 
 The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)

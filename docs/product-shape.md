@@ -6,7 +6,7 @@ This document records the delivered text scope. [Request v1](contracts/request-v
 
 ## Two useful paths, one local service
 
-**Ordinary transfer:** open the prebuilt macOS app or native CLI's desktop command, scan the browser page's QR, paste and send on the phone, then copy on the computer. It needs no Git, Go, Node, account, or AI component at runtime. The phone page stays ready for subsequent messages within the temporary session. Source building is a contributor path.
+**Ordinary transfer:** run the public native CLI's `desktop` command, scan the browser page's QR, paste and send on the phone, then copy on the computer. That native route needs no Git, Go, Node, account, or AI component at runtime. An optional npm wrapper requires existing arm64 Node 22+ and is currently a local package preview; Go users can instead install the fixed source tag. Neither optional route changes the transfer protocol. The phone page stays ready for subsequent messages within the temporary session.
 
 **Task collection:** an Agent needs one piece of phone-side text. It creates a request naming the work and missing input, displays a QR, and reads only that request's result through a private handle. The original task interprets the feedback and continues. The first collection format is one plain-text response.
 
@@ -23,7 +23,7 @@ A second task can request different text at the same time. Its reader and sender
 
 ## Deliberate form
 
-The current product is **one Go core + prebuilt macOS app/native CLI + scan-to-open web pages + an optional local Codex Skill**. The app is a Go launcher for the existing browser UI, compiled from the same command with `DefaultMode=desktop`; it is not another backend or a separate Swift/Electron UI. State and transfer semantics remain shared.
+The current product is **one Go core + a native CLI + scan-to-open web pages + an optional local Codex Skill**. Go source installation and the small npm wrapper are installation/entry choices, not additional backends. The local app preview is a Go launcher for the same browser UI, compiled from the same command with `DefaultMode=desktop`; it is not a separate Swift/Electron UI. State and transfer semantics remain shared.
 
 Current alpha.2 packages are frozen at clean source `a351555`; the Mac Apple Silicon CLI is available in the [public prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2), while App and other-platform packages remain local previews. The interface uses black, white, and gray with translucent layers. Transfer/request semantics and the one-core product shape remain unchanged. All eight archives and same-input rebuild checks passed; Mac arm64 packaged lifecycle/CLI/safety checks passed. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. QR codes keep an opaque background and quiet zone; transparency is for surrounding UI layers, not the scan surface. [Contrast calculations](ui-contrast.md) are distinct from real dark-mode rendering. [Distribution](distribution.md) records the fixed artifact identities and remaining gates.
 
@@ -35,11 +35,16 @@ For users, the `.app` is Ferry Dock itself: first ZIP extraction → open → QR
 | --- | --- | --- |
 | Prebuilt macOS launcher app, native Go CLI, and web pages | Current distribution form; local packaging validation is separate from publication | Default users should not need a compiler, Git checkout, or Node. Preserve one Go core. |
 | Bundled/manual local Codex Skill | Current optional workflow guide | Validate a real Codex task; do not require it for ordinary transfer or install it globally. |
-| npm/npx launcher | Not implemented or scheduled | Installation is demonstrated to be the main barrier for intended users. |
+| npm entry | Implemented and locally validated: a Node 22+ Mac arm64 TGZ bundling the pinned native core; no-argument entry maps to desktop | Public registry `npx` needs a confirmed owner/name and publication; current local tests do not establish registry availability. |
+| `go install` | Fixed-tag source installation verified with Go 1.27.3 on Mac arm64; `version` remains dev/unknown, module identity is attested separately | Requires an existing Go toolchain/network; no general offline or other-platform first-launch claim. |
 | MCP adapter | Not implemented or scheduled | An identified client needs collection tools and has no usable shell interface. |
 | Browser extension or plugin | Not implemented or scheduled | Desktop selected-text sharing becomes an independent primary use case. |
 
-This is not a plan to accumulate all five forms. Another adapter must reuse the existing core and earn its maintenance cost with a specific access problem.
+For existing Node users, the npm entry provides a familiar command without
+install-time backend downloads; the package is not a public registry promise.
+Other adapters must reuse the core and solve a concrete access problem.
+Homebrew distribution is not implemented. The delivered npm and Go routes and
+their limits are recorded in [distribution](distribution.md).
 
 ## Desktop lifecycle
 

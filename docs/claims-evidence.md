@@ -1,5 +1,14 @@
 # Claims and evidence
 
+## npm implementation and Go-user installation
+
+| Claim | Evidence | Status and boundary |
+| --- | --- | --- |
+| A local npm package can start the existing Go desktop flow without a compiler or postinstall download. | [Entry](../npm/bin/ferry-dock.cjs), [pinned core](../npm/core.json), [packager](../scripts/package-npm.py), [79-check receipt](benchmarks/2026-10-29-npm-validation.json). | PASS_LOCAL for Mac arm64, Node 22.17.1/npm 10.9.2. Actual registry publication/installation and default-browser opening are NOT_RUN. Candidate name is not reserved; Node is required for this entry. |
+| npm arguments, stdio, exit codes and interrupted waits preserve the underlying interface. | [smoke-npm.py](../scripts/smoke-npm.py); npm receipt. | PASS_LOCAL including Unicode/space/shell-literal argv, numeric exits, direct signals and owned PTY Ctrl+C, pending request preserved, ordinary/request retrieval and cleanup. Other-platform signal behavior is NOT_RUN. |
+| An npm upgrade automatically upgrades a reused live service. | Current desktop verification checks owner/instance identity, not version; wrapper prints a notice before desktop startup. | Unsupported. Package version pins the bundled executable only. No automatic Quit or shared-service replacement is performed. |
+| Go users can install the fixed public source tag without cloning this repository. | [31-check Go-install receipt](benchmarks/2026-10-29-go-install-validation.json). | PASS_LOCAL: Go 1.27.3/Mac arm64, fresh caches and network install, source/tag confirmed. Explicit `desktop` starts the user path. CLI `version` remains dev/unknown; `go version -m` records the module version. Not a compiler-free or guaranteed-offline route. |
+
 ## Published CLI availability
 
 The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)
@@ -192,7 +201,7 @@ latency, or Agent/model processing speed.
 | State is temporary and is discarded when the process exits. | In-memory maps in [server.go](../internal/relay/server.go) and [requests.go](../internal/relay/requests.go). | SOURCE_REVIEWED. Restart/crash recovery and durable delivery are not provided. Browser session storage, history, clipboard managers, OS swap, and crash dumps are separate from server retention. |
 | Parallel requests return input to the originating request, rather than reading a global latest message. | `RequestSnapshot.RequestID`, `readerRequestLocked`, and `ReadRequest` in [requests.go](../internal/relay/requests.go). | SOURCE_REVIEWED. Request/handle selection is explicit. A matching task label is not permission. |
 | A manual local Skill explains an optional Codex workflow. | [Skill](../skills/ferry-dock/SKILL.md); it is included in the source and packaged documentation. | SOURCE_REVIEWED as workflow text. Manual loading is required; real Codex-host execution is NOT_RUN. It does not install global configuration, require a source checkout, or wake a paused host. |
-| npm/npx, MCP, browser extensions, file/image/audio transfer, remote phone control, and continuous clipboard synchronization are provided. | [Product shape](product-shape.md) and [request contract](contracts/request-v1.md) explicitly exclude them. | OUT_OF_SCOPE. Do not present these as current capabilities or scheduled deliverables. |
+| Public npm/npx, MCP, browser extensions, file/image/audio transfer, remote phone control, and continuous clipboard synchronization are provided. | [Product shape](product-shape.md) and [request contract](contracts/request-v1.md); current local npm evidence is recorded separately above. | Public npm availability is NOT_PUBLISHED even though local packaging is implemented. The other capabilities remain OUT_OF_SCOPE; do not present them as current or scheduled deliverables. |
 
 ## Ordinary text sessions
 

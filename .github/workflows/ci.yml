@@ -55,3 +55,26 @@ jobs:
       - name: Check native packaged lifecycle
         if: runner.os == 'macOS' && matrix.go == '1.27.x'
         run: python3 scripts/smoke-package.py --dist "dist/$FERRY_DOCK_PREVIEW_VERSION"
+
+  npm-preview:
+    name: Local npm package / macOS arm64 / Node 22
+    runs-on: macos-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+      - name: Obtain the pinned public Go artifact
+        run: |
+          mkdir -p bin/npm-input
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 2 --output bin/npm-input/core.tar.gz https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
+          curl --fail --location --proto '=https' --proto-redir '=https' --retry 2 --output bin/npm-input/manifest.json https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json
+      - name: Pack the verified core with the npm entry
+        run: |
+          npm_preview_cli="$(node -p 'require("node:fs").realpathSync(process.argv[1])' "$(command -v npm)")"
+          python3 scripts/package-npm.py --archive bin/npm-input/core.tar.gz --manifest bin/npm-input/manifest.json --out dist/npm --node "$(command -v node)" --npm-cli "$npm_preview_cli"
+      - name: Check local install, exec, signals and lifecycle without registry writes
+        run: |
+          npm_preview_cli="$(node -p 'require("node:fs").realpathSync(process.argv[1])' "$(command -v npm)")"
+          python3 scripts/smoke-npm.py --package dist/npm/0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2.tgz --node "$(command -v node)" --npm-cli "$npm_preview_cli"

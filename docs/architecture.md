@@ -123,7 +123,7 @@ Ordinary LAN HTTP pages may not expose the asynchronous Clipboard API. Manual sy
 
 ## Extension boundary
 
-The accepted entry points are the Go CLI, web pages, and repository-local Skill. npm/npx, an MCP adapter, and a browser plugin are not implemented or scheduled. [Product shape](product-shape.md) records specific user problems that would justify revisiting one; they must reuse the core rather than introduce another request store. Ordinary transfer remains independent of the Skill or an AI component.
+The accepted entry points share the Go CLI and web pages, with an optional repository-local Skill. Go users can install the fixed public source tag. A local npm package carries the pinned native binary and a small Node entry; it maps no arguments to desktop and preserves explicit CLI commands, but is not published to a registry yet. npm owns no request state or background-service lifecycle. An MCP adapter and browser plugin remain unimplemented. [Product shape](product-shape.md) records the user problems that would justify another adapter; it must reuse the core rather than introduce another request store. Ordinary transfer remains independent of the Skill or an AI component.
 
 Files and images require explicit streaming, storage quotas, safe filenames, content disposition, cleanup, and download authorization. They should not be added by treating arbitrary file bodies as text messages.
 

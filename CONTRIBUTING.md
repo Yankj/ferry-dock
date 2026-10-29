@@ -1,6 +1,6 @@
 # Contributing to Ferry Dock
 
-Small, reviewable contributions are welcome. For a new input type, transport, dependency, or persistent store, open an issue first so that the change can be evaluated against [product shape](docs/product-shape.md). The current form is a Go CLI, scan-to-open web pages, and an optional repository-local Codex Skill; additional entry points are not a scheduled expansion plan.
+Small, reviewable contributions are welcome. For a new input type, transport, dependency, or persistent store, open an issue first so that the change can be evaluated against [product shape](docs/product-shape.md). The Go core serves the native CLI, scan-to-open web pages, a small local npm entry and an optional repository-local Codex Skill. Additional backends or integrations are not a scheduled expansion plan.
 
 ## Local checks
 
@@ -16,7 +16,7 @@ go build -o bin/ferry-dock ./cmd/ferry-dock
 
 Keep formatting changes focused on the files you touch. Run the race detector on a supported host; if unavailable, record the platform and limitation in the PR. Do not claim a check passed unless you ran it.
 
-The optional developer checks below need Python 3 and Node 18 or newer; neither is an application runtime dependency. After building the binary above:
+The optional developer checks below need Python 3 and Node 18 or newer. The native Go executable does not need these tools at runtime; the separate npm entry requires Node 22+. After building the binary above:
 
 ```sh
 python3 scripts/smoke-http.py --binary bin/ferry-dock
@@ -26,6 +26,18 @@ node scripts/smoke-ui.cjs --binary bin/ferry-dock
 ```
 
 `smoke-ui.cjs` obtains the embedded HTML and JavaScript from its own compiled service, runs that script with a DOM adapter, and uses real loopback HTTP plus the CLI. Offline and lost-response cases are explicit local fault injection. It does not render a browser, use the OS clipboard, scan a QR, or execute an actual Agent host. On Windows, pass the `.exe` binary path.
+
+## Local npm packaging
+
+The `npm/` directory is a source template, not an installable package containing
+the native payload. Follow [the local packaging instructions](docs/distribution.md#npm-packaging-preview-local-only)
+to stage the pinned public Go artifact with `scripts/package-npm.py`, then run
+`scripts/smoke-npm.py` against that generated TGZ. Use an existing Node 22+ LTS
+and npm; do not change a contributor's global toolchain or configuration.
+The test installs only the supplied local package, offline with scripts disabled,
+private empty configuration and temporary runtime state. It exercises signals
+and an owned loopback service, and never publishes or logs in to a registry.
+The CI job follows the same packaging/verification path without publishing.
 
 ## Changes worth testing
 

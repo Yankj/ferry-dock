@@ -44,9 +44,9 @@ Ferry Dock's intended distinction is the optional task-bound loop: a shell-capab
 
 ## Is this a cloud drive or a general Agent platform?
 
-No. The accepted form is one Go core, with a published Apple Silicon Mac CLI testing package, small web pages, and an optional bundled local Codex Skill. App bundles and other-platform native CLI packages remain local previews. These packages do not introduce another backend. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
+No. The accepted form is one Go core, with a published Apple Silicon Mac CLI testing package, small web pages, and an optional local Codex Skill. A local npm wrapper and fixed-tag Go source installation are entry choices for people who already use those runtimes; they do not add another transfer backend. App bundles and other-platform native CLI packages remain local previews. These packages do not introduce another backend. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
 
-npm/npx, MCP, and a browser extension are not implemented or scheduled. Revisit them only when installation is the main demonstrated barrier, a specific client lacks shell access, or desktop selected-text sharing becomes a separate primary need. See [the product-shape decision](docs/product-shape.md).
+The npm entry is now implemented and locally tested, but not published to a registry; a public `npx` command is not available. MCP and a browser extension remain unimplemented: revisit them only for a specific client without usable shell access or a separate primary desktop selected-text need. Homebrew distribution is not implemented. See [the product-shape decision](docs/product-shape.md).
 
 ## How does the ordinary mode work?
 
@@ -63,6 +63,26 @@ For someone separately given a local `.app` preview, that bundle is this product
 Git and Go are contributor/source-build prerequisites. The packaging script also uses Python's standard library, but preview users do not run that script. After packaging, the application's pages, QR generation, and brand assets are local, without a runtime cloud API or telemetry call in the Ferry Dock service/UI.
 
 Build and CI platform results are not evidence that a physical phone, mobile clipboard permission, camera scanner, or network works. Real Android/iOS and actual Codex-host acceptance must name the tested device or host and remain `NOT_RUN` when not exercised.
+
+## Is the npm entry a working public npx command?
+
+Not yet. The local `ferry-dock@0.1.0-alpha.2` TGZ is implemented and passed 79 assertions on Mac arm64 with Node 22.17.1/npm 10.9.2. It bundles the same pinned alpha.2/a351555 Go binary, has no runtime dependencies or install lifecycle scripts, and makes no backend download at installation or startup. Its JavaScript entry maps no arguments to `desktop`; explicit native arguments retain their meaning.
+
+It currently supports Apple Silicon macOS with **arm64 Node 22+**, not x64 Node under Rosetta or other platforms. The package name is a candidate, not a confirmed npm ownership/publication claim. There is no published TGZ URL or registry `npx` recipe. Someone given the verified local file can install and run it in a private/local prefix using the [documented npm install/exec commands](docs/usage.md#node-users-local-package-only). Everyone else can use the existing native Release download. An eventual one-command registry entry requires a confirmed owner/name and an approved publication; it is not presented as usable today.
+
+Local tests included offline script-disabled install/exec, argument/exit handling, real wait-interruption signals/PTY and explicit no-browser lifecycle checks. Default no-argument mapping and unsupported-platform guards used a VM. These do not establish public registry installation, default-browser opening, real-phone or actual Codex-host behavior. The wrapper cannot remove macOS signing/Gatekeeper or HTTP trust boundaries, and may reuse a running service without attesting its binary version. It does not quit a shared service to upgrade it.
+
+## Can I install it with Go?
+
+Yes, with an existing Go 1.26+ toolchain and network access. In a POSIX shell:
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+go version -m ./ferry-dock-bin/ferry-dock
+./ferry-dock-bin/ferry-dock desktop
+```
+
+A fresh Go 1.27.3 Mac arm64 installation passed 31 assertions for command help, private-loopback ordinary/request flows, service reuse and cleanup. The tag is `a351555`; application `version` still prints `dev` / `unknown` because that source tag has no release linker metadata. `go version -m` should identify module `github.com/Yankj/ferry-dock` at `v0.1.0-alpha.2`, which is the installation evidence. This source-build route does not promise offline installation or Go 1.26/native-other-platform acceptance. It installs only the executable: obtain the optional Skill separately and reference it manually. [Full details](docs/distribution.md#go-install-from-the-fixed-tag).
 
 ## Is the app a second native UI or another backend?
 

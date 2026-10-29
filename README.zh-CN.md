@@ -25,7 +25,7 @@
 | 从终端启动，不编译源码 | 预编译原生 CLI 的 `desktop` | 打开同一个电脑页面，运行同一 Go 核心。 |
 | 给正在执行的任务补充手机信息 | CLI 请求＋可选手动引用的 Codex Skill | 带任务说明的二维码 → 查询该请求 → 读取反馈 → 继续原任务。 |
 
-适合传已经能够粘贴的文字。本版不支持文件、截图、语音、手机远控、后台剪贴板读取、npm/npx、MCP 或浏览器插件。请求收集是工具，不是 Agent 宿主：Skill 本身不能唤醒暂停的任务。
+适合传已经能够粘贴的文字。本版不支持文件、截图、语音、手机远控、后台剪贴板读取、MCP 或浏览器插件。可选 npm 入口是本地打包预览，尚不是已发布的 registry 命令。请求收集是工具，不是 Agent 宿主：Skill 本身不能唤醒暂停的任务。
 
 ## 下载并启动 — Apple Silicon Mac
 
@@ -53,6 +53,32 @@ cd ferry-dock-0.1.0-alpha.2-darwin-arm64
 关闭浏览器标签不会结束 Go 服务。再次运行 `./ferry-dock desktop` 会回到经过验证的同一实例；在电脑本地页面点击 **Quit Ferry Dock** 才会退出，并清空**全部**内存会话和请求。私有缓存目录或 `startup.log` 可能保留。共享服务时，一个任务结束只应取消自己的请求。
 
 **未签名测试包：** CLI 未做 Developer ID 签名和 Apple 公证，macOS 可能警告或阻止下载的程序。下载／哈希通过、开发机运行通过，不等于浏览器下载后的隔离属性／Gatekeeper 首启、浏览器自动打开或真机兼容性验收。不要关闭系统保护。具体已验范围见[使用指南](docs/usage.zh-CN.md)和[分发说明](docs/distribution.md)。
+
+## 已经有 Node？本地包预览
+
+npm 包只是**同一 Go 二进制的薄入口**，不会在安装或启动时下载后端。当前要求 **Apple Silicon Mac 上的 arm64 Node.js 22+**，请使用受支持的 LTS。候选包名 `ferry-dock` **尚未在 npm 预留或发布**，TGZ 也不是 GitHub Release 下载项；不要运行未经核实的 registry `npx ferry-dock` 命令。
+
+若你已经拿到核验后的本地 `ferry-dock-0.1.0-alpha.2.tgz`，替换下方绝对路径。安装仅写入新的本地目录：
+
+```sh
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+cd ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
+
+仅 npm 入口不带参数时会转为 **`desktop`**；明确传入 `version`、`desktop`、`serve`、`request ...` 时保持原生命令语义。手动 Skill 位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。包没有运行时依赖或安装生命周期脚本。没拿到本地 TGZ 或没有 Node 时，使用上方公开原生包即可。[本地包使用说明](docs/usage.zh-CN.md#node-用户仅本地包)。
+
+## 已经在用 Go？
+
+已有 Go 1.26+ 和网络时，可在 POSIX shell 把固定源码标签安装到明确的本地目录，不必获取源码仓库或修改全局 PATH：
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+./ferry-dock-bin/ferry-dock desktop
+```
+
+这条路径会编译源码，已用 Mac arm64／Go 1.27.3 实测，未重复 Go 1.26 本机验收。旧标签没有发行链接参数，因此安装后 `version` 显示 `dev`／`unknown`；使用 `go version -m ./ferry-dock-bin/ferry-dock` 核对模块 `github.com/Yankj/ferry-dock` 的版本为 `v0.1.0-alpha.2`，不能把开发元数据误读成安装了别的模块版本。源码安装不承诺离线可用。[安装详情](docs/distribution.md#go-install-from-the-fixed-tag)。
 
 ## 其他本地预览入口
 
@@ -152,7 +178,7 @@ runtime_dir="$(mktemp -d)"
 | 桌面启动报告未知服务 | 尚未验证其身份，不应杀进程或覆盖共享状态来强行启动。 |
 | 服务已退出／重启 | 原内存数据已丢失；句柄不是备份。 |
 
-当前不含文件、照片、音频、远控、连续剪贴板同步、持久历史、云中继、npm/npx、MCP 或浏览器插件。[产品形态](docs/product-shape.md)记录窄范围决策。
+当前不含文件、照片、音频、远控、连续剪贴板同步、持久历史、云中继、MCP 或浏览器插件。npm registry 发布和公开的一条 `npx` 命令仍未提供。[产品形态](docs/product-shape.md)记录窄范围决策。
 
 ## 验证与贡献
 

@@ -25,7 +25,7 @@ The guides here are newer than the frozen `a351555` package documentation; exist
 | Start from a terminal without building source | Prebuilt native CLI, `desktop` | Opens the same computer page and uses the same Go core. |
 | Give missing phone information to an active task | CLI request + optional manual Codex Skill | A task-specific question and QR; query that request, read the response, continue the work. |
 
-Use it for text already available to paste. Files, screenshots, audio, remote phone control, background clipboard reading, npm/npx, MCP, and browser extensions are not included. The request loop is a tool, not an Agent host: a Skill cannot wake a paused task.
+Use it for text already available to paste. Files, screenshots, audio, remote phone control, background clipboard reading, MCP, and browser extensions are not included. An optional npm entry is a local packaging preview, not a published registry command. The request loop is a tool, not an Agent host: a Skill cannot wake a paused task.
 
 ## Download and start — Apple Silicon Mac
 
@@ -53,6 +53,32 @@ Default desktop LAN mode listens on all IPv4 interfaces at a free port and uses 
 Closing the browser tab keeps the Go service running. Run `./ferry-dock desktop` again to return to its verified instance. Use **Quit Ferry Dock** on the local computer page to stop it; quitting clears **every** in-memory session and request. Private cache directories or `startup.log` may remain. Cancel only your own request when other tasks share the service.
 
 **Unsigned testing build:** this CLI lacks Developer ID signing and Apple notarization. macOS may warn or block a downloaded executable. A verified download/hash or developer-machine run does not establish browser-download quarantine/Gatekeeper acceptance, automatic browser opening, or real-phone compatibility. Do not disable OS protections. See [the guide](docs/usage.md) and [distribution](docs/distribution.md) for the exact checks and limits.
+
+## Already use Node? Local package preview
+
+An npm package wraps the **same bundled Go binary**; it does not download a backend during installation or startup. This preview requires **arm64 Node.js 22+ on an Apple Silicon Mac**; use a supported LTS. The candidate package name `ferry-dock` is **not reserved or published on npm**, and the TGZ is not a GitHub Release asset. Do not run an unverified registry `npx ferry-dock` command.
+
+If you have been given the verified local `ferry-dock-0.1.0-alpha.2.tgz`, replace its absolute path below. This installs only into a new local directory:
+
+```sh
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+cd ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
+
+For this npm entry only, no arguments map to **`desktop`**. Explicit `version`, `desktop`, `serve` and `request ...` pass through to the native command. The bundled manual Skill is at `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. There are no runtime dependencies or lifecycle install scripts. Use the public native download above if you do not have the local TGZ or Node. [Local-package instructions](docs/usage.md#node-users-local-package-only).
+
+## Already use Go?
+
+With Go 1.26+ and network access, use a POSIX shell to install the fixed source tag into an explicit local directory, without a source checkout or global PATH change:
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+./ferry-dock-bin/ferry-dock desktop
+```
+
+This route compiles source. It was tested with Go 1.27.3 on Mac arm64; Go 1.26 native execution was not repeated. The installed command's `version` reports `dev` / `unknown` because this tag has no release linker metadata. Use `go version -m ./ferry-dock-bin/ferry-dock` to verify module `github.com/Yankj/ferry-dock` at `v0.1.0-alpha.2`. Do not interpret that development label as a different requested module version. Source installation is not promised to work offline. [Install details](docs/distribution.md#go-install-from-the-fixed-tag).
 
 ## Other local preview entry points
 
@@ -154,7 +180,7 @@ Local operation/no model call describe the Ferry Dock service. Once the optional
 | Desktop reports an unknown service | Its identity was not verified. Do not kill it or overwrite shared state to force a launch. |
 | Service quit/restarted | Old in-memory content is gone; handles are not backups. |
 
-Files, photos, audio, remote phone control, continuous clipboard sync, durable history, cloud relay, npm/npx, MCP, and a browser plugin are not included. [Product shape](docs/product-shape.md) records the narrow scope.
+Files, photos, audio, remote phone control, continuous clipboard sync, durable history, cloud relay, MCP, and a browser plugin are not included. npm registry publication and a public one-command `npx` entry are not available yet. [Product shape](docs/product-shape.md) records the narrow scope.
 
 ## Evidence and contributing
 

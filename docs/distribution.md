@@ -12,7 +12,7 @@ The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag
 | [SHA256SUMS](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/SHA256SUMS) | Two entries: that CLI archive and the original manifest. |
 | [manifest.json](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json) | Original full local-build provenance, including unpublished artifacts. |
 
-The tag and artifact source are exactly `a351555ccd1615795bc2a6c10dd7e97a633a074f`; subsequent repository changes are documentation/evidence. This is an unsigned, unnotarized **test release**, not proof of downloaded-file OS acceptance. The original manifest inventories eight local artifacts, but the release includes only the Mac arm64 CLI. Its release-specific checksum list therefore has no missing App/other-platform entries. Download all three files into the same directory, then run:
+The native tag and artifact source are exactly `a351555ccd1615795bc2a6c10dd7e97a633a074f`. Later repository documentation and the npm entry do not replace that frozen native executable. This is an unsigned, unnotarized **test release**, not proof of downloaded-file OS acceptance. The original manifest inventories eight local artifacts, but the release includes only the Mac arm64 CLI. Its release-specific checksum list therefore has no missing App/other-platform entries. Download all three files into the same directory, then run:
 
 ```sh
 shasum -a 256 -c SHA256SUMS
@@ -25,6 +25,133 @@ cd ferry-dock-0.1.0-alpha.2-darwin-arm64
 The archive and its bundled documentation remain immutable at `a351555`. Some bundled text predates public availability; use the online [English](usage.md) or [Chinese](usage.zh-CN.md) guide for current status. The original local `dist/0.1.0-alpha.2/SHA256SUMS` still covers all eight archives and is distinct from the release's CLI-only checksum list.
 
 All eight local archives passed package checks, Mac arm64 packaged lifecycle/CLI/safety checks passed, and a same-input rebuild matched all ten local outputs byte-for-byte. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes; publication does not expand them.
+
+## npm packaging preview: local only
+
+The optional npm entry is implemented as a small JavaScript launcher around the
+existing pinned Mac arm64 Go executable. It is not another transfer backend.
+Candidate package metadata is `ferry-dock@0.1.0-alpha.2`, with Node `>=22`,
+`os: darwin` and `cpu: arm64`. Use a supported Node LTS; an x64 Node process
+under Rosetta is outside this preview's allowlist. There is no confirmed npm
+registry ownership or publication, no global installation, and no new GitHub
+Release asset for this TGZ.
+
+The validated local artifact is
+`dist/npm-verified/0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2.tgz`,
+**3,139,752 bytes**, SHA-256
+`5a50504b7d726fa1fa80a31d9aae776db6e57c1b02a8daa635d1dfd6fedfc680`.
+This is a local build-output path, not a file guaranteed to exist in a source
+checkout or a public download URL. A second pack from the same inputs produced
+identical bytes. The native binary inside remains the exact alpha.2/a351555
+binary recorded by the original release manifest.
+
+Given that verified local TGZ, a Node user can install it into a new local
+directory without invoking lifecycle scripts or a registry:
+
+```sh
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+cd ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
+
+The npm entry maps no arguments to `desktop`; explicit `version`, `desktop`,
+`serve` and `request ...` arguments are passed unchanged to the native command.
+The native JSON `defaultMode: serve` remains accurate for that executable and
+does not describe the wrapper's no-argument mapping. The package carries its
+binary and checks its size/hash against bundled metadata before execution;
+there are no runtime dependencies, optional platform packages, install hooks,
+runtime binary downloads or compiler requirements for this local-package route.
+That integrity check is not publisher signing or transport encryption.
+
+Installed locations beneath the chosen prefix:
+
+- command: `node_modules/.bin/ferry-dock`;
+- native core: `node_modules/ferry-dock/native/ferry-dock`;
+- manual Skill: `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`;
+- matching contract: `node_modules/ferry-dock/docs/contracts/request-v1.md`.
+
+No global Skill, MCP, Agent configuration, PATH entry, login item or OS service
+is installed. Runtime handles and control state belong outside the package.
+`desktop` may reuse a known running instance without verifying that service's
+binary version; the wrapper emits an advisory, not a version-detection result.
+Do not stop a service shared by other tasks just to replace a package.
+
+[Local validation](benchmarks/2026-10-29-npm-validation.json) passed 79 assertions
+on Mac arm64 with Node 22.17.1/npm 10.9.2: package allowlist and hashes, offline
+script-disabled install/exec, literal arguments and numeric exits, SIGINT/SIGTERM
+and actual PTY Ctrl+C ending only a wait, and explicit `desktop --no-open`
+readiness/reuse/owned Quit/cleanup. No-argument mapping and unsupported
+Node/OS/CPU guards were VM checks. Automatic browser opening, public registry
+installation or `npx`, other OS/CPU, physical phone and actual Codex-host
+acceptance remain NOT_RUN.
+
+Maintainers can reproduce a local pack from a source checkout, a previously
+verified native archive/manifest, Python 3 and an existing Node/npm installation:
+
+```sh
+python3 scripts/package-npm.py \
+  --archive /absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz \
+  --manifest /absolute/path/manifest.json \
+  --node /absolute/path/node \
+  --npm-cli /absolute/path/npm-cli.js \
+  --out dist/npm
+```
+
+The builder verifies the pinned archive/manifest/binary identities, stages an
+explicit file allowlist, uses local offline `npm pack --ignore-scripts`, and
+refuses an existing output version directory. It does not log in or publish.
+After a registry owner/name, version and publication are confirmed, the intended
+registry shape would be the following placeholder, **not a working command
+today**:
+
+```text
+npx <confirmed-package-name>@<published-version>
+```
+
+The public native download remains the available fallback. Homebrew, MCP and
+browser extensions are not part of this installation work.
+
+## Go install from the fixed tag
+
+For users who already have Go 1.26+ and network access, the fixed module command is:
+
+```sh
+GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2
+./ferry-dock-bin/ferry-dock desktop
+```
+
+This selects a user-controlled local destination without modifying global PATH,
+and compiles source instead of downloading the prebuilt release binary. The
+installed command defaults to foreground `serve`, so include `desktop` to use
+the browser launcher. Verify source-module identity with:
+
+```sh
+go version -m ./ferry-dock-bin/ferry-dock
+```
+
+The expected module line identifies `github.com/Yankj/ferry-dock`
+`v0.1.0-alpha.2`, checksum
+`h1:25n36E7ullJ7Vci/EtyA/AhTXmApSphEeupn1/aanfo=`. Its tag points to
+`a351555ccd1615795bc2a6c10dd7e97a633a074f`. This source tag predates release
+linker metadata: application `version` reports `dev`, `unknown`, `darwin`,
+`arm64`, and default mode `serve` in the tested Mac build. It must not be
+described as returning the prebuilt binary's release version/commit fields.
+
+[A fresh install](benchmarks/2026-10-29-go-install-validation.json) using Go 1.27.3 on Mac arm64, public Go proxy/checksum service
+and new module/build caches passed 31 local assertions: command help, private
+loopback desktop readiness/reuse, ordinary exact-text transfer, scoped request
+pending/submission/read/cancel, and owned-service Quit/cleanup. No browser,
+physical phone, default cache, Codex host, Go 1.26 native or other-platform
+acceptance was inferred. A separate `CGO_ENABLED=0 CC=/nonexistent` source
+install passed build/version/desktop-help checks; the runtime flow was not
+repeated for that variant. Offline installation is not promised: a cached
+`GOPROXY=off` retry failed its module deprecation lookup. Standard Go
+toolchain/compiler requirements and network policy still apply.
+
+`go install` installs only the executable. Obtain the optional repository Skill
+separately and pass its actual local path to the Agent; this route does not
+install or auto-discover a Skill.
 
 ## Frozen alpha.2 artifact snapshot
 

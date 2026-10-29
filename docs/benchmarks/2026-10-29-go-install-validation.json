@@ -1,0 +1,104 @@
+{
+  "status": "PASS_LOCAL",
+  "requestedCommand": "go install github.com/Yankj/ferry-dock/cmd/ferry-dock@v0.1.0-alpha.2",
+  "toolchain": "go1.27.3 darwin/arm64",
+  "temporaryInstallDirectories": true,
+  "freshModuleAndBuildCache": true,
+  "goEnvironmentOverrides": {
+    "GOENV": "off",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "https://proxy.golang.org",
+    "GOSUMDB": "sum.golang.org"
+  },
+  "downloadedModule": {
+    "path": "github.com/Yankj/ferry-dock",
+    "version": "v0.1.0-alpha.2",
+    "sum": "h1:25n36E7ullJ7Vci/EtyA/AhTXmApSphEeupn1/aanfo=",
+    "origin": {
+      "VCS": "git",
+      "URL": "https://github.com/Yankj/ferry-dock",
+      "Hash": "a351555ccd1615795bc2a6c10dd7e97a633a074f",
+      "Ref": "refs/tags/v0.1.0-alpha.2"
+    }
+  },
+  "binary": {
+    "sizeBytes": 10954066,
+    "sha256": "7b3cf9693d29026c86df0061e032c5e13a2150bc693c59798a840b68c335786a",
+    "cgoEnabled": true,
+    "versionOutput": {
+      "version": "dev",
+      "commit": "unknown",
+      "os": "darwin",
+      "arch": "arm64",
+      "defaultMode": "serve"
+    }
+  },
+  "checks": [
+    "command exit zero: version",
+    "source-install default version metadata documented honestly",
+    "go version -m proves pinned module and checksum",
+    "downloaded module origin matches existing GitHub tag source",
+    "help: serve --help",
+    "help: desktop --help",
+    "help: request create --help",
+    "help: request status --help",
+    "help: request wait --help",
+    "help: request read --help",
+    "help: request cancel --help",
+    "source-installed desktop readies without GUI or developer-tool PATH",
+    "repeat source-installed desktop call reuses owned instance",
+    "ordinary session creation",
+    "synthetic sender submits ordinary text",
+    "ordinary computer read preserves exact Unicode and whitespace",
+    "command exit zero: request create",
+    "source-installed request create writes matching handle and QR",
+    "command exit zero: request wait",
+    "bounded wait returns pending without cancelling",
+    "synthetic request sender submits",
+    "command exit zero: request wait",
+    "command exit zero: request read",
+    "same-handle read receives exact request-bound input",
+    "command exit zero: request read",
+    "repeat read has stable input identity",
+    "command exit zero: request cancel",
+    "explicit request cancellation",
+    "own desktop accepts authenticated Quit",
+    "own private control file removed after Quit",
+    "own service socket stopped"
+  ],
+  "notRun": [
+    "physical phone/LAN/QR scan",
+    "default cache and automatic browser opening",
+    "GUI/OS clipboard",
+    "browser-download Gatekeeper acceptance",
+    "actual Codex host",
+    "Go 1.26 native toolchain",
+    "other OS/CPU source install"
+  ],
+  "noGlobalConfigurationChanged": true,
+  "noSecuritySettingsChanged": true,
+  "pureGoVariant": {
+    "status": "PASS_BUILD_VERSION_HELP",
+    "environment": {
+      "CGO_ENABLED": "0",
+      "CC": "/nonexistent",
+      "GOPROXY": "https://proxy.golang.org"
+    },
+    "sizeBytes": 10954066,
+    "sha256": "775c280dc9a219fad4b2ed3f8fef923aff04b7adf1a21809f17672f0290c60be",
+    "versionOutput": {
+      "version": "dev",
+      "commit": "unknown",
+      "os": "darwin",
+      "arch": "arm64",
+      "defaultMode": "serve"
+    },
+    "samePinnedModule": true,
+    "repeatedFullRuntimeFlow": false
+  },
+  "offlineReinstallObservation": {
+    "goproxy": "off",
+    "status": "FAILED_MODULE_LOOKUP",
+    "message": "Go 1.27.3 attempted a module deprecation lookup even with the pinned module cached. This is an install-time condition, not an installed-runtime failure."
+  }
+}
