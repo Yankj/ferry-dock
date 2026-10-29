@@ -6,13 +6,15 @@
 
 This online guide is newer than the frozen `a351555` package documentation. The archive has not been rewritten: its bundled documentation predates public release and may describe downloads as unavailable. Use this guide for current download steps; the executable interface is unchanged.
 
+**Do not use the old alpha.1/alpha.2 App previews.** A complete-bundle signature defect has been reproduced, despite passing ZIP integrity and direct-executable tests. Those App launch recommendations are withdrawn. A corrected alpha.3 bundle is under private structural test; it is not a public download or a Gatekeeper acceptance result. The published alpha.2 native CLI is outside that App envelope, with its existing unsigned-download limits.
+
 ## Choose the shortest path
 
 | What is missing from your work? | Use | What arrives |
 | --- | --- | --- |
 | Text on your phone that you want to paste into a desktop app | Published Mac arm64 CLI → `desktop` → scan → send → Copy | Text in a temporary computer inbox |
 | Phone feedback needed by a specific Agent task | Running CLI + request commands, optionally guided by the local Skill | One response associated with that request |
-| An app icon or a different platform | Separately supplied local preview only; not part of this release | Same service, with separate acceptance limits |
+| A different platform | Separately supplied native CLI preview only; not part of this release | Same service, with separate acceptance limits |
 
 Examples: copy customer comments from a phone chat into a proposal on your computer; send error **text** from your phone to the task fixing your code. This preview transfers text, not screenshots, attachments, audio, or remote phone control. The Agent path does not wake a paused host automatically.
 
@@ -135,7 +137,7 @@ details](distribution.md#go-install-from-the-fixed-tag).
 
 These alternatives are **not uploaded in this prerelease**. They are useful only if you separately received a matching local preview; a platform label is not a public download link or native acceptance result.
 
-For a local macOS app ZIP, extract **Ferry Dock.app** directly (no outer package folder) and open it. Its intended launch path starts the same Go service and opens the system browser. It is Ferry Dock itself, not a platform that CLI users must install. Finder zero-argument/default-cache/default-browser and downloaded-app Gatekeeper acceptance remain **NOT_RUN**. The same phone steps and **Quit Ferry Dock** apply.
+The historical alpha.1/alpha.2 macOS App ZIPs are not recommended launchers: complete-bundle strict signature verification failed even though archive integrity and direct-executable checks passed. Do not follow their bundled “extract and open” steps. The private alpha.3 repair must validate the completed bundle before and after archiving; an ad-hoc structural pass still would not establish Developer ID identity, notarization, browser-download Gatekeeper acceptance, Finder or automatic browser opening. No old archive is overwritten, and no protection-bypass procedure is provided.
 
 Other native CLI archives have an outer platform/version folder. From inside that folder, macOS/Linux use:
 
@@ -175,11 +177,13 @@ runtime_dir="$(mktemp -d)"
 open "$runtime_dir/proposal.json.png"
 ```
 
-For the app package, replace the first assignment with the actual absolute path, keeping quotes around spaces:
+For the verified local npm package, replace the first assignment with its actual native-core path, keeping quotes around spaces:
 
 ```sh
-ferry_bin="/absolute/path/Ferry Dock.app/Contents/MacOS/ferry-dock"
+ferry_bin="/absolute/path/ferry-dock-node/node_modules/ferry-dock/native/ferry-dock"
 ```
+
+Do not use the withdrawn alpha.1/alpha.2 App launcher for this workflow.
 
 `--control`, a nonblank `--prompt`, and a new `--handle` path are required. `--task-id`, `--ttl`, and `--max-bytes` are optional; this example makes their values explicit. Use the `controlPath` returned by your `desktop` invocation when you selected a custom state directory or a different OS. Do not print the control file or handle: they contain access capabilities. Handle and QR paths must not already exist.
 
@@ -236,7 +240,6 @@ The Skill is a Markdown workflow, not an installed integration or wake-up mechan
 | --- | --- |
 | Extracted CLI package | `skills/ferry-dock/SKILL.md` under the package root |
 | Local npm package installed in a directory | `node_modules/ferry-dock/skills/ferry-dock/SKILL.md` under that directory |
-| Mac app | `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md` |
 | Source checkout, for contributors | `skills/ferry-dock/SKILL.md` |
 
 `go install` provides only the command; acquire the optional Skill file

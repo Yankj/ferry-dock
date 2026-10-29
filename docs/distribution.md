@@ -24,7 +24,38 @@ cd ferry-dock-0.1.0-alpha.2-darwin-arm64
 
 The archive and its bundled documentation remain immutable at `a351555`. Some bundled text predates public availability; use the online [English](usage.md) or [Chinese](usage.zh-CN.md) guide for current status. The original local `dist/0.1.0-alpha.2/SHA256SUMS` still covers all eight archives and is distinct from the release's CLI-only checksum list.
 
-All eight local archives passed package checks, Mac arm64 packaged lifecycle/CLI/safety checks passed, and a same-input rebuild matched all ten local outputs byte-for-byte. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes; publication does not expand them.
+All eight local archives passed the then-existing archive/metadata checks, Mac arm64 direct packaged-executable lifecycle/CLI checks passed, and a same-input rebuild matched all ten local outputs byte-for-byte. Those checks omitted complete App-bundle signature validation and did not catch the later reproduced defect below. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes; publication does not expand them.
+
+## App packaging incident: alpha.1 and alpha.2
+
+The old alpha.1/alpha.2 `.app` previews are **not recommended launchers**. Do
+not keep following their bundled “extract and open” instructions or redistribute
+them as working App downloads. The archives are retained unchanged as evidence;
+the public alpha.2 CLI Release is not an App ZIP and is not being overwritten.
+
+Inspection of the retained alpha.2 Apple Silicon App found:
+
+- ZIP CRC/SHA-256, extraction and executable modes passed.
+- `codesign --verify --deep --strict` on the complete App failed with
+  `code has no resources but signature indicates they must be present`.
+- The same executable passed strict verification outside the App bundle.
+- The old ad-hoc signature covered the Go executable without binding the
+  completed Info.plist/resource envelope; sealed App resources were absent.
+  The retained Intel App was unsigned.
+
+This is a bundle-signing defect, not evidence that changing file permissions or
+re-downloading identical ZIP bytes will repair it. The native CLI has no App
+resource envelope; that distinction does not make its unsigned downloaded-file
+trust or Gatekeeper acceptance a pass.
+
+The alpha.3 repair is under private structural test: finish staging every App
+resource, ad-hoc sign the completed bundle, strictly verify it, archive those
+sealed bytes, then extract and verify again. A local ad-hoc pass is separate
+from Developer ID publisher identity, Apple notarization and browser-download
+Gatekeeper acceptance. No old tag/Release/archive is overwritten, no new App
+Release is published, and no quarantine removal or OS-protection bypass is part
+of the repair. Final candidate results will be recorded separately rather than
+inherited from the old archive/runtime checks.
 
 ## npm packaging preview: local only
 
@@ -182,7 +213,7 @@ Finder/default-cache discovery, default-browser auto-opening, downloaded Gatekee
 
 Version `0.1.0-alpha.1` is a **verified historical local preview** frozen at clean source `3d6fca8c843281b9ab2806966fc2661e3cccbe52`. The eight archives passed package checks; a second complete build using the same source/toolchain produced identical bytes for all eight archives, the manifest, and checksums. This fixed snapshot predates the next visual revision. Later documentation or UI changes do not change these files or inherit their results. Alpha.1 has no GitHub Release, public artifact URL, package registry upload, or installer. Do not construct an alpha.1 download link from its version label; only the alpha.2 CLI availability above is public.
 
-The `.app` is Ferry Dock itself. First use is ZIP extraction → open → QR; later use is open → QR. There is no installation wizard, registration, login item, or additional Go/Node platform to install.
+The historical `.app` packaged Ferry Dock itself rather than another desktop platform. Its former ZIP → open → QR instructions are withdrawn because of the complete-bundle signature defect. Archive and direct-executable checks below are retained evidence, not an App first-launch recommendation.
 
 The packaging script wrote local outputs under `dist/0.1.0-alpha.1/`, with `manifest.json` and `SHA256SUMS`. These are generated build outputs, not files a public source checkout can assume are present. The committed [artifact manifest](benchmarks/2026-10-29-artifacts.json) records their sizes, target/binary/archive hashes, toolchain, and signing metadata:
 
@@ -201,16 +232,22 @@ Apple Silicon app ZIP SHA-256: `5fcec3986d47765b9a5b0c966c15be9723a58339160e6798
 
 ## macOS preview recipients
 
-1. Obtain the local `.app` ZIP supplied for your architecture. Apple Silicon uses `darwin-arm64`; Intel uses `darwin-amd64`. There is no universal-binary claim.
-2. Extract `Ferry Dock.app` and open it. It contains the same Go program as the CLI, compiled with desktop as its no-argument default; it is a launcher for a browser interface, not a separate Swift/Electron backend.
-3. The launcher starts its own background Go service, waits for private control readiness, opens the system browser, and exits. The computer page displays the phone entry and network status. Phone use requires a reachable trusted LAN.
-4. Closing the browser tab leaves the service running. Reopen the app to return to its verified instance. Use **Quit Ferry Dock** on the local computer page to stop it and discard all in-memory sessions and requests.
+Do not use the historical alpha.1/alpha.2 App ZIP as a launcher. Its complete
+bundle signature failed the newly added check, even though the old archive and
+internal-executable runtime checks passed. Keep the old artifacts only for
+reproducibility and incident evidence; do not try permission/quarantine changes
+as a repair.
 
-If several tasks share that service, ending one request is different from quitting the application. Cancel only the request that is no longer needed.
+The alpha.3 App is a private repair candidate, not a published release. Its
+structural signature, archive round-trip and runtime results must be recorded
+for its own exact bytes before distribution. Even complete local ad-hoc
+verification would not establish Developer ID/notarization or a trusted browser
+download's first launch. Use the public native CLI route for the current
+published package, with its separate unsigned-executable limitations.
 
-Quit clears the service's in-memory data and normal control-file cleanup is scoped to the instance. Private runtime/cache directories and `startup.log` may remain; no zero-residue uninstall or secure-memory-erasure claim is made.
-
-A local executable check does not establish Finder double-click, system-browser rendering, downloaded-file quarantine, Gatekeeper, or physical-phone acceptance. Those remain separate validation gates.
+The intended future App remains a small container for the same Go launcher,
+not a new backend, registration flow or installer. That architectural goal is
+not an instruction to open one of the defective old bundles.
 
 ## Native CLI preview recipients
 
@@ -261,7 +298,7 @@ The packaging script performs no Developer ID signing, Apple notarization, uploa
 
 ## Alpha.1 validation record
 
-The [desktop receipt](benchmarks/2026-10-29-desktop-preview.json) records exit-zero `smoke-package.py --require-all`: all eight archive/binary hashes, target headers, metadata, permissions, and layouts passed. Mac arm64 native checks passed app default-mode flag dispatch, Chinese/space extraction path, private HOME with `PATH=/nonexistent`, version/readiness, CLI compatibility, reuse, Quit, stale recovery, occupied/unknown-service safety, and owned cleanup. The app executable was invoked with `--no-open --state-dir ... --listen 127.0.0.1:0`, without a `desktop` subcommand. This verifies flag dispatch, not zero-argument Finder/default-cache launch.
+The [desktop receipt](benchmarks/2026-10-29-desktop-preview.json) records exit-zero `smoke-package.py --require-all`: all eight archive/binary hashes, target headers, metadata, permissions, and layouts passed. Mac arm64 native checks passed app default-mode flag dispatch, Chinese/space extraction path, private HOME with `PATH=/nonexistent`, version/readiness, CLI compatibility, reuse, Quit, stale recovery, occupied/unknown-service safety, and owned cleanup. The app executable was invoked with `--no-open --state-dir ... --listen 127.0.0.1:0`, without a `desktop` subcommand. This verifies flag dispatch, not complete App-bundle signature integrity or zero-argument Finder/default-cache launch. The later reproduced signature defect withdraws the historical App launch recommendation.
 
 The [rebuild receipt](benchmarks/2026-10-29-reproducibility.json) records all ten outputs byte-identical across two complete builds from the same clean source and toolchain into different directories. It is not a claim about arbitrary toolchains or build environments.
 

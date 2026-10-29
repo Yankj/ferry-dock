@@ -23,7 +23,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:
-      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.2'
+      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.3'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -55,6 +55,9 @@ jobs:
       - name: Check native packaged lifecycle
         if: runner.os == 'macOS' && matrix.go == '1.27.x'
         run: python3 scripts/smoke-package.py --dist "dist/$FERRY_DOCK_PREVIEW_VERSION"
+      - name: Reject altered app metadata and resource seals
+        if: runner.os == 'macOS' && matrix.go == '1.27.x'
+        run: python3 scripts/test-app-signature.py --archive "dist/$FERRY_DOCK_PREVIEW_VERSION/ferry-dock-$FERRY_DOCK_PREVIEW_VERSION-darwin-arm64-app.zip"
 
   npm-preview:
     name: Local npm package / macOS arm64 / Node 22

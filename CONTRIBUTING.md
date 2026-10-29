@@ -39,6 +39,14 @@ private empty configuration and temporary runtime state. It exercises signals
 and an owned loopback service, and never publishes or logs in to a registry.
 The CI job follows the same packaging/verification path without publishing.
 
+For App packaging, use macOS with its system `codesign`. `scripts/package.py`
+seals complete new bundles after staging their resources, and records ad-hoc
+integrity separately from publisher trust. Run `scripts/smoke-package.py` and
+`scripts/test-app-signature.py` on the resulting archives; hash/layout checks
+or direct executable runs alone do not validate a Mac App. Never remove a user's
+quarantine attributes or disable OS protection to make an acceptance check pass.
+See the [App packaging incident](docs/packaging-incident.md).
+
 ## Changes worth testing
 
 For protocol or state changes, test the behavior at its boundary: role separation, session closure and expiry, exact text bytes, duplicate retry behavior, ordering after reconnection, and limits under concurrent requests. Tests should catch a plausible regression rather than repeat implementation details.

@@ -6,13 +6,15 @@
 
 本在线指南比固定的 `a351555` 包内文档更新。归档没有重写：其中的文档早于公开发布，可能仍写着下载尚不可用。下载步骤以本指南为准，程序接口保持不变。
 
+**不要继续使用旧 alpha.1／alpha.2 App 预览。** 已复现完整应用包签名缺陷，ZIP 完整性和直接执行内部程序的检查未覆盖它，现已撤回这两版 App 的启动建议。修正后的 alpha.3 正在进行私有结构测试，不是公开下载或 Gatekeeper 通过证明。公开 alpha.2 原生 CLI 不在该 App 封装内，仍保留下方未签名下载限制。
+
 ## 先选最短路径
 
 | 你手里的工作缺什么？ | 使用路径 | 结果在哪里 |
 | --- | --- | --- |
 | 手机上的文字，要粘到电脑软件 | 已发布的 Mac arm64 CLI → `desktop` → 扫码 → 发送 → Copy | 电脑临时收件箱 |
 | 某个 Agent 任务缺手机上的意见 | 已运行的 CLI＋请求命令，可由本地 Skill 指导 | 只属于该请求的一次响应 |
-| 希望用应用图标或其他平台 | 仅供另外拿到对应本地预览的人使用，不在本次发布中 | 同一服务，各有未验边界 |
+| 其他平台 | 仅供另外拿到对应原生 CLI 本地预览的人使用，不在本次发布中 | 同一服务，各有未验边界 |
 
 例如：手机聊天里有客户修改意见，电脑上有待改提案；手机上有报错**文字**，电脑任务正在排查代码。当前只传文本，不传截图、附件或语音，也不远程控制手机。Agent 路径不会自动唤醒暂停的宿主任务。
 
@@ -120,7 +122,7 @@ Codex 宿主。源码安装需要 Go 工具链与网络，不承诺离线可用�
 
 以下形态**未上传到本次预发布**，仅供另外拿到对应本地预览包的人使用；平台名称不是公开下载链接，也不是本机验收证明。
 
-本地 macOS 应用 ZIP 解压后直接得到 **Ferry Dock.app**，没有额外目录。打开后按设计启动同一 Go 服务及系统浏览器。它就是渡口本身，不是 CLI 用户必须安装的平台。Finder 零参数／默认缓存／默认浏览器和下载应用 Gatekeeper 首启仍为 **NOT_RUN**。后续手机操作及 **Quit Ferry Dock** 相同。
+历史 alpha.1／alpha.2 macOS App ZIP 不再推荐作为启动器：归档完整性和直接执行检查通过，但完整应用包严格签名校验失败。不要继续按其包内“解压后打开”步骤使用。alpha.3 私有修复候选需在归档前后验证完整应用封装；即使 ad-hoc 结构校验通过，也不代表 Developer ID 身份、Apple 公证、浏览器下载 Gatekeeper、Finder 或浏览器自动打开已通过。不会覆盖旧归档，也不提供绕过系统保护的流程。
 
 其他原生 CLI 包有一层平台／版本目录，在目录内，macOS／Linux 使用：
 
@@ -160,11 +162,13 @@ runtime_dir="$(mktemp -d)"
 open "$runtime_dir/proposal.json.png"
 ```
 
-若用的是应用包，把第一行换成真实绝对路径，保留路径空格外的引号：
+若用的是已核验本地 npm 包，把第一行换成其原生核心的真实绝对路径，保留路径空格外的引号：
 
 ```sh
-ferry_bin="/absolute/path/Ferry Dock.app/Contents/MacOS/ferry-dock"
+ferry_bin="/absolute/path/ferry-dock-node/node_modules/ferry-dock/native/ferry-dock"
 ```
+
+不要在此工作流使用已撤回启动建议的 alpha.1／alpha.2 App。
 
 必需的是 `--control`、非空 `--prompt`、尚不存在的 `--handle` 路径；`--task-id`、`--ttl`、`--max-bytes` 可选，示例明确设置了它们。自定义状态目录或其他系统应使用 `desktop` 返回的实际 `controlPath`。不要打印控制文件或句柄正文，它们含有访问权限。句柄及二维码路径都必须尚不存在。
 
@@ -221,7 +225,6 @@ Skill 是一份 Markdown 工作流，不是已安装的集成，也不会唤醒�
 | --- | --- |
 | 解压后的 CLI 包 | 包根目录下 `skills/ferry-dock/SKILL.md` |
 | 安装到本地目录的 npm 包 | 该目录下 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md` |
-| Mac 应用 | `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md` |
 | 开发者源码仓库 | `skills/ferry-dock/SKILL.md` |
 
 `go install` 只提供命令；使用该源码安装路径时，可选 Skill 文件需另行取得。

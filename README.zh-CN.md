@@ -17,6 +17,8 @@
 
 这里的指南比固定在 `a351555` 的包内文档更新；已有 alpha.2 归档未被替换。
 
+**旧应用包：停止使用 alpha.1／alpha.2 的 `.app` 预览。** 已复现完整应用包的签名缺陷；ZIP 完整性和直接执行内部程序的检查没有覆盖该签名封装，现不再推荐这两版 App 启动器。公开 alpha.2 原生 CLI 不在该 App 封装内，但仍有下方未签名下载限制。正在准备修正后的 alpha.3 私有结构测试包，不代表公开发布或已经通过 Gatekeeper。
+
 ## 选择一条路径
 
 | 你想做什么 | 使用方式 | 实际流程 |
@@ -82,7 +84,7 @@ GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-d
 
 ## 其他本地预览入口
 
-App 包及 Intel Mac／Linux／Windows CLI 已在本地生成，**未上传到本次预发布**。如果你另外拿到了匹配系统与架构的原生预览包，在包的根目录用 macOS/Linux POSIX shell 运行：
+Intel Mac／Linux／Windows CLI 已在本地生成，**未上传到本次预发布**。如果你另外拿到了匹配系统与架构的原生 CLI 预览包，在包的根目录用 macOS/Linux POSIX shell 运行：
 
 ```sh
 ./ferry-dock version
@@ -91,7 +93,7 @@ App 包及 Intel Mac／Linux／Windows CLI 已在本地生成，**未上传到�
 
 Windows 在 PowerShell 中使用 `.\ferry-dock.exe`。生成或交叉编译出安装包，不代表每个平台都完成本机运行验收。CLI 无子命令时默认前台 `serve`；需要浏览器启动器和后台生命周期时，明确使用 `desktop`。
 
-如果另外拿到本地 macOS 应用 ZIP，可以解压后打开 **Ferry Dock.app**。它共用同一服务和浏览器界面，不是已发布 CLI 的运行前提；Finder 零参数启动及下载应用首启仍未验。
+不要继续按旧 alpha.1／alpha.2 应用 ZIP 的“解压后打开”说明使用。完整应用包签名缺陷与压缩文件损坏是不同问题；即使修正封装并通过本地严格签名校验，也不等于具备 Developer ID 签名、Apple 公证或下载后的 Gatekeeper 接受证明。当前公开包请使用上方原生 CLI 路径。
 
 CLI 和应用内的可执行文件都支持 JSON `version` 及 `request` 命令。版本输出含 `version`、`commit`、`os`、`arch`、`defaultMode`。包内布局与高级 `serve --listen ... --public-url ...` 用法见[分发说明](docs/distribution.md)。
 
@@ -105,7 +107,7 @@ CLI 和应用内的可执行文件都支持 JSON `version` 及 `request` 命令�
 
 复用已运行的桌面实例与私有控制文件。macOS 默认路径为 `~/Library/Caches/ferry-dock/runtime/control.json`，`desktop` 也会返回 `controlPath`。不要打印文件正文，它包含进程管理权限。
 
-将 `ferry_bin` 设置为预构建可执行文件的**绝对路径**。应用内路径为 `Ferry Dock.app/Contents/MacOS/ferry-dock`，CLI 包则使用解压出的 `ferry-dock`。下列 POSIX 示例假定桌面实例已就绪，并为当前任务创建新的私有目录：
+将 `ferry_bin` 设置为预构建程序的**绝对路径**：原生包解压出的 `ferry-dock`，或已核验本地 npm 包内的 `native/ferry-dock`。不要使用已撤回启动建议的 alpha.1／alpha.2 App。下列 POSIX 示例假定桌面实例已就绪，并为当前任务创建新的私有目录：
 
 ```sh
 ferry_bin="/absolute/path/to/ferry-dock"
@@ -139,7 +141,7 @@ runtime_dir="$(mktemp -d)"
 
 ## 让 Agent 收集手机上的缺失信息
 
-可选[本地 Skill](skills/ferry-dock/SKILL.md)向有 shell 能力的 Agent 说明这个工作流。原生 CLI 包中为 `skills/ferry-dock/SKILL.md`；应用中为 `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md`。把可读取的绝对路径交给 Agent，属于手动文件引用，**不等于自动安装或自动发现**。
+可选[本地 Skill](skills/ferry-dock/SKILL.md)向有 shell 能力的 Agent 说明这个工作流。原生 CLI 包中为 `skills/ferry-dock/SKILL.md`；本地 npm 安装后为 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。把可读取的绝对路径交给 Agent，属于手动文件引用，**不等于自动安装或自动发现**。
 
 渡口已运行时，替换路径后可使用：
 
@@ -182,7 +184,7 @@ runtime_dir="$(mktemp -d)"
 
 ## 验证与贡献
 
-Alpha.2 的八个归档通过产物检查，相同输入两次构建的十个输出逐字节一致；Mac arm64 包的生命周期、CLI、安全检查通过。Go、12 项 HTTP、27 项合成请求、11 项 UI VM 与真实服务脚本／HTTP 检查通过。Safari 浅色桌面收发及 **Copied** 标签通过，新版未重复实际系统粘贴。深色／手机尺寸 GUI 仍因桌面认证交互边界受阻。[验证记录](docs/verification.md)与[主张／证据](docs/claims-evidence.md)保留独立的历史 alpha.1 观察。Finder／默认缓存发现、默认浏览器自动打开、手机局域网／扫码、Gatekeeper、实际 Codex 宿主及 Intel Mac/Windows/Linux 本机验收仍为 **NOT_RUN**。
+Alpha.2 的八个归档通过当时的归档／元数据检查，相同输入两次构建的十个输出逐字节一致；Mac arm64 包内程序的直接执行、生命周期与 CLI 检查通过。这些检查遗漏了完整 App 签名验证，后来复现的签名缺陷推翻了基于它们给出的 App 启动建议。Go、12 项 HTTP、27 项合成请求、11 项 UI VM 与真实服务脚本／HTTP 检查通过。Safari 浅色桌面收发及 **Copied** 标签通过，新版未重复实际系统粘贴。深色／手机尺寸 GUI 仍因桌面认证交互边界受阻。[验证记录](docs/verification.md)与[主张／证据](docs/claims-evidence.md)保留独立的历史 alpha.1 观察。Finder／默认缓存发现、默认浏览器自动打开、手机局域网／扫码、Gatekeeper、实际 Codex 宿主及 Intel Mac/Windows/Linux 本机验收仍为 **NOT_RUN**。
 
 [此前 macOS arm64／Go 1.27.3 loopback 基线](docs/performance-baseline.md)与[原始样本](docs/benchmarks/2026-10-28-macos-arm64.json)测的是特定旧 CLI／核心二进制，不代表应用启动、浏览器打开、手机操作或 Agent 速度。[预算](docs/performance.md)仍是工程目标。
 

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Build local, deterministic native archives. Uses Python's standard library.
 
-No upload, signing, notarization, installer, or security-setting changes occur.
+macOS apps receive a local ad-hoc bundle seal after all resources are staged.
+No publisher signing, notarization, upload, installer, or security-setting
+changes occur. An ad-hoc seal does not establish Gatekeeper distribution trust.
 An unclean source tree requires --allow-dirty and is identified in metadata.
 """
 
@@ -36,6 +38,9 @@ TARGETS = (
     "windows/amd64", "windows/arm64",
 )
 BUILDINFO = "github.com/Yankj/ferry-dock/internal/buildinfo"
+APP_NAME = "Ferry Dock.app"
+APP_IDENTIFIER = "io.github.yankj.ferry-dock"
+MAC_CODESIGN = Path("/usr/bin/codesign")
 
 
 def run(command, *, env=None):
@@ -257,6 +262,63 @@ def signature_status(binary, goos):
     return status
 
 
+def seal_app(entries, temporary):
+    """Seal a newly staged app, then return the exact bytes to archive.
+
+    Go's arm64 linker signature describes a standalone executable. Copying that
+    file into an app does not bind Info.plist or seal Resources. Sign the final
+    bundle after staging all of those inputs; never mutate a supplied archive or
+    downloaded application, and never treat this local seal as publisher trust.
+    """
+    if sys.platform != "darwin" or not MAC_CODESIGN.is_file():
+        raise RuntimeError("macOS app packaging requires macOS /usr/bin/codesign; use --cli-only for command archives")
+    prefix = APP_NAME + "/"
+    with tempfile.TemporaryDirectory(prefix="bundle-", dir=temporary) as folder:
+        directory = Path(folder)
+        app = directory / APP_NAME
+        app.mkdir(mode=0o755)
+        for name, (data, mode) in sorted(entries.items()):
+            if not name.startswith(prefix):
+                continue
+            relative = Path(name)
+            if relative.is_absolute() or any(part in (".", "..") for part in relative.parts):
+                raise ValueError("app bundle contains an unsafe member name")
+            output = directory / relative
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_bytes(data)
+            output.chmod(mode)
+        app.chmod(0o755)
+        for path in app.rglob("*"):
+            if path.is_dir():
+                path.chmod(0o755)
+        # No nested executable/framework is present. Sign this completed bundle
+        # directly rather than using --deep to mask a nested-code layout error.
+        run([str(MAC_CODESIGN), "--force", "--sign", "-", "--timestamp=none",
+             "--identifier", APP_IDENTIFIER, str(app)])
+        run([str(MAC_CODESIGN), "--verify", "--deep", "--strict", "--verbose=2", str(app)])
+        resources = app / "Contents/_CodeSignature/CodeResources"
+        if not resources.is_file() or resources.is_symlink():
+            raise RuntimeError("signed app is missing its sealed resource envelope")
+        # codesign display writes its diagnostic metadata to stderr; inspect it
+        # separately instead of interpreting a successful empty stdout as proof.
+        inspected = subprocess.run([str(MAC_CODESIGN), "--display", "--verbose=4", str(app)],
+                                   capture_output=True, text=True, check=False)
+        details = inspected.stdout + inspected.stderr
+        if inspected.returncode or "Signature=adhoc" not in details or "Sealed Resources version=2" not in details:
+            raise RuntimeError("completed app does not have the expected ad-hoc resource seal")
+        sealed = {name: value for name, value in entries.items() if not name.startswith(prefix)}
+        for path in sorted(app.rglob("*")):
+            if path.is_symlink():
+                raise RuntimeError("signed app unexpectedly contains a symlink")
+            if path.is_file():
+                sealed[path.relative_to(directory).as_posix()] = (path.read_bytes(), stat.S_IMODE(path.stat().st_mode))
+        status = {"scope": "bundle", "publisherSigned": False, "developerIdSigned": False,
+                  "notarized": False, "adHoc": True, "bundleSigned": True,
+                  "bundleVerified": True, "resourceSealed": True,
+                  "strictVerification": "PASS", "identifier": APP_IDENTIFIER}
+        return sealed, status
+
+
 def instructions(goos, app=False):
     if app:
         return """Ferry Dock / 渡口 — macOS alpha
@@ -267,9 +329,10 @@ To stop the service, use the desktop page's shutdown control.
 Usage documents and the optional Skill are in Contents/Resources. The Skill is
 included as a local file; nothing installs it or changes Agent configuration.
 
-This app has no Developer ID signing or Apple notarization. Any linker ad-hoc
-signature is not a verified publisher identity. macOS may block a downloaded
-app; this package does not bypass Gatekeeper. A source build is an alternative.
+This test app has a complete local ad-hoc bundle seal, but no Developer ID
+publisher signing or Apple notarization. Its seal detects damaged resources;
+it does not establish publisher trust or Gatekeeper acceptance. macOS may block
+a downloaded app; do not remove quarantine or disable OS protections to run it.
 
 Physical-phone access needs a reachable LAN address and your network's normal
 permissions. HTTP is not encrypted. Share invitations only with intended senders.
@@ -324,9 +387,10 @@ def documentation():
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", default="0.1.0-alpha.2", help="artifact/product version (default: %(default)s)")
+    parser.add_argument("--version", default="0.1.0-alpha.3", help="artifact/product version (default: %(default)s)")
     parser.add_argument("--target", action="append", choices=TARGETS, help="repeat for a subset (default: both Darwin architectures)")
     parser.add_argument("--all", action="store_true", help="build all six targets, including both macOS apps")
+    parser.add_argument("--cli-only", action="store_true", help="omit macOS apps; permits native command cross-builds without codesign")
     parser.add_argument("--out", type=Path, default=ROOT / "dist", help="output parent; creates a new version directory")
     parser.add_argument("--go", default=os.environ.get("GO", "go"), help="Go executable path")
     parser.add_argument("--allow-dirty", action="store_true", help="package an explicitly marked unclean working tree")
@@ -342,6 +406,9 @@ def parse_args():
 def main():
     args = parse_args()
     targets = list(TARGETS) if args.all else sorted(set(args.target or TARGETS[:2]))
+    has_apps = not args.cli_only and any(target.startswith("darwin/") for target in targets)
+    if has_apps and (sys.platform != "darwin" or not MAC_CODESIGN.is_file()):
+        raise RuntimeError("macOS app packaging requires macOS /usr/bin/codesign; use --cli-only for command archives")
     commit = run(["git", "rev-parse", "HEAD"])
     dirty = bool(run(["git", "status", "--porcelain", "--untracked-files=normal"]))
     if dirty and not args.allow_dirty:
@@ -375,7 +442,7 @@ def main():
     }
     license_data = (ROOT / "LICENSE").read_bytes()
     docs = documentation()
-    icon = app_icon() if any(target.startswith("darwin/") for target in targets) else None
+    icon = app_icon() if has_apps else None
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix=".ferry-dock-package-", dir=destination.parent) as temporary:
         stage = Path(temporary) / "artifacts"
@@ -383,7 +450,7 @@ def main():
         for target in targets:
             goos, goarch = target.split("/")
             environment.update({"GOOS": goos, "GOARCH": goarch})
-            for kind in (["cli", "app"] if goos == "darwin" else ["cli"]):
+            for kind in (["cli", "app"] if goos == "darwin" and not args.cli_only else ["cli"]):
                 mode = "desktop" if kind == "app" else "serve"
                 executable_name = "ferry-dock.exe" if goos == "windows" else "ferry-dock"
                 binary = Path(temporary) / f"{goos}-{goarch}-{kind}-{executable_name}"
@@ -400,7 +467,7 @@ def main():
                     bundle_version = ".".join(numeric_version.groups()) if numeric_version else "0.0.0"
                     info = {"CFBundleDevelopmentRegion": "en", "CFBundleDisplayName": "Ferry Dock / 渡口",
                             "CFBundleExecutable": "ferry-dock", "CFBundleIconFile": "FerryDock.icns",
-                            "CFBundleIdentifier": "io.github.yankj.ferry-dock", "CFBundleInfoDictionaryVersion": "6.0",
+                            "CFBundleIdentifier": APP_IDENTIFIER, "CFBundleInfoDictionaryVersion": "6.0",
                             "CFBundleName": "Ferry Dock", "CFBundlePackageType": "APPL",
                             "CFBundleShortVersionString": bundle_version, "CFBundleVersion": bundle_version,
                             "FerryDockVersion": args.version, "FerryDockCommit": binary_commit,
@@ -413,6 +480,8 @@ def main():
                                "README.txt": (instructions(goos, app=True).encode(), 0o644),
                                "LICENSE": (license_data, 0o644)}
                     entries.update({"Ferry Dock.app/Contents/Resources/" + name: value for name, value in docs.items()})
+                    entries, signing = seal_app(entries, temporary)
+                    binary_data = entries[binary_path][0]
                     filename = stem + "-app.zip"
                 else:
                     binary_path = f"{stem}/{executable_name}"
@@ -420,6 +489,7 @@ def main():
                                f"{stem}/README.txt": (instructions(goos).encode(), 0o644),
                                f"{stem}/LICENSE": (license_data, 0o644)}
                     entries.update({stem + "/" + name: value for name, value in docs.items()})
+                    signing = signature_status(binary, goos)
                     filename = stem + (".zip" if goos == "windows" else ".tar.gz")
                 data = zip_bytes(entries, epoch) if filename.endswith(".zip") else tar_bytes(entries, epoch)
                 (stage / filename).write_bytes(data)
@@ -427,10 +497,8 @@ def main():
                     "file": filename, "kind": kind, "goos": goos, "goarch": goarch,
                     "defaultMode": mode, "sha256": digest(data), "size": len(data),
                     "binary": {"path": binary_path, "sha256": digest(binary_data), "size": len(binary_data)},
-                    "signing": signature_status(binary, goos), "nativeValidation": "NOT_RUN",
+                    "signing": signing, "nativeValidation": "NOT_RUN",
                 })
-                if kind == "app":
-                    manifest["artifacts"][-1]["signing"]["bundleSigned"] = False
         manifest_data = (json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()
         (stage / "manifest.json").write_bytes(manifest_data)
         sums = "".join(f"{digest(path.read_bytes())}  {path.name}\n" for path in sorted(stage.iterdir()))

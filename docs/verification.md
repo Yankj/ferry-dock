@@ -1,5 +1,24 @@
 # Verification record
 
+## App signature incident and alpha.3 correction
+
+The supplied App-open screenshot led to a reproduced defect in the original
+alpha.2 Mac App bundles. ZIP integrity, layout, modes and direct runtime checks
+had passed, but complete arm64 bundle verification failed with
+`code has no resources but signature indicates they must be present`; the
+same binary outside the bundle verified successfully. The Intel App was unsigned.
+This supersedes any interpretation of the earlier package-runtime passes as
+complete App validity or downloaded first-launch acceptance. See the
+[incident record](packaging-incident.md) for the actual diagnostics and boundary.
+
+The alpha.3 source correction stages every resource before locally sealing the
+complete new bundle, verifies it strictly, and archives those exact bytes.
+Mac package checks now verify complete bundles reconstructed from ZIPs before
+execution, with separate tamper-rejection regressions. Formal alpha.3 results
+are recorded after the frozen build; the bundled documentation can therefore
+predate those later evidence records. No Developer ID signing, notarization or
+Gatekeeper pass is inferred from an ad-hoc resource seal.
+
 ## Local npm entry and fixed-tag Go install, 2026-10-29
 
 The npm entry is implemented and locally tested, **not published to a registry**.

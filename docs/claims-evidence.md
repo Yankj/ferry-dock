@@ -1,5 +1,17 @@
 # Claims and evidence
 
+## App validity correction
+
+Original alpha.1/alpha.2 App bundles must not be recommended for downloaded use.
+The alpha.2 arm64 whole-bundle strict signature check failed even though the
+same executable bytes verified outside the bundle; Intel App code was unsigned.
+Archive hashes and direct `--no-open` runtime results did not establish bundle
+integrity or first-launch acceptance. [Incident evidence](packaging-incident.md)
+records the actual error and the source-level sealing/test correction for
+alpha.3. A new local ad-hoc bundle signature still does not establish Developer
+ID identity, notarization or Gatekeeper acceptance. Public alpha.2 CLI and local
+npm/Go-install evidence remain scoped to standalone executables.
+
 ## npm implementation and Go-user installation
 
 | Claim | Evidence | Status and boundary |

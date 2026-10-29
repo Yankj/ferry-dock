@@ -167,9 +167,19 @@ def validate_archives(directory, require_all):
         signing = artifact.get("signing", {})
         check(signing.get("developerIdSigned") is False and signing.get("notarized") is False,
               "unsigned local alpha manifest unexpectedly claims publisher signing/notarization")
-        check(signing.get("publisherSigned", False) is False
-              and (target[2] != "app" or signing.get("bundleSigned", False) is False),
-              "local alpha manifest unexpectedly claims publisher or complete bundle signing")
+        check(signing.get("publisherSigned", False) is False,
+              "local alpha manifest unexpectedly claims publisher signing")
+        legacy_app = (target[2] == "app" and manifest["version"] in
+                      ("0.1.0-alpha.1", "0.1.0-alpha.2")
+                      and signing.get("bundleSigned", False) is False)
+        if target[2] == "app" and not legacy_app:
+            check(signing.get("scope") == "bundle" and signing.get("adHoc") is True
+                  and signing.get("bundleSigned") is True
+                  and signing.get("bundleVerified") is True
+                  and signing.get("resourceSealed") is True
+                  and signing.get("strictVerification") == "PASS"
+                  and signing.get("identifier") == "io.github.yankj.ferry-dock",
+                  "new app manifest must record a verified complete ad-hoc bundle signature")
         archive = directory / name
         check(archive.is_file() and archive.stat().st_size <= MAX_ARCHIVE_BYTES, "archive is missing or exceeds its byte bound")
         data = archive.read_bytes()
@@ -198,6 +208,12 @@ def validate_archives(directory, require_all):
             check(icon_path in entries and entries[icon_path][0].startswith(b"icns"), "app icon is missing or not ICNS")
             check("LICENSE" in entries and "README.txt" in entries
                   and "Ferry Dock.app/Contents/Resources/LICENSE" in entries, "app license or local-use instructions are missing")
+            if not legacy_app:
+                seal_path = "Ferry Dock.app/Contents/_CodeSignature/CodeResources"
+                check(seal_path in entries, "new app has no bundled resource signature")
+                envelope = plistlib.loads(entries[seal_path][0])
+                check(isinstance(envelope.get("files2"), dict) and envelope["files2"],
+                      "new app resource signature has no version-two sealed resources")
             docs_prefix = "Ferry Dock.app/Contents/Resources/"
         else:
             stem = "ferry-dock-{}-{}-{}".format(manifest["version"], target[0], target[1])
@@ -217,6 +233,45 @@ def validate_archives(directory, require_all):
         check(targets == TARGETS, "--require-all expected six CLI and two macOS app archives")
     print("PASS PACKAGE: all {} archive hashes, binary hashes/target headers, metadata, permissions, and layouts verified.".format(len(artifacts)))
     return manifest, selected
+
+
+def strict_bundle_check(app):
+    """Verify the complete reconstructed bundle without launching or signing it."""
+    codesign = Path("/usr/bin/codesign")
+    check(sys.platform == "darwin" and codesign.is_file(),
+          "complete app signature checks require macOS codesign")
+    result = subprocess.run([str(codesign), "--verify", "--deep", "--strict",
+                             "--verbose=4", str(app)],
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            timeout=20, check=False)
+    check(result.returncode == 0, "complete app strict signature verification failed")
+
+
+def write_entries(destination, entries):
+    for name, (data, mode) in entries.items():
+        member = destination.joinpath(*safe_member(name).parts)
+        member.parent.mkdir(parents=True, exist_ok=True)
+        member.write_bytes(data)
+        member.chmod(mode)
+
+
+def validate_app_signatures(directory, manifest):
+    """Check both macOS architectures, not only the one this host can execute.
+
+    Legacy archive-only checks remain readable, but a normal macOS run must
+    catch their unsealed/unsigned App defect before invoking any executable.
+    """
+    checked = 0
+    with tempfile.TemporaryDirectory(prefix="ferry-dock-app-signatures-") as temporary:
+        for artifact in manifest["artifacts"]:
+            if artifact.get("kind") != "app":
+                continue
+            destination = Path(temporary) / artifact["goarch"]
+            write_entries(destination, members(directory / artifact["file"]))
+            strict_bundle_check(destination / "Ferry Dock.app")
+            checked += 1
+    if checked:
+        print("PASS PACKAGE_SIGNATURE: {} complete App bundles reconstructed from ZIPs passed codesign --verify --deep --strict; publisher trust/notarization is not implied.".format(checked))
 
 
 def process_matches(pid, executable):
@@ -345,11 +400,9 @@ class NativeCheck:
         binaries = {}
         for kind, (artifact, entries) in self.selected.items():
             destination = self.base / "解压 渡口 package" / kind
-            for name, (data, mode) in entries.items():
-                member = destination.joinpath(*safe_member(name).parts)
-                member.parent.mkdir(parents=True, exist_ok=True)
-                member.write_bytes(data)
-                member.chmod(mode)
+            write_entries(destination, entries)
+            if kind == "app":
+                strict_bundle_check(destination / "Ferry Dock.app")
             binary = destination / artifact["binary"]["path"]
             version = self.execute(binary, ["version"])
             check(version == {"version": self.manifest["version"], "commit": self.manifest["source"]["binaryCommit"],
@@ -466,14 +519,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dist", type=Path, required=True, help="version directory containing manifest.json and SHA256SUMS")
     parser.add_argument("--require-all", action="store_true", help="require all six CLI and two app archives")
-    parser.add_argument("--archive-only", action="store_true", help="skip native lifecycle checks explicitly")
+    parser.add_argument("--archive-only", action="store_true", help="check archive metadata only; skip complete app signature and native lifecycle checks explicitly")
     parser.add_argument("--timeout", type=float, default=60, help="native scenario deadline in seconds, excluding bounded cleanup")
     args = parser.parse_args()
     check(1 <= args.timeout <= 300, "timeout must be between 1 and 300 seconds")
     manifest, selected = validate_archives(args.dist.resolve(), args.require_all)
     if args.archive_only or sys.platform != "darwin":
+        print("NOT_RUN: complete App codesign verification (archive-only option or non-macOS host).")
         print("NOT_RUN: native macOS package lifecycle (archive-only option or non-macOS host).")
     else:
+        validate_app_signatures(args.dist.resolve(), manifest)
         native = NativeCheck(manifest, selected, args.timeout)
         try:
             native.run()

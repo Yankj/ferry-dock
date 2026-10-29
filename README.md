@@ -17,6 +17,8 @@ Client comments are in a phone chat; the proposal is on your computer. Or an err
 
 The guides here are newer than the frozen `a351555` package documentation; existing alpha.2 archives have not been replaced.
 
+**Old App bundles: stop using the alpha.1/alpha.2 `.app` previews.** A complete-bundle signature defect has been reproduced; their ZIP integrity and direct-executable checks did not validate that envelope. They are no longer recommended launchers. The public alpha.2 native CLI is outside this App envelope, but still has the unsigned-download limits below. A corrected alpha.3 App is being prepared for private structural testing, not public distribution or a promise of Gatekeeper acceptance.
+
 ## Choose your path
 
 | You want to… | Use | What happens |
@@ -82,7 +84,7 @@ This route compiles source. It was tested with Go 1.27.3 on Mac arm64; Go 1.26 n
 
 ## Other local preview entry points
 
-App bundles and Intel Mac/Linux/Windows CLI packages have been built locally but are **not uploaded in this prerelease**. If you have separately received a matching native preview, run from its package root in a macOS/Linux POSIX shell:
+Intel Mac/Linux/Windows CLI packages have been built locally but are **not uploaded in this prerelease**. If you have separately received a matching native CLI preview, run from its package root in a macOS/Linux POSIX shell:
 
 ```sh
 ./ferry-dock version
@@ -91,7 +93,7 @@ App bundles and Intel Mac/Linux/Windows CLI packages have been built locally but
 
 Windows uses `.\ferry-dock.exe` in PowerShell. Archive creation or cross-compilation does not establish native execution on every platform. The CLI defaults to foreground `serve` if run with no subcommand; use `desktop` explicitly for the browser launcher/background lifecycle.
 
-For a separately supplied local macOS app ZIP, extract and open **Ferry Dock.app**. It uses the same service/browser interface; it is not a prerequisite for the published CLI. Finder zero-argument launch and downloaded-app acceptance remain unverified.
+Do not follow the old alpha.1/alpha.2 App ZIP's “extract and open” instructions. Its complete-bundle signing defect is separate from archive corruption. Repairing the bundle and passing local strict signature verification would still not provide Developer ID signing, Apple notarization or downloaded-file Gatekeeper acceptance. Use the native CLI path above for the current published package.
 
 Both the CLI and app executable support JSON `version` and `request` commands. Version output includes `version`, `commit`, `os`, `arch`, and `defaultMode`. See [distribution](docs/distribution.md) for package layout and advanced `serve --listen ... --public-url ...` use.
 
@@ -105,7 +107,7 @@ Ordinary text is limited to 64 KiB per message, 1 MiB and 128 messages per sessi
 
 Use an already running desktop instance and its private control path. On macOS the default is `~/Library/Caches/ferry-dock/runtime/control.json`; `desktop` also returns `controlPath`. Do not print the file: it contains process management authority.
 
-Set `ferry_bin` to the **absolute** prebuilt executable path. For an app this is `Ferry Dock.app/Contents/MacOS/ferry-dock`; for a native archive it is the extracted `ferry-dock`. The following POSIX example assumes the desktop instance is ready and uses a new private directory:
+Set `ferry_bin` to the **absolute** prebuilt executable path: the extracted `ferry-dock`, or the verified local npm package's `native/ferry-dock`. Do not use a withdrawn alpha.1/alpha.2 App as the launcher. The following POSIX example assumes the desktop instance is ready and uses a new private directory:
 
 ```sh
 ferry_bin="/absolute/path/to/ferry-dock"
@@ -139,7 +141,7 @@ Reads return stable `input.id` and `trust: "untrusted_user_input"`. The consumer
 
 ## Ask an Agent to collect the missing text
 
-The optional [local Skill](skills/ferry-dock/SKILL.md) describes this workflow for a shell-capable Agent. It is bundled at `skills/ferry-dock/SKILL.md` in native archives and `Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md` in the app. Give the Agent a readable absolute path; this is a manual file reference, **not** an automatic installation or discovery mechanism.
+The optional [local Skill](skills/ferry-dock/SKILL.md) describes this workflow for a shell-capable Agent. It is bundled at `skills/ferry-dock/SKILL.md` in native archives and `node_modules/ferry-dock/skills/ferry-dock/SKILL.md` in a locally installed npm preview. Give the Agent a readable absolute path; this is a manual file reference, **not** an automatic installation or discovery mechanism.
 
 With Ferry Dock already running, adapt this prompt:
 
@@ -184,7 +186,7 @@ Files, photos, audio, remote phone control, continuous clipboard sync, durable h
 
 ## Evidence and contributing
 
-Alpha.2: all eight archives passed package checks; ten same-input rebuild outputs matched byte-for-byte. Mac arm64 packaged lifecycle/CLI/safety checks passed. Go, 12 HTTP, 27 synthetic-request, 11 UI-VM, and served-script/HTTP checks passed. Safari desktop-light send/receive and the **Copied** label passed; this revision did not repeat actual system paste. Dark/phone-size GUI checks were blocked by an interactive desktop authentication boundary. [Verification](docs/verification.md) and [claims/evidence](docs/claims-evidence.md) preserve the separate historical alpha.1 observations. Finder/default-cache discovery, default-browser auto-opening, physical-phone/LAN/QR, Gatekeeper, actual Codex-host and Intel Mac/Windows/Linux native acceptance remain **NOT_RUN**.
+Alpha.2: all eight archives passed the then-existing archive/metadata checks; ten same-input rebuild outputs matched byte-for-byte. Mac arm64 direct packaged-executable lifecycle/CLI checks passed. Those checks missed complete App-bundle signature validation; the subsequently reproduced App signature defect supersedes any launch recommendation based on them. Go, 12 HTTP, 27 synthetic-request, 11 UI-VM, and served-script/HTTP checks passed. Safari desktop-light send/receive and the **Copied** label passed; this revision did not repeat actual system paste. Dark/phone-size GUI checks were blocked by an interactive desktop authentication boundary. [Verification](docs/verification.md) and [claims/evidence](docs/claims-evidence.md) preserve the separate historical alpha.1 observations. Finder/default-cache discovery, default-browser auto-opening, physical-phone/LAN/QR, Gatekeeper, actual Codex-host and Intel Mac/Windows/Linux native acceptance remain **NOT_RUN**.
 
 The [earlier macOS arm64 / Go 1.27.3 loopback baseline](docs/performance-baseline.md) and [raw samples](docs/benchmarks/2026-10-28-macos-arm64.json) measure a specific prior CLI/core binary, not app launch, browser opening, mobile interaction, or Agent speed. [Budgets](docs/performance.md) remain engineering targets.
 
