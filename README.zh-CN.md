@@ -13,7 +13,7 @@
 
 <img src="brand/scenario.svg" width="960" alt="两条路径：手机扫码、粘贴、发送，电脑收件后复制使用；或回答特定任务的收集请求，Agent 查询同一请求后继续修改提案或代码。">
 
-**当前是预览，尚非公开二进制发行版。** 已制作本地 `0.1.0-alpha.2` 包，但**没有发布 GitHub Release 或原生包公开下载链接**。Apple Silicon 应用 ZIP 为 3,290,056 字节。拿到预构建包后无需安装 Git、Go 或 Node；下方源码构建只面向开发者。[分发与验证说明](docs/distribution.md)记录固定产物和首启未验项。
+**公开测试版：[`v0.1.0-alpha.2`](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)。** [下载 Apple Silicon Mac CLI](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz)，3,260,347 字节。不用另装 Mac App、Git、Go 或 Node。本次只公开 Mac arm64 CLI，其他平台原生包及应用包仍是本地预览。[分发与验证说明](docs/distribution.md)记录固定源码和未验边界。
 
 这里的指南比固定在 `a351555` 的包内文档更新；已有 alpha.2 归档未被替换。
 
@@ -21,32 +21,42 @@
 
 | 你想做什么 | 使用方式 | 实际流程 |
 | --- | --- | --- |
-| 将手机文字复制到任意电脑应用 | macOS 应用＋手机网页 | 扫码 → 粘贴 → 发送 → 电脑 Copy；不需要 Agent。 |
+| 将手机文字复制到任意电脑应用 | 已发布的 Mac arm64 CLI `desktop`＋手机网页 | 启动 → 扫码 → 粘贴 → 发送 → 电脑 Copy；不需要 Agent。 |
 | 从终端启动，不编译源码 | 预编译原生 CLI 的 `desktop` | 打开同一个电脑页面，运行同一 Go 核心。 |
 | 给正在执行的任务补充手机信息 | CLI 请求＋可选手动引用的 Codex Skill | 带任务说明的二维码 → 查询该请求 → 读取反馈 → 继续原任务。 |
 
 适合传已经能够粘贴的文字。本版不支持文件、截图、语音、手机远控、后台剪贴板读取、npm/npx、MCP 或浏览器插件。请求收集是工具，不是 Agent 宿主：Skill 本身不能唤醒暂停的任务。
 
-## 打开本地预览
+## 下载并启动 — Apple Silicon Mac
 
-普通传输推荐 macOS 应用，这是当前设计中最短的路径。`.app` 就是渡口本身，不用另外安装平台、安装器、注册账号或配置登录启动项。
+下载 [CLI 压缩包](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz)。在终端进入下载文件所在目录，执行：
 
-1. 解压拿到的 `ferry-dock-0.1.0-alpha.2-darwin-arm64-app.zip`（Apple Silicon），或 `darwin-amd64-app.zip`（Intel）预览包，打开 **Ferry Dock.app**。程序不要求先移入 Applications。
-2. 启动器按设计打开系统浏览器；电脑页面自动创建会话与二维码。首次成功打开不必点击 **New session**；创建失败可点它重试。
-3. 手机与电脑处于可互通的可信局域网，手机扫码、粘贴文字，点击 **Send to computer**。
-4. 电脑点击 **Copy**，再粘贴到提案、编辑器或其他应用。
+```sh
+tar -xzf ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
+cd ferry-dock-0.1.0-alpha.2-darwin-arm64
+./ferry-dock version
+./ferry-dock desktop
+```
 
-以后：重新打开 **Ferry Dock.app**，扫码即可。已验证身份的运行实例会复用；会话有效时，同一手机页面能继续发送，不必反复扫码。
+`version` 应显示 `0.1.0-alpha.2`、源码 `a351555ccd1615795bc2a6c10dd7e97a633a074f`、`darwin`、`arm64`、`defaultMode: "serve"`。请明确加 **`desktop`**：它启动或复用服务，并请求系统浏览器打开页面。电脑页面首次成功加载会自动创建会话与二维码，不用再点 **New session**，创建失败时才需点击重试。
+
+1. 手机与电脑在可互通的可信局域网中，手机扫描电脑页面二维码。
+2. 粘贴文字，点击 **Send to computer**。
+3. 电脑点击 **Copy**，再粘贴到提案、编辑器或其他应用。
+
+以后：在解压目录再次运行 `./ferry-dock desktop`。已验证身份的运行实例会复用；会话有效时，同一手机页面能继续发送，不必反复扫码。
+
+可选完整性校验：将 [SHA256SUMS](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/SHA256SUMS) 和 [manifest.json](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json) 下载到压缩包旁边，解压前执行 `shasum -a 256 -c SHA256SUMS`。发布校验清单只覆盖 CLI 包和原始 manifest；manifest 还记录了未发布的本地应用包／其他平台构建，不代表这些也是公开下载项。
 
 桌面模式的默认局域网路径在所有 IPv4 网卡的空闲端口监听，并把选定的私有 IPv4 用于手机链接。无法明确选择局域网地址时，会退回 loopback 监听并显示 **Local only**，真实手机不能访问该地址。二维码不能穿透访客 Wi-Fi 隔离、VPN、路由或防火墙。
 
-关闭浏览器标签不会结束 Go 服务。再次打开应用会回到经过验证的同一实例；在电脑本地页面点击 **Quit Ferry Dock** 才会退出，并清空**全部**内存会话和请求。私有缓存目录或 `startup.log` 可能保留。共享服务时，一个任务结束只应取消自己的请求。
+关闭浏览器标签不会结束 Go 服务。再次运行 `./ferry-dock desktop` 会回到经过验证的同一实例；在电脑本地页面点击 **Quit Ferry Dock** 才会退出，并清空**全部**内存会话和请求。私有缓存目录或 `startup.log` 可能保留。共享服务时，一个任务结束只应取消自己的请求。
 
-**首启限制：** 预览未做 Developer ID 签名和 Apple 公证，macOS 可能要求确认或阻止下载的应用。Finder 零参数首启、默认浏览器自动打开及 Gatekeeper 接受情况仍未验证；应用包内核心另有运行测试。以上是操作路径，不能当作已通过下载首启验收。详见[逐步指南](docs/usage.zh-CN.md)和[分发说明](docs/distribution.md)，本预览不提供关闭安全机制的绕过流程。
+**未签名测试包：** CLI 未做 Developer ID 签名和 Apple 公证，macOS 可能警告或阻止下载的程序。下载／哈希通过、开发机运行通过，不等于浏览器下载后的隔离属性／Gatekeeper 首启、浏览器自动打开或真机兼容性验收。不要关闭系统保护。具体已验范围见[使用指南](docs/usage.zh-CN.md)和[分发说明](docs/distribution.md)。
 
-## 偏好 CLI？
+## 其他本地预览入口
 
-解压匹配系统与架构的原生 CLI 包，在包的根目录用 macOS/Linux POSIX shell 运行：
+App 包及 Intel Mac／Linux／Windows CLI 已在本地生成，**未上传到本次预发布**。如果你另外拿到了匹配系统与架构的原生预览包，在包的根目录用 macOS/Linux POSIX shell 运行：
 
 ```sh
 ./ferry-dock version
@@ -54,6 +64,8 @@
 ```
 
 Windows 在 PowerShell 中使用 `.\ferry-dock.exe`。生成或交叉编译出安装包，不代表每个平台都完成本机运行验收。CLI 无子命令时默认前台 `serve`；需要浏览器启动器和后台生命周期时，明确使用 `desktop`。
+
+如果另外拿到本地 macOS 应用 ZIP，可以解压后打开 **Ferry Dock.app**。它共用同一服务和浏览器界面，不是已发布 CLI 的运行前提；Finder 零参数启动及下载应用首启仍未验。
 
 CLI 和应用内的可执行文件都支持 JSON `version` 及 `request` 命令。版本输出含 `version`、`commit`、`os`、`arch`、`defaultMode`。包内布局与高级 `serve --listen ... --public-url ...` 用法见[分发说明](docs/distribution.md)。
 
@@ -132,7 +144,7 @@ runtime_dir="$(mktemp -d)"
 | 情况 | 处理方式 |
 | --- | --- |
 | 显示 Local only | 手机无法访问 loopback；高级配置需使用已确认的局域网地址，不要关闭网络保护。 |
-| 浏览器标签已关闭 | 重新打开应用；服务一直运行到 **Quit Ferry Dock** 或进程退出。 |
+| 浏览器标签已关闭 | 再运行 `./ferry-dock desktop`；服务一直运行到 **Quit Ferry Dock** 或进程退出。 |
 | 服务已就绪，但浏览器打开失败 | 重试打开，或使用已知的私有控制路径；浏览器报错不会撤销服务启动。 |
 | Paste 或 Copy 不可用 | 使用系统手动粘贴或选中可见文字复制；浏览器权限各不相同。 |
 | 等待返回 pending | 保留句柄再查询；超时没有取消收集。 |

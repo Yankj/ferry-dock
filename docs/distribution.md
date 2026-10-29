@@ -1,14 +1,34 @@
 # Distribution: prebuilt first
 
-Ferry Dock's user path is a prebuilt macOS app or native CLI archive. Git, Go, and Node are not runtime installation requirements. Source builds and packaging tools belong to the contributor path.
+The public user path is a portable **macOS Apple Silicon CLI**. Download, extract, and run `desktop`; Git, Go, Node and a separately installed Mac App are not required. The macOS app and other-platform packages remain local previews. Source builds and packaging tools belong to the contributor path.
 
 ## Availability
 
-Current local preview `0.1.0-alpha.2` is frozen at clean source `a351555ccd1615795bc2a6c10dd7e97a633a074f`, with the black, white, and gray visual revision. All eight archives passed package checks, Mac arm64 packaged lifecycle/CLI/safety checks passed, and a same-input rebuild matched all ten outputs byte-for-byte. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes. The transfer/request API and install form remain unchanged. No public binary download has been published.
+The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2) publishes exactly three assets:
+
+| Public asset | Purpose |
+| --- | --- |
+| [Apple Silicon CLI archive](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz) | macOS arm64 portable command; 3,260,347 bytes. |
+| [SHA256SUMS](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/SHA256SUMS) | Two entries: that CLI archive and the original manifest. |
+| [manifest.json](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json) | Original full local-build provenance, including unpublished artifacts. |
+
+The tag and artifact source are exactly `a351555ccd1615795bc2a6c10dd7e97a633a074f`; subsequent repository changes are documentation/evidence. This is an unsigned, unnotarized **test release**, not proof of downloaded-file OS acceptance. The original manifest inventories eight local artifacts, but the release includes only the Mac arm64 CLI. Its release-specific checksum list therefore has no missing App/other-platform entries. Download all three files into the same directory, then run:
+
+```sh
+shasum -a 256 -c SHA256SUMS
+tar -xzf ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
+cd ferry-dock-0.1.0-alpha.2-darwin-arm64
+./ferry-dock version
+./ferry-dock desktop
+```
+
+The archive and its bundled documentation remain immutable at `a351555`. Some bundled text predates public availability; use the online [English](usage.md) or [Chinese](usage.zh-CN.md) guide for current status. The original local `dist/0.1.0-alpha.2/SHA256SUMS` still covers all eight archives and is distinct from the release's CLI-only checksum list.
+
+All eight local archives passed package checks, Mac arm64 packaged lifecycle/CLI/safety checks passed, and a same-input rebuild matched all ten local outputs byte-for-byte. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes; publication does not expand them.
 
 ## Frozen alpha.2 artifact snapshot
 
-The [artifact manifest](benchmarks/2026-10-29-alpha2-artifacts.json) records source, toolchain, targets, sizes, binary/archive hashes and signing metadata. These are local archive identities, not public download links:
+The [artifact manifest](benchmarks/2026-10-29-alpha2-artifacts.json) records source, toolchain, targets, sizes, binary/archive hashes and signing metadata. The table inventories the local build; only its Apple Silicon CLI has been published at the link above:
 
 | Local archive | Bytes |
 | --- | ---: |
@@ -33,7 +53,7 @@ Finder/default-cache discovery, default-browser auto-opening, downloaded Gatekee
 
 ## Frozen alpha.1 artifact snapshot
 
-Version `0.1.0-alpha.1` is a **verified historical local preview** frozen at clean source `3d6fca8c843281b9ab2806966fc2661e3cccbe52`. The eight archives passed package checks; a second complete build using the same source/toolchain produced identical bytes for all eight archives, the manifest, and checksums. This fixed snapshot predates the next visual revision. Later documentation or UI changes do not change these files or inherit their results. No GitHub Release, public artifact URL, package registry upload, or installer has been published. Do not construct a download link from the version label.
+Version `0.1.0-alpha.1` is a **verified historical local preview** frozen at clean source `3d6fca8c843281b9ab2806966fc2661e3cccbe52`. The eight archives passed package checks; a second complete build using the same source/toolchain produced identical bytes for all eight archives, the manifest, and checksums. This fixed snapshot predates the next visual revision. Later documentation or UI changes do not change these files or inherit their results. Alpha.1 has no GitHub Release, public artifact URL, package registry upload, or installer. Do not construct an alpha.1 download link from its version label; only the alpha.2 CLI availability above is public.
 
 The `.app` is Ferry Dock itself. First use is ZIP extraction → open → QR; later use is open → QR. There is no installation wizard, registration, login item, or additional Go/Node platform to install.
 

@@ -1,5 +1,17 @@
 # Claims and evidence
 
+## Published CLI availability
+
+The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)
+now provides a real Apple Silicon CLI download, release-specific checksums and
+the original manifest. Tag/source is `a351555`; the original manifest also lists
+unpublished local App and other-platform artifacts. See [distribution](distribution.md)
+for the exact three-asset scope and [download verification](verification.md#published-cli-download-check-2026-10-29)
+for the independently downloaded binary's size/hash/version/help, HTTP/request
+and isolated desktop lifecycle checks. This is not an acceptance claim for
+publisher signing, browser-downloaded quarantine/Gatekeeper, automatic browser
+opening, physical phones or an actual Codex host.
+
 ## Current usage instructions
 
 The [English](usage.md) and [Chinese](usage.zh-CN.md) guides and README scenario
@@ -70,7 +82,7 @@ evidence separately. Earlier executions keep their source/binary identities.
 | The eight local archives have recorded identities and a same-input rebuild result. | Artifact manifest and rebuild receipt above. | RECORDED_PASS: all eight archive/binary hashes, target headers, metadata, permissions and layouts; two complete builds matched all ten outputs byte-for-byte. Scope is the same clean source/toolchain, not arbitrary build environments. |
 | The Apple Silicon app ZIP is 3,274,113 bytes. | `darwin-arm64-app.zip` entry in the artifact manifest, SHA-256 `5fcec3986d47765b9a5b0c966c15be9723a58339160e6798a82f36afd6e746c0`. | RECORDED_PASS for the fixed alpha.1 artifact. Later documentation/UI changes do not rebuild it or inherit its checks. |
 | Packaged app readiness has a measured local baseline. | Desktop receipt: 20 fresh process/private-state samples, Apple M4 Pro / Darwin arm64 / Go 1.27.3, `--no-open --state-dir ... --listen 127.0.0.1:0`. | RECORDED_MEASUREMENT: p50 82.281 ms, p95 85.225 ms, maximum 98.025 ms; zero recorded errors, every instance quit/cleaned. Definition includes launcher exit-zero, control read and authenticated HTTP instance validation. Caches were not flushed; excludes browser/Finder/default-cache/Gatekeeper/LAN discovery/phone/Agent, not OS cold boot or a platform ranking. |
-| Local artifacts have public Release/download URLs. | Packaging has no upload/publication step. | NOT_PUBLISHED. Do not fabricate links or call a generated local archive a public release. |
+| Alpha.2 (`a351555`) has a public CLI prerelease; this does not publish the historical alpha.1 snapshot. | Release/tag/three assets were read back; [public-download receipt](benchmarks/2026-10-29-public-download-validation.json). The packager itself still has no publication step. | RECORDED_PASS for the alpha.2 Mac Apple Silicon CLI, exact subset checksums and original manifest. App, other-platform and alpha.1 artifacts remain unpublished; no URL is inferred from a version label. |
 | Local app generation proves Developer ID signing, Apple notarization or Gatekeeper/Finder acceptance. | Packager performs no publisher signing or notarization; signature metadata is recorded separately. | Unsupported. Ad-hoc linker signing is not verified publisher identity. Finder/default-browser auto-opening/quarantine/Gatekeeper remain NOT_RUN; separate Safari UI evidence does not establish them. |
 | Earlier HTTP/CLI tests and performance results validate the new app's launch/first-use experience. | Historic source/binary records below and [prior baseline](performance-baseline.md). | Unsupported. Preserve those scopes; new packaging/native/UI results need their own evidence. |
 

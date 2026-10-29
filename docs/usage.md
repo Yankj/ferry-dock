@@ -2,63 +2,85 @@
 
 [中文](usage.zh-CN.md) · [Product overview](../README.md) · [Distribution and trust](distribution.md)
 
-**Preview status:** `0.1.0-alpha.2` packages have been built and checked locally; there is no published GitHub Release or public binary download yet. Use a preview package provided to you, matching your computer. These steps do not require Git, Go, Node, a phone app, or an AI account. Do not treat the source repository as a binary download.
+**Public testing prerelease:** [`v0.1.0-alpha.2`](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2). [Download the Apple Silicon Mac CLI](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz), 3,260,347 bytes. This release provides only the Mac arm64 CLI. No Mac app, Git, Go, Node, phone app or AI account is required for ordinary transfer.
 
-This guide was added after the frozen `a351555` package snapshot; it is available in the repository, not retroactively inside those archives. Their executable interface is the one documented here.
+This online guide is newer than the frozen `a351555` package documentation. The archive has not been rewritten: its bundled documentation predates public release and may describe downloads as unavailable. Use this guide for current download steps; the executable interface is unchanged.
 
 ## Choose the shortest path
 
 | What is missing from your work? | Use | What arrives |
 | --- | --- | --- |
-| Text on your phone that you want to paste into a desktop app | Mac app → scan → send → Copy | Text in a temporary computer inbox |
-| Phone feedback needed by a specific Agent task | Running app/CLI + request commands, optionally guided by the local Skill | One response associated with that request |
-| A terminal entry point instead of an app icon | Prebuilt CLI → `desktop` | The same browser interface and service |
+| Text on your phone that you want to paste into a desktop app | Published Mac arm64 CLI → `desktop` → scan → send → Copy | Text in a temporary computer inbox |
+| Phone feedback needed by a specific Agent task | Running CLI + request commands, optionally guided by the local Skill | One response associated with that request |
+| An app icon or a different platform | Separately supplied local preview only; not part of this release | Same service, with separate acceptance limits |
 
 Examples: copy customer comments from a phone chat into a proposal on your computer; send error **text** from your phone to the task fixing your code. This preview transfers text, not screenshots, attachments, audio, or remote phone control. The Agent path does not wake a paused host automatically.
 
-## 1. Send text without AI — recommended first use
+## 1. Download, start and send text without AI
 
-On Apple Silicon Macs, the current app archive is `ferry-dock-0.1.0-alpha.2-darwin-arm64-app.zip` (3,290,056 bytes). Intel Macs use the `darwin-amd64-app.zip` variant, whose native execution has not been tested.
+This download is for **Apple Silicon Macs (arm64)**. Intel Mac, Linux and Windows archives and `.app` bundles have been built locally, but they are not uploaded in this prerelease.
 
-1. Extract the ZIP. It contains **`Ferry Dock.app`** directly, without an additional package folder.
-2. Open `Ferry Dock.app`. Its intended launch path starts the local service and opens your system browser. The computer page automatically creates a temporary session and displays its QR; no **New session** click is normally required. If session creation fails, the page reports the failure and **New session** retries it.
-3. Check the computer page's network message. If it says **Local only**, stop: a real phone cannot reach that loopback address. Otherwise, use a trusted network on which the phone can reach the computer, then scan the QR with the phone camera.
-4. Copy the desired text in the phone app, switch to the opened web page, and paste into **Your text**. System long-press → Paste is the reliable manual path; an optional **Paste** button only appears when the browser supports and permits clipboard reading. There is no silent clipboard capture.
-5. Tap **Send to computer**. Wait for **Received. Ready on your computer.** Then click **Copy** beside the received text on the computer and paste into your working app. If automatic copy is blocked, use the visible selection and your system Copy command.
+1. Download [ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz). Open Terminal in the directory containing the downloaded archive.
+2. Extract it, enter its directory and run:
 
-You can continue sending on that phone page while the ordinary session remains active. Default retention is 15 minutes. **End session** clears this session; **New session** creates another. A receipt means the service accepted the text, not that a person read or copied it.
+```sh
+tar -xzf ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
+cd ferry-dock-0.1.0-alpha.2-darwin-arm64
+./ferry-dock version
+./ferry-dock desktop
+```
 
-**Stop:** on the computer page, click **Quit Ferry Dock**. It stops the background service and clears **all** in-memory sessions and requests. Closing the browser tab only closes the page; it does not stop the service. Opening the app again reuses its verified running instance, or starts a new one if it has stopped. Cache folders or a private `startup.log` may remain.
+The extracted folder contains `ferry-dock`, `README.txt`, and `skills/`. `version` should report `0.1.0-alpha.2`, commit `a351555ccd1615795bc2a6c10dd7e97a633a074f`, `darwin`, `arm64`, and `defaultMode: "serve"`. Include **`desktop`**: the bare CLI defaults to foreground `serve`.
 
-**Important preview boundary:** packaged Mac arm64 lifecycle checks passed with private state, loopback and `--no-open`; Finder zero-argument launch, default-cache discovery and automatic default-browser opening have **NOT_RUN** status. The app is not Developer ID signed/notarized; downloaded-file Gatekeeper acceptance is also **NOT_RUN**. Do not disable OS protections to follow this guide. Actual phone/LAN/QR use remains **NOT_RUN**; desktop Safari loopback tests are not a real-phone test. See [verification](verification.md).
+`desktop` starts/reopens the verified local service, returns JSON with `state`, `reused`, and `controlPath`, and requests your system browser to open. The computer page automatically creates a session and QR; no **New session** click is normally needed. If creation fails, the page reports it and **New session** retries.
+
+3. Check the computer page's network message. If it says **Local only**, a physical phone cannot reach that loopback address. Otherwise use a trusted network on which the phone can reach the computer, then scan the QR with the phone camera.
+4. Copy the desired text in its phone app, switch to the opened web page, and paste into **Your text**. Long-press → Paste is the manual path. An optional **Paste** button appears only when the browser supports and permits clipboard reading; there is no silent clipboard capture.
+5. Tap **Send to computer** and wait for **Received. Ready on your computer.** Then click **Copy** beside the received text on the computer and paste into your working app. If automatic copy is blocked, use the visible selection and your system Copy command.
+
+For later use, run `./ferry-dock desktop` again from the extracted directory. You can continue sending on the phone page while its session remains active. Default retention is 15 minutes. **End session** clears that session; **New session** creates another. A receipt means the service accepted the text, not that a person read or copied it.
+
+**Stop:** click **Quit Ferry Dock** on the computer page. It stops the background service and clears **all** in-memory sessions and requests. Closing the browser tab, or pressing Ctrl+C after the short-lived launcher has returned, does not stop the service. Relaunching verifies and reuses the running instance. Cache folders or private `startup.log` may remain. A browser-open failure can occur after the service is ready; do not infer nothing started or launch an unrelated replacement.
+
+### Optional integrity check
+
+Before extracting, download [SHA256SUMS](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/SHA256SUMS) and [manifest.json](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json) beside the archive, then run in that directory:
+
+```sh
+shasum -a 256 -c SHA256SUMS
+```
+
+Both entries should say **OK**. The release checksum file covers only the published CLI archive and the original manifest; it does not request missing app files. The unchanged manifest inventories all eight original local builds, including app/other-platform archives that are not published here. The CLI archive SHA-256 is `32221968d78612bfc4234701874201ab0e37c8dd10337db795021d4fb4230796`.
+
+**Unsigned testing build:** this executable has no Developer ID signing or Apple notarization. macOS may warn or block it. Download/hash verification or execution on a developer machine is not a browser-download quarantine/Gatekeeper first-launch test. Automatic default-browser opening, actual phone/LAN/QR, and actual Codex-host acceptance remain separate unverified scopes. Do not clear quarantine attributes or disable OS protections to follow this guide. See [verification](verification.md).
 
 Optional prompt for ordinary-transfer help; no Skill is needed:
 
 ```text
-I want to move text from a phone chat into my desktop proposal using Ferry Dock's ordinary mode. Explain the next manual step from my current screen: open the provided app, scan, paste, send, then Copy on the computer. Do not create an Agent request, install tools, or assume access to my phone or clipboard. If the page says Local only or an OS trust prompt prevents opening, tell me the actual blocker.
+I want to move text from a phone chat into my desktop proposal using Ferry Dock's ordinary mode. Guide me through downloading the Apple Silicon CLI testing release, extracting it, running ferry-dock desktop, scanning, pasting, sending, then Copy on the computer. Do not create an Agent request, install developer tools, or assume access to my phone or clipboard. If the page says Local only or an OS trust prompt prevents opening, tell me the actual blocker.
 ```
 
-## 2. Start from a prebuilt CLI
+## 2. Other local preview entry points
 
-Extract the native archive matching your OS and CPU. CLI archives have an outer folder such as `ferry-dock-0.1.0-alpha.2-darwin-arm64/`; open a terminal **inside that folder**, where `ferry-dock`, `README.txt`, and `skills/` are siblings.
+These alternatives are **not uploaded in this prerelease**. They are useful only if you separately received a matching local preview; a platform label is not a public download link or native acceptance result.
 
-macOS/Linux, POSIX shell:
+For a local macOS app ZIP, extract **Ferry Dock.app** directly (no outer package folder) and open it. Its intended launch path starts the same Go service and opens the system browser. It is Ferry Dock itself, not a platform that CLI users must install. Finder zero-argument/default-cache/default-browser and downloaded-app Gatekeeper acceptance remain **NOT_RUN**. The same phone steps and **Quit Ferry Dock** apply.
+
+Other native CLI archives have an outer platform/version folder. From inside that folder, macOS/Linux use:
 
 ```sh
 ./ferry-dock version
 ./ferry-dock desktop
 ```
 
-Windows, PowerShell, from the extracted package folder:
+Windows uses PowerShell:
 
 ```powershell
 .\ferry-dock.exe version
 .\ferry-dock.exe desktop
 ```
 
-`version` prints JSON identifying version, source commit, OS, CPU and default mode. `desktop` starts or reopens the verified instance and prints JSON containing `state`, `reused`, and `controlPath`; it also requests the system browser to open. The plain CLI's no-subcommand default is foreground `serve`, so include **`desktop`** for this path. Linux/Windows and Intel Mac archives were checked structurally and cross-compiled, not executed natively.
-
-Continue with steps 3–5 above. Use the page's **Quit Ferry Dock** to stop the service; Ctrl+C after the short-lived `desktop` launcher has returned does not stop its background service. Browser-open failure may occur after the service starts; report that distinction rather than starting an unrelated second service. Advanced foreground `serve` and network overrides are described in [distribution](distribution.md).
+The package archives were checked structurally, and the source CI runs builds and automated CLI/HTTP checks across macOS, Linux and Windows. That is not user first-launch acceptance for every packaged OS/CPU. Advanced foreground `serve` and network overrides are described in [distribution](distribution.md).
 
 ## 3. Collect feedback for a particular task
 
@@ -153,8 +175,8 @@ Copy and fill in this prompt:
 Continue revising my launch proposal in this task. The customer's changes are in a phone chat.
 
 First read the local Ferry Dock Skill at:
-/absolute/path/Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md
-Executable: /absolute/path/Ferry Dock.app/Contents/MacOS/ferry-dock
+/absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64/skills/ferry-dock/SKILL.md
+Executable: /absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64/ferry-dock
 The service is already running. Control path: /absolute/private/path/control.json
 Proposal to edit: /absolute/path/launch-proposal.md
 

@@ -10,7 +10,7 @@ Ferry Dock lets a person bring text from a phone into a computer inbox or the ta
 
 In the task flow, an Agent working on a proposal asks for the comments held in a phone chat. The phone page names that proposal and asks for the missing text. The user pastes and sends. Only the request's reader can retrieve the result, and the original task uses the feedback to revise the proposal.
 
-**Current status:** local `0.1.0-alpha.2` archives are frozen at clean source `a351555`, with a black, white, and gray interface and translucent layers. Transfer/request semantics are unchanged. All eight archives passed package checks, ten build outputs matched byte-for-byte on a same-input rebuild, and Mac arm64 passed packaged lifecycle/CLI/safety checks. Its app ZIP is 3,290,056 bytes. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI acceptance remains blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](docs/verification.md) records the exact scopes. There is no published GitHub Release or public binary download URL.
+**Current status:** local `0.1.0-alpha.2` archives are frozen at clean source `a351555`, with a black, white, and gray interface and translucent layers. Transfer/request semantics are unchanged. All eight archives passed package checks, ten build outputs matched byte-for-byte on a same-input rebuild, and Mac arm64 passed packaged lifecycle/CLI/safety checks. Its app ZIP is 3,290,056 bytes. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI acceptance remains blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](docs/verification.md) records the exact scopes. The [public `v0.1.0-alpha.2` testing prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2) provides the [Apple Silicon Mac CLI](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz), 3,260,347 bytes, plus CLI-subset checksums and the original build manifest. The app ZIP and other-platform packages remain local previews. The immutable bundled documentation predates publication; use the online guide for current download instructions.
 
 **Historical preview evidence:** eight local `0.1.0-alpha.1` archives from clean source `3d6fca8` passed archive checks and same-input rebuild comparison. Mac arm64 packaged lifecycle/CLI/safety checks passed with `--no-open` and private state; Safari 27.0.1 has separate scoped UI passes. Its app ZIP is 3,274,113 bytes. These results belong to that fixed snapshot and remain separate from alpha.2. Finder/default-cache discovery, default-browser auto-opening, Gatekeeper, real-phone/LAN/QR, actual Codex-host and Intel Mac/Windows/Linux native acceptance remain `NOT_RUN`. [Distribution](docs/distribution.md) identifies both snapshots and their receipts.
 
@@ -30,9 +30,9 @@ For example, paste a client's phone-chat edits into a launch-proposal request; t
 
 ## What is the simplest way to start?
 
-For a recipient of the local macOS preview: extract the matching app ZIP, open `Ferry Dock.app`, then scan the computer page's QR, paste text, and send. The page automatically creates a session after successful loading; there is no initial New session click. Copy on the computer and paste into the destination app. Reopening a verified running instance reuses it. The exact button for stopping the service is **Quit Ferry Dock**; closing the tab does not stop it.
+For an Apple Silicon Mac: download the [published CLI archive](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz), extract it, enter its versioned directory in Terminal, and run `./ferry-dock desktop`. No Mac app, developer runtime, installer or account is required. The launcher requests the system browser to open; a successfully loaded computer page automatically creates a session and QR, without an initial New session click. Scan on the phone, paste, send, then Copy on the computer. Run the same `desktop` command again to reopen a verified running instance. Stop with **Quit Ferry Dock**; closing the tab does not stop the service.
 
-This is the intended launch path, not a claim of verified Finder/default-browser/Gatekeeper first launch. Packages have not been published as a public Release, and the preview lacks publisher signing/notarization. The [usage guide](docs/usage.md) separates the app, portable CLI, and manual Skill paths, with prerequisites, commands, expected results, stopping, and English/Chinese prompts. Source checkout/build is a contributor path.
+This is a testing prerelease without Developer ID signing or Apple notarization. macOS can warn or block downloaded executables. Download/hash checks and developer-machine runs do not establish browser-download quarantine/Gatekeeper, default-browser auto-opening or real-phone acceptance. The [usage guide](docs/usage.md) gives exact download/extract/start steps, checksum verification and manual Skill prompts. App bundles and other-platform native archives are not uploaded in this release; source checkout/build is a contributor path.
 
 Task collection adds one explicit action: `request create` saves a QR PNG and returns its path; it does not display it. The user opens that PNG, or a capable Agent displays it in the requesting conversation. The ordinary inbox QR does not become that request's QR.
 
@@ -44,21 +44,21 @@ Ferry Dock's intended distinction is the optional task-bound loop: a shell-capab
 
 ## Is this a cloud drive or a general Agent platform?
 
-No. The accepted form is one Go core, distributed as a macOS browser-launcher app or portable native CLI, with small web pages and an optional bundled local Codex Skill. These packages do not introduce another backend. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
+No. The accepted form is one Go core, with a published Apple Silicon Mac CLI testing package, small web pages, and an optional bundled local Codex Skill. App bundles and other-platform native CLI packages remain local previews. These packages do not introduce another backend. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
 
 npm/npx, MCP, and a browser extension are not implemented or scheduled. Revisit them only when installation is the main demonstrated barrier, a specific client lacks shell access, or desktop selected-text sharing becomes a separate primary need. See [the product-shape decision](docs/product-shape.md).
 
 ## How does the ordinary mode work?
 
-Open the prebuilt macOS app, or explicitly run `desktop` from an extracted native CLI package. The launcher starts/reopens its verified Go service and opens the system browser. The page creates a temporary session and shows a locally generated QR. Scan it on the phone, paste text, and send. The computer retrieves it and offers Copy. End the session when finished, or let it expire.
+Run `./ferry-dock desktop` from the extracted published Mac arm64 CLI directory. A separately supplied local macOS app preview can launch the same service. The launcher starts/reopens its verified Go service and opens the system browser. The page creates a temporary session and shows a locally generated QR. Scan it on the phone, paste text, and send. The computer retrieves it and offers Copy. End the session when finished, or let it expire.
 
 Ordinary sessions allow repeated text submissions and remain separate from one-response collection requests. No model or Skill is required to run the service or transfer text.
 
 ## What must be installed, and where can it run?
 
-The default user path is a prebuilt app or native CLI, not a Git clone or a Go/Node installation. The phone uses a browser with JavaScript. Local preview recipients extract the package matching their OS/architecture; no global PATH or Agent configuration is changed. Public binary downloads have not been published, so a version label must not be turned into an invented Release link.
+The public default is the [prebuilt Apple Silicon Mac CLI](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz). Download, extract, enter the package directory, and explicitly run `desktop`; no app installation, Git clone, Go/Node runtime, global PATH change, or Agent configuration change is required. The phone uses a browser with JavaScript. Only Mac arm64 has an uploaded binary in this prerelease; other platform builds and app bundles are local previews.
 
-The `.app` is this product, not an extra desktop platform. The first-use path is ZIP extraction → open the app → scan; subsequent use is open → scan. There is no installation wizard, registration, or login item to configure.
+For someone separately given a local `.app` preview, that bundle is this product rather than an extra platform, and it is not required by the published CLI. Neither entry point adds an installation wizard, registration, or login item.
 
 Git and Go are contributor/source-build prerequisites. The packaging script also uses Python's standard library, but preview users do not run that script. After packaging, the application's pages, QR generation, and brand assets are local, without a runtime cloud API or telemetry call in the Ferry Dock service/UI.
 
@@ -70,7 +70,7 @@ No. `Ferry Dock.app/Contents/MacOS/ferry-dock` is built from the same Go command
 
 ## Does closing the browser quit the app?
 
-No. The short-lived launcher exits after starting/reopening its own background service and opening the browser. Close the browser and the service keeps running. Reopen the app to return to the verified instance. **Quit Ferry Dock** on the local computer page authenticates the computer capability and loopback request, then stops the service and clears all in-memory sessions and collection requests.
+No. The short-lived launcher exits after starting/reopening its own background service and opening the browser. Close the browser and the service keeps running. Run `./ferry-dock desktop` again (or reopen a separately supplied local app) to return to the verified instance. **Quit Ferry Dock** on the local computer page authenticates the computer capability and loopback request, then stops the service and clears all in-memory sessions and collection requests.
 
 The desktop launcher serializes startup and checks its saved owner capability and instance ID before reusing a service. An unknown service is an error, not something to kill or replace automatically. Quitting a shared service affects other tasks; canceling one request does not.
 

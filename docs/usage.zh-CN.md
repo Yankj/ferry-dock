@@ -2,63 +2,85 @@
 
 [English](usage.md) · [产品介绍](../README.zh-CN.md) · [分发与信任边界](distribution.md)
 
-**预览状态：**`0.1.0-alpha.2` 安装包已在本地生成并完成范围明确的检查，尚未发布 GitHub Release，也没有原生包的公开下载地址。以下从“你已拿到匹配电脑的预览包”开始；不用 Git、Go、Node、手机 App 或 AI 账号。源码仓库不是二进制下载页。
+**公开测试版：**[`v0.1.0-alpha.2`](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)。[下载 Apple Silicon Mac CLI](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz)，3,260,347 字节。本次只发布 Mac arm64 CLI。普通传输无需另外安装 Mac App、Git、Go、Node、手机 App 或注册 AI 账号。
 
-本指南在固定的 `a351555` 打包快照之后补充，位于仓库中，不会追溯出现在已有归档里；包内程序接口与这里的命令一致。
+本在线指南比固定的 `a351555` 包内文档更新。归档没有重写：其中的文档早于公开发布，可能仍写着下载尚不可用。下载步骤以本指南为准，程序接口保持不变。
 
 ## 先选最短路径
 
 | 你手里的工作缺什么？ | 使用路径 | 结果在哪里 |
 | --- | --- | --- |
-| 手机上的文字，要粘到电脑软件 | Mac 应用 → 扫码 → 发送 → Copy | 电脑临时收件箱 |
-| 某个 Agent 任务缺手机上的意见 | 已运行的应用／CLI + 请求命令，可由本地 Skill 指导 | 只属于该请求的一次响应 |
-| 更习惯命令行启动 | 原生 CLI → `desktop` | 同一套浏览器界面与服务 |
+| 手机上的文字，要粘到电脑软件 | 已发布的 Mac arm64 CLI → `desktop` → 扫码 → 发送 → Copy | 电脑临时收件箱 |
+| 某个 Agent 任务缺手机上的意见 | 已运行的 CLI＋请求命令，可由本地 Skill 指导 | 只属于该请求的一次响应 |
+| 希望用应用图标或其他平台 | 仅供另外拿到对应本地预览的人使用，不在本次发布中 | 同一服务，各有未验边界 |
 
-例如：手机聊天里有客户修改意见，电脑上有待改的提案；手机上有报错**文字**，电脑任务正在排查代码。当前只传文本，不传截图、附件或语音，也不远程控制手机。Agent 路径不会自动唤醒暂停的宿主任务。
+例如：手机聊天里有客户修改意见，电脑上有待改提案；手机上有报错**文字**，电脑任务正在排查代码。当前只传文本，不传截图、附件或语音，也不远程控制手机。Agent 路径不会自动唤醒暂停的宿主任务。
 
-## 1. 不用 AI，先传一段文字
+## 1. 下载、启动，不用 AI 先传一段文字
 
-Apple Silicon Mac 的当前应用包名为 `ferry-dock-0.1.0-alpha.2-darwin-arm64-app.zip`，3,290,056 字节；Intel Mac 对应 `darwin-amd64-app.zip`，尚未完成 Intel 本机运行验收。
+此下载适用于 **Apple Silicon Mac（arm64）**。Intel Mac、Linux、Windows 原生包及 `.app` 已在本地生成，但未上传到本次预发布。
 
-1. 解压 ZIP，直接得到 **`Ferry Dock.app`**，没有额外的包目录。
-2. 打开 `Ferry Dock.app`。启动器的预期路径是启动本地服务、打开系统浏览器。电脑页面会自动创建临时会话并显示二维码，正常不必再点 **New session**；若创建失败，页面显示错误，可用 **New session** 重试。
-3. 先看电脑页面的网络提示。显示 **Local only** 时，真实手机不能访问该 loopback 地址，不能继续把二维码当作可用手机入口。否则，手机和电脑应处于彼此可达的可信网络，再用手机相机扫码。
-4. 在手机原应用中复制文字，切回扫码打开的网页，在 **Your text** 输入框粘贴。手动长按输入框 → 粘贴即可；只有浏览器支持并允许读取剪贴板时才显示可选 **Paste** 按钮，不会静默读取。
-5. 点击 **Send to computer**，等页面显示 **Received. Ready on your computer.**。电脑收到文字后，点该条旁边的 **Copy**，再粘贴到工作的软件里。自动复制受限时，选中可见文字并使用系统复制。
+1. 下载 [ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz)，在终端进入压缩包所在目录。
+2. 解压、进入目录、运行：
 
-普通会话有效时，同一手机页面可以继续发送，不用每条重新扫码。默认 15 分钟到期；**End session** 清空当前会话，**New session** 创建另一个。发送回执只表示服务已接收，不代表对方已阅读或复制。
-
-**结束使用：**在电脑页面点 **Quit Ferry Dock**。它会停止后台服务并清空**全部**内存会话与请求。关闭浏览器标签只关页面，不会停止服务；重新打开应用会回到已验证的同一实例，服务已停则重新启动。缓存目录或私有 `startup.log` 可能保留。
-
-**预览验收边界：**Mac arm64 包已通过私有状态目录、loopback、`--no-open` 条件下的生命周期检查；Finder 零参数启动、默认缓存发现、默认浏览器自动打开仍为 **NOT_RUN**。应用没有 Developer ID 签名／公证，真实下载文件的 Gatekeeper 首启也为 **NOT_RUN**，不要通过关闭系统保护来使用。本版手机真机／局域网／扫码验收为 **NOT_RUN**，桌面 Safari loopback 测试不是手机真机测试。详见[验证记录](verification.md)。
-
-如果想让 AI 指导普通传输，可以这样说；无需 Skill：
-
-```text
-我想用渡口普通模式，把手机聊天里的一段文字粘到电脑提案中。请根据我当前页面告诉我下一步手动操作：打开已有应用、扫码、粘贴、发送，再在电脑 Copy。不要创建 Agent 请求，不要安装工具，也不要假设你能访问我的手机或剪贴板。出现 Local only 或系统信任提示阻止打开时，说明具体阻塞。
+```sh
+tar -xzf ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
+cd ferry-dock-0.1.0-alpha.2-darwin-arm64
+./ferry-dock version
+./ferry-dock desktop
 ```
 
-## 2. 用预编译 CLI 启动
+解压目录中并列有 `ferry-dock`、`README.txt`、`skills/`。`version` 应显示 `0.1.0-alpha.2`、源码 `a351555ccd1615795bc2a6c10dd7e97a633a074f`、`darwin`、`arm64`、`defaultMode: "serve"`。请明确使用 **`desktop`**；CLI 不带子命令默认前台 `serve`。
 
-解压匹配系统和 CPU 的原生 CLI 包。CLI 压缩包有一层目录，例如 `ferry-dock-0.1.0-alpha.2-darwin-arm64/`；在**该目录内部**打开终端，这里应并列看到 `ferry-dock`、`README.txt`、`skills/`。
+`desktop` 启动或复用已验证身份的本地服务，输出 `state`、`reused`、`controlPath` JSON，并请求系统浏览器打开。电脑页面会自动创建会话和二维码，正常不必点击 **New session**；创建失败时页面显示错误，可点击它重试。
 
-macOS／Linux，POSIX shell：
+3. 先看电脑页面的网络提示。显示 **Local only** 时，真实手机不能访问该 loopback 地址。否则，使用手机和电脑彼此可达的可信网络，再用手机相机扫码。
+4. 在手机原应用复制文字，切回扫码打开的网页，在 **Your text** 中粘贴。可手动长按 → 粘贴；仅当浏览器支持且允许读取剪贴板时显示可选 **Paste**，不会静默读取。
+5. 点击 **Send to computer**，等页面显示 **Received. Ready on your computer.**。电脑收到文字后点击该条旁边的 **Copy**，再粘贴到工作软件。自动复制受限时，选中可见文字并使用系统复制。
+
+以后在解压目录再次运行 `./ferry-dock desktop` 即可。同一手机页面在会话有效时可以继续发送，默认 15 分钟到期。**End session** 清空当前会话，**New session** 创建另一个。发送回执只表示服务已接收，不代表人已阅读或复制。
+
+**结束使用：**在电脑页面点 **Quit Ferry Dock**，停止后台服务并清空**全部**内存会话与请求。关闭浏览器标签，或启动命令返回后再按 Ctrl+C，都不会停止后台服务。再次运行会核验并复用已有实例；缓存目录或私有 `startup.log` 可能保留。浏览器打开失败可能发生在服务已经就绪之后，不能因此推断“什么都没启动”或另起无关服务。
+
+### 可选完整性校验
+
+解压前，将 [SHA256SUMS](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/SHA256SUMS) 和 [manifest.json](https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json) 下载到压缩包旁边，在该目录执行：
+
+```sh
+shasum -a 256 -c SHA256SUMS
+```
+
+两项都应显示 **OK**。本次发布校验清单只覆盖 CLI 包和原始 manifest，不会要求不存在的应用包。原始 manifest 保持不变，记录了全部八个本地构建，也包含未公开上传的应用／其他平台包。CLI 归档 SHA-256 为 `32221968d78612bfc4234701874201ab0e37c8dd10337db795021d4fb4230796`。
+
+**未签名测试包：**程序未做 Developer ID 签名和 Apple 公证，macOS 可能警告或阻止。下载／哈希校验或开发机运行，不等于浏览器下载隔离属性／Gatekeeper 首启验收。默认浏览器自动打开、真机／局域网／扫码、实际 Codex 宿主仍是独立未验范围。不要清除隔离属性或关闭系统保护来使用。详见[验证记录](verification.md)。
+
+如果想让 AI 指导普通传输，可以这样说；不需要 Skill：
+
+```text
+我想用渡口普通模式，把手机聊天里的一段文字粘到电脑提案中。请指导我下载 Apple Silicon CLI 测试版、解压、运行 ferry-dock desktop、扫码、粘贴、发送，再在电脑 Copy。不要创建 Agent 请求，不要安装开发工具，也不要假设你能访问我的手机或剪贴板。出现 Local only 或系统信任提示阻止运行时，说明具体阻塞。
+```
+
+## 2. 其他本地预览入口
+
+以下形态**未上传到本次预发布**，仅供另外拿到对应本地预览包的人使用；平台名称不是公开下载链接，也不是本机验收证明。
+
+本地 macOS 应用 ZIP 解压后直接得到 **Ferry Dock.app**，没有额外目录。打开后按设计启动同一 Go 服务及系统浏览器。它就是渡口本身，不是 CLI 用户必须安装的平台。Finder 零参数／默认缓存／默认浏览器和下载应用 Gatekeeper 首启仍为 **NOT_RUN**。后续手机操作及 **Quit Ferry Dock** 相同。
+
+其他原生 CLI 包有一层平台／版本目录，在目录内，macOS／Linux 使用：
 
 ```sh
 ./ferry-dock version
 ./ferry-dock desktop
 ```
 
-Windows，在解压目录内部用 PowerShell：
+Windows 使用 PowerShell：
 
 ```powershell
 .\ferry-dock.exe version
 .\ferry-dock.exe desktop
 ```
 
-`version` 输出版本、源码提交、系统、CPU、默认模式等 JSON。`desktop` 启动或复用已验证的实例，输出包含 `state`、`reused`、`controlPath` 的 JSON，并请求系统浏览器打开页面。CLI 不带子命令默认是前台 `serve`，所以这条路径请明确加 **`desktop`**。Linux／Windows／Intel Mac 包目前通过结构检查和交叉构建，尚无对应系统的本机运行验收。
-
-之后接普通传输第 3–5 步。停止时仍点页面的 **Quit Ferry Dock**；短暂的 `desktop` 启动命令返回后，再按 Ctrl+C 不能停止后台服务。浏览器打开失败可能发生在服务已启动之后，不能因此推断“什么都没启动”。高级前台 `serve` 与网络参数见[分发说明](distribution.md)。
+归档已通过结构检查，源码 CI 在 macOS、Linux、Windows 执行构建和 CLI／HTTP 自动化检查；这不代表每个系统／CPU 的打包程序都通过用户首启验收。高级前台 `serve` 和网络配置见[分发说明](distribution.md)。
 
 ## 3. 把手机意见送给指定任务
 
@@ -153,8 +175,8 @@ Skill 是一份 Markdown 工作流，不是已安装的集成，也不会唤醒�
 继续本任务中的发布提案修改。客户意见在手机聊天里。
 
 先读取本地渡口 Skill：
-/absolute/path/Ferry Dock.app/Contents/Resources/skills/ferry-dock/SKILL.md
-程序：/absolute/path/Ferry Dock.app/Contents/MacOS/ferry-dock
+/absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64/skills/ferry-dock/SKILL.md
+程序：/absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64/ferry-dock
 服务已运行，控制文件路径：/absolute/private/path/control.json
 待修改提案：/absolute/path/launch-proposal.md
 

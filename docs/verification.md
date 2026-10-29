@@ -1,5 +1,33 @@
 # Verification record
 
+## Published CLI download check, 2026-10-29
+
+The [v0.1.0-alpha.2 prerelease](https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2)
+publishes only the Mac Apple Silicon CLI archive, a release-specific `SHA256SUMS`
+and the original full-build `manifest.json`. The tag was read back as a commit
+reference to `a351555ccd1615795bc2a6c10dd7e97a633a074f`; all three assets were
+confirmed uploaded. App and other-platform packages remain unpublished.
+
+All three public HTTPS asset URLs were downloaded without GitHub authentication
+into a new private temporary directory. The [sanitized receipt](benchmarks/2026-10-29-public-download-validation.json)
+records 21 assertions plus the existing 12 HTTP and 27 synthetic request checks
+against that downloaded binary. Archive size/SHA, both entries of the release's
+checksum list, original-manifest executable hash and `version` source/platform
+identity matched. `serve` and all five request-operation help commands exited
+zero. An isolated `desktop --no-open --state-dir PRIVATE --listen 127.0.0.1:0`
+with private HOME and `PATH=/nonexistent` reached ready, reused its verified
+instance, accepted synthetic sender text, returned the exact ordinary inbox
+text and stopped with authenticated Quit, socket closure and control cleanup.
+
+This was a command-line `curl` download and developer-machine execution, not a
+browser-downloaded quarantine/Gatekeeper first-launch test. Observed archive and
+binary xattr-name lists contained only `com.apple.provenance`, with no
+`com.apple.quarantine` listed; no security attribute was removed. No GUI,
+default-cache/browser automatic opening, OS clipboard, real phone/LAN/QR scan or
+actual Codex host was exercised. Publication and successful command checks do
+not accept those remaining paths. The binary and older bundled documentation
+remain immutable at `a351555`; use the current online guides for availability.
+
 ## Repository usage-guide check, 2026-10-29
 
 The English and Chinese [guides](usage.md) were added after the frozen alpha.2
@@ -75,7 +103,8 @@ backend. The immutable artifact source is clean commit
 `3d6fca8c843281b9ab2806966fc2661e3cccbe52`; its final package checks passed.
 This historical snapshot predates the next visual revision, which requires its
 own acceptance. Actual Safari loopback acceptance is recorded separately below.
-No GitHub Release or public artifact URL has been published.
+Alpha.1 has no GitHub Release or public artifact URL; the separate alpha.2 CLI
+publication is recorded above.
 
 The desktop contract is a short-lived launcher, one owned background Go service,
 private owner/instance verification on reopen, browser opening, and explicit

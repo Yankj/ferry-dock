@@ -1,0 +1,56 @@
+{
+  "status": "PASS_LOCAL",
+  "releaseUrl": "https://github.com/Yankj/ferry-dock/releases/tag/v0.1.0-alpha.2",
+  "assetUrl": "https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz",
+  "archiveSize": 3260347,
+  "archiveSha256": "32221968d78612bfc4234701874201ab0e37c8dd10337db795021d4fb4230796",
+  "version": {
+    "version": "0.1.0-alpha.2",
+    "commit": "a351555ccd1615795bc2a6c10dd7e97a633a074f",
+    "os": "darwin",
+    "arch": "arm64",
+    "defaultMode": "serve"
+  },
+  "downloadMethod": "curl over public HTTPS asset URLs, redirects restricted to HTTPS; no GitHub authentication",
+  "checks": [
+    "public archive SHA256 and approved identity match",
+    "public archive size matches",
+    "downloaded executable matches original manifest",
+    "downloaded executable version/source/platform/mode",
+    "help: serve --help",
+    "help: request create --help",
+    "help: request status --help",
+    "help: request wait --help",
+    "help: request read --help",
+    "help: request cancel --help",
+    "smoke-http.py against public-download binary",
+    "smoke-request.py against public-download binary",
+    "desktop starts with PATH=/nonexistent, private HOME/state and no GUI",
+    "new isolated desktop ready",
+    "relaunch reuses authenticated owned instance",
+    "ordinary session creation",
+    "synthetic phone sender submission",
+    "computer receives exact ordinary text",
+    "authenticated own desktop Quit accepted",
+    "own control file cleaned",
+    "own service socket stopped"
+  ],
+  "observedXattrNames": {
+    "ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz": [
+      "com.apple.provenance"
+    ],
+    "ferry-dock": [
+      "com.apple.provenance"
+    ]
+  },
+  "noSecurityAttributesRemoved": true,
+  "notRun": [
+    "browser download/quarantine first launch",
+    "Gatekeeper acceptance",
+    "default cache/browser auto-opening",
+    "real browser rendering and OS clipboard",
+    "physical phone/LAN/QR scan",
+    "actual Codex host",
+    "other platform package native acceptance"
+  ]
+}
