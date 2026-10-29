@@ -47,3 +47,9 @@ jobs:
       - run: node scripts/test-ui.cjs
       - name: Exercise served scripts against the compiled service
         run: node scripts/smoke-ui.cjs --binary ./ferry-dock${{ runner.os == 'Windows' && '.exe' || '' }}
+      - name: Package local macOS previews
+        if: runner.os == 'macOS' && matrix.go == '1.27.x'
+        run: python3 scripts/package.py --offline
+      - name: Check native packaged lifecycle
+        if: runner.os == 'macOS' && matrix.go == '1.27.x'
+        run: python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.1

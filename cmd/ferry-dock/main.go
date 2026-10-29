@@ -5,11 +5,18 @@ import (
 	"context"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+
+	"github.com/Yankj/ferry-dock/internal/buildinfo"
 )
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	os.Exit(runCLI(ctx, os.Args[1:], os.Stdout, os.Stderr))
+	args := os.Args[1:]
+	if buildinfo.DefaultMode == "desktop" && (len(args) == 0 || (strings.HasPrefix(args[0], "-") && args[0] != "--version")) {
+		args = append([]string{"desktop"}, args...)
+	}
+	os.Exit(runCLI(ctx, args, os.Stdout, os.Stderr))
 }

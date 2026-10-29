@@ -14,6 +14,8 @@ import (
 
 type Options struct {
 	Listen, PublicURL string
+	PublicHost        string
+	Desktop           *relay.DesktopConfig
 	TTL               time.Duration
 }
 
@@ -37,7 +39,7 @@ func Start(options Options) (*Runtime, error) {
 	}
 	ip := net.ParseIP(host)
 	loopback := host == "localhost" || (ip != nil && ip.IsLoopback())
-	if !loopback && options.PublicURL == "" {
+	if !loopback && options.PublicURL == "" && options.PublicHost == "" {
 		return nil, fmt.Errorf("LAN listeners require -public-url with the address your phone can reach")
 	}
 	if options.TTL <= 0 || options.TTL > 24*time.Hour {
@@ -65,8 +67,14 @@ func Start(options Options) (*Runtime, error) {
 	localURL := "http://" + net.JoinHostPort(localIP.String(), fmt.Sprint(addr.Port))
 	if options.PublicURL == "" {
 		options.PublicURL = localURL
+		if options.PublicHost != "" {
+			if ip := net.ParseIP(options.PublicHost); ip == nil || ip.To4() == nil || !ip.IsPrivate() {
+				return nil, fmt.Errorf("public host must be a private IPv4 address")
+			}
+			options.PublicURL = "http://" + net.JoinHostPort(options.PublicHost, fmt.Sprint(addr.Port))
+		}
 	}
-	app, err := relay.New(relay.Config{OwnerToken: owner, LocalURL: localURL, PublicURL: options.PublicURL, TTL: options.TTL})
+	app, err := relay.New(relay.Config{OwnerToken: owner, LocalURL: localURL, PublicURL: options.PublicURL, TTL: options.TTL, Desktop: options.Desktop})
 	if err != nil {
 		return nil, err
 	}

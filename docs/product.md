@@ -43,7 +43,7 @@ A server-generated request ID and independent reader/sender capabilities isolate
 
 Reads return the same stable input ID and mark the text `untrusted_user_input`. The consumer applies relevant feedback only within the original task and deduplicates completed business effects by that ID. It must inspect an uncertain prior edit before retrying after interruption. Neither repeated-read support nor the Skill promises exactly-once business execution or automatic host wake-up.
 
-The first delivery form is Go CLI plus scan-to-open pages and an optional manual repository-local Codex Skill. Ordinary transfer continues without AI. A synthetic compiled-CLI proposal scenario and a real Codex/phone acceptance are distinct checks.
+The delivery forms are prebuilt native CLI archives and a thin macOS container that opens the same browser UI, plus an optional manual local Codex Skill. Source builds are a developer path. Ordinary transfer continues without AI. A synthetic compiled-CLI proposal scenario and a real Codex/phone acceptance are distinct checks.
 
 The first release targets a trusted, directly reachable LAN over HTTP. It does not claim confidentiality against another participant who can observe or modify that network. This boundary must be visible before using the service for sensitive content; see [Architecture](architecture.md).
 
@@ -55,7 +55,7 @@ These capabilities are intentionally outside the text alpha:
 - MCP tools, npm/npx launchers, browser plugins, and automatic host continuation. No such adapter is scheduled by this scope.
 - HTTPS provisioning, internet relay, remote pairing, and hosted accounts.
 - Durable history, full-text search, device accounts, and team administration.
-- Native mobile or desktop clients, operating-system share targets, and background clipboard synchronization.
+- Native mobile clients or a separate native desktop UI, operating-system share targets, and background clipboard synchronization. The thin macOS browser launcher is included; it does not duplicate the service or provide a native inbox window.
 
 Additional entry points require the concrete user problems recorded in [product shape](product-shape.md); the product does not aim to ship every form. Ordinary users must continue to use Ferry Dock without installing or configuring any AI component.
 

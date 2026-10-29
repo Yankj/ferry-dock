@@ -19,6 +19,8 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/Yankj/ferry-dock/internal/buildinfo"
+	"github.com/Yankj/ferry-dock/internal/desktop"
 	"github.com/Yankj/ferry-dock/internal/host"
 	"github.com/Yankj/ferry-dock/internal/relay"
 )
@@ -29,6 +31,8 @@ type controlFile struct {
 	SchemaVersion int    `json:"schemaVersion"`
 	ServerURL     string `json:"serverUrl"`
 	OwnerToken    string `json:"ownerToken"`
+	InstanceID    string `json:"instanceId,omitempty"`
+	PID           int    `json:"pid,omitempty"`
 }
 
 type requestHandle struct {
@@ -50,6 +54,21 @@ func invalid(message string) error {
 }
 
 func runCLI(ctx context.Context, args []string, out, errOut io.Writer) int {
+	if len(args) > 0 && (args[0] == "version" || args[0] == "--version") {
+		if len(args) != 1 {
+			fmt.Fprintln(errOut, "version takes no arguments")
+			return 2
+		}
+		_ = json.NewEncoder(out).Encode(buildinfo.Current())
+		return 0
+	}
+	if len(args) > 0 && args[0] == "desktop" {
+		if err := desktop.Run(ctx, args[1:], out, errOut); err != nil {
+			fmt.Fprintln(errOut, "Ferry Dock:", err)
+			return 1
+		}
+		return 0
+	}
 	if len(args) == 0 || strings.HasPrefix(args[0], "-") || args[0] == "serve" {
 		if len(args) > 0 && args[0] == "serve" {
 			args = args[1:]
@@ -61,7 +80,7 @@ func runCLI(ctx context.Context, args []string, out, errOut io.Writer) int {
 		return 0
 	}
 	if args[0] != "request" {
-		fmt.Fprintln(errOut, "Usage: ferry-dock [serve] [options] | request <create|status|wait|read|cancel> [options]")
+		fmt.Fprintln(errOut, "Usage: ferry-dock desktop [options] | version | [serve] [options] | request <create|status|wait|read|cancel> [options]")
 		return 2
 	}
 	result, err := requestCommand(ctx, args[1:], errOut)

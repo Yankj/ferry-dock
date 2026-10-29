@@ -10,6 +10,13 @@
     remove(key) { try { sessionStorage.removeItem(key); } catch { /* Optional persistence. */ } },
   };
   const fragment = new URLSearchParams(location.hash.slice(1));
+  // A camera/browser may reuse the existing /send tab for another invitation.
+  // Reload the document before using its new authority rather than retaining
+  // the previous request's closed-over capability.
+  window.addEventListener?.("hashchange", () => {
+    const incoming = new URLSearchParams(location.hash.slice(1));
+    if (["request", "session", "owner", "key"].some((key) => incoming.has(key))) location.reload();
+  });
   // Fragments never enter HTTP requests; remove them from the visible URL after reading.
   if (location.hash) history.replaceState(null, "", location.pathname);
   const status = (id, message, error = false) => { $(id).textContent = message; $(id).classList.toggle("error", error); };
@@ -197,6 +204,21 @@
   if (!owner) { $("entry").hidden = false; return; }
   store.set("ferryDock.owner", owner);
   $("receiver").hidden = false;
+  api("/api/desktop", owner).then((info) => {
+    if (info?.desktop !== true) return;
+    $("desktop-controls").hidden = false;
+    $("desktop-network").textContent = info.localOnly ? "Local only: no unambiguous private network address was selected. Phone access needs a reachable LAN origin." : `Phone address: ${info.publicUrl}. Use only on a trusted LAN; HTTP is not encrypted.`;
+    $("quit-app").addEventListener("click", async () => {
+      $("quit-app").disabled = true;
+      try {
+        await api("/api/desktop/quit", owner, { method: "POST", body: "{}" });
+        ended();
+        status("receiver-status", "Ferry Dock has stopped. Reopen the app to start again.");
+        store.remove("ferryDock.active"); store.remove("ferryDock.owner");
+        ["create", "close", "copy-link"].forEach((id) => { $(id).disabled = true; });
+      } catch { $("quit-app").disabled = false; status("receiver-status", "Could not confirm shutdown. Retry Quit or reopen Ferry Dock.", true); }
+    });
+  }).catch(() => { /* Plain serve has no desktop lifecycle controls. */ });
   let active = fragment.has("owner") && owner !== previousOwner ? null : store.get("ferryDock.active"), cursor = 0, generation = 0, busy = false;
   if (!active) store.remove("ferryDock.active");
   const seen = new Set();

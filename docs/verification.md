@@ -1,5 +1,63 @@
 # Verification record
 
+## Local packaging preview, 2026-10-29
+
+Version `0.1.0-alpha.1` changes the user installation path to prebuilt macOS app
+and native CLI archives; source builds are for contributors. It builds the same
+`cmd/ferry-dock`, with desktop as the app's no-argument default, not another
+backend. Final archive/native-package validation is pending; actual Safari
+loopback acceptance is recorded separately below. No GitHub Release or public
+artifact URL has been published.
+
+The desktop contract is a short-lived launcher, one owned background Go service,
+private owner/instance verification on reopen, browser opening, and explicit
+**Quit Ferry Dock** from the local owner page. Closing the browser keeps the
+service running. Default state is in the OS user cache under
+`ferry-dock/runtime`; requests can reuse that private control file.
+
+The package record must identify source/dirty state, target architecture,
+embedded `version` output, binary/archive hashes, bundled docs/Skill, and actual
+start/reopen/quit/request/cleanup results before recording a package pass.
+Publisher signing, notarization, downloaded-file Gatekeeper, Finder/no-argument
+default-cache launch, default-browser auto-opening, real-phone LAN/QR scan, and
+actual Codex-host workflows remain **NOT_RUN**. A Safari page opened explicitly
+for the tests below is not the default-browser launch chain.
+
+See [distribution](distribution.md) and [packaging claims](claims-evidence.md).
+The older results below are preserved with their source/binary identities. They
+do not establish app launch, a downloaded package's first-use experience, or a
+new performance baseline for this packaging change.
+
+## Actual Safari loopback acceptance, 2026-10-29
+
+The implementation lead exercised Safari 27.0.1 on the Mac through the supported
+computer-use surface, in an independent private window and against an owned
+loopback service. These are **RECORDED_PASS** observations, not a physical-phone,
+Finder, or packaged-download test. No OS security protection or browser privacy
+setting was lowered for this run.
+
+| Case | Observed result |
+| --- | --- |
+| S1: ordinary transfer and system clipboard | Text sent and appeared in the receiver; Copy showed **Copied**. A real system Cmd+V pasted the original leading/trailing whitespace, newlines, Chinese, emoji, and literal HTML text. Clipboard was not merely a test double. |
+| S2: request flow after bounded timeout | Task A's prompt displayed; submission changed the form to **Received**, disabled send, and made the textarea read-only. The initial CLI ten-second wait had timed out; a later wait/read through the same handle returned received state and exact text. Refresh kept the received form locked against another send. |
+| S3: ended-page states | An expired request and invalid-token page displayed ended/disabled states while the textarea remained editable. These initial-page cases are not an in-flight failed-network/dropped-response test. |
+| S4: layout sample | Safari Responsive Design Mode at 390×844 was visually inspected from an actual screenshot, without observed cropping or overlap. This is desktop Safari viewport emulation, not an iPhone/Android or software-keyboard test. |
+| S5: UI Quit and owned cleanup | Clicking **Quit Ferry Dock** showed stopped status. The socket then refused connections and the owned control file was removed. The test's own files were cleaned and its private window closed. Normal Quit does not promise to remove the default cache directory or `startup.log`. |
+| S6: same-tab invitation change, fresh binary | After fixing hash-change handling, a fresh compiled binary was retested in Safari. Replacing hash A with hash B in the same `/send` tab, without manually reloading, immediately showed B. Submission left A pending with no input; B alone received the intended text. The owned window/service/control/files were cleaned. |
+
+The same-tab fix also passed the eleventh UI VM regression. The latest working
+tree passed `go vet ./...`, `go test -race -cover ./...`, the 12-check ordinary
+HTTP smoke, 27-check synthetic request scenario, and SCRIPT_HTTP integration.
+Recorded unit coverage was relay 88.4%, CLI 41.3%, desktop 21.1%; these package
+figures are not product or UI acceptance percentages. The final package record
+will separately identify its clean source and artifact identities.
+
+Remaining UI/device gates include Finder/default-cache first launch, automatic
+system-browser opening, physical-phone LAN/QR scan, other browsers, actual
+in-flight network failure/retry, unexercised clipboard permission/fallback paths,
+Gatekeeper/download trust, and actual Codex-host execution. None is inferred
+from S1–S6 or a VM/SCRIPT_HTTP pass.
+
 ## Collection-request slice, 2026-10-28
 
 The request core and JSON CLI were frozen at local source revision
@@ -23,7 +81,8 @@ See [claims and evidence](claims-evidence.md) for command-level audit and
 [the measured baseline](performance-baseline.md) for machine, raw data and limits.
 The CI workflow includes the new scenarios, but the earlier remote CI run below
 belongs to the prior text alpha and is not evidence for this local revision.
-Browser, physical Android/iOS and actual Codex-host acceptance remain **NOT_RUN**.
+At that earlier freeze, browser, physical Android/iOS and actual Codex-host
+acceptance were **NOT_RUN**; the later Safari-only evidence is recorded above.
 
 ## Follow-up use-path audit, 2026-10-28
 
@@ -58,8 +117,9 @@ source, and executes it with a narrow DOM adapter. It covers:
   runtime files. The harness bounds its own failures/deadline; it does not promise
   cleanup after an uncatchable external kill.
 
-The Go/application sources remain at the `5d3caff` freeze. This adds integration
-evidence, not a product runtime change or a new performance baseline. Faults
+At that follow-up audit, the Go/application sources remained at the `5d3caff`
+freeze. It added integration evidence, not a runtime change or a new performance
+baseline; the later desktop/packaging revision is recorded separately above. Faults
 are explicitly injected before a request or after its real HTTP response;
 an actual network outage is not claimed. This is **not** rendered-browser,
 OS-clipboard, physical-phone/LAN, QR-scan, or actual Codex-host acceptance.
@@ -120,19 +180,18 @@ now carries that `.gitattributes` rule. CI prints actual index/worktree line-end
 information and any future formatting diff instead of hiding the reason for a
 failure. See the latest Actions run for the result on a real Windows runner.
 
-## Browser and device acceptance
+## Earlier blocked browser attempt
 
-**NOT_RUN for the Ferry Dock revision.** During this audit, the supported
+Before the later Safari run above, the supported
 computer-use tool reported a locked desktop and no connected browser surface.
 Installed browser applications and cached Chromium binaries were present;
 the blocker was access through that tool/session, rather than missing browser
 software.
 
-The minimum condition for resuming UI acceptance is a manually unlocked Mac
-and a supported isolated test tab/window through the computer-use tool. The
-complete rendered receive/copy/paste loop, permission prompts, and phone-page
-responsive layout remain unverified. The SCRIPT_HTTP result above does not
-satisfy that gate.
+That attempt required a manually unlocked Mac and a supported isolated test
+tab/window. It did not perform rendered UI acceptance; SCRIPT_HTTP was not used
+as a substitute. Actual Safari cases subsequently completed are listed above,
+with their remaining limitations.
 
 Real Android and iOS LAN acceptance is also **NOT_RUN**. Before claiming mobile
 compatibility, verify QR scan, text submission, exact copy, fallback selection,

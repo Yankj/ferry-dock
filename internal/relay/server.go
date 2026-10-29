@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -40,6 +41,13 @@ type Config struct {
 	LocalURL   string
 	PublicURL  string
 	TTL        time.Duration
+	Desktop    *DesktopConfig
+}
+
+// DesktopConfig exists only in the packaged local launcher mode.
+type DesktopConfig struct {
+	InstanceID string
+	Quit       func()
 }
 
 type Message struct {
@@ -92,6 +100,13 @@ func New(config Config) (*Server, error) {
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 	})
+	if config.Desktop != nil {
+		if config.Desktop.InstanceID == "" || config.Desktop.Quit == nil {
+			return nil, errors.New("invalid desktop lifecycle configuration")
+		}
+		mux.HandleFunc("GET /api/desktop", s.desktopStatus)
+		mux.HandleFunc("POST /api/desktop/quit", s.desktopQuit)
+	}
 	mux.HandleFunc("POST /api/sessions", s.create)
 	mux.HandleFunc("GET /api/sessions/{id}", s.list)
 	mux.HandleFunc("DELETE /api/sessions/{id}", s.close)
@@ -147,6 +162,36 @@ func (s *Server) owner(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+
+func (s *Server) desktopOwner(w http.ResponseWriter, r *http.Request) bool {
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	ip := net.ParseIP(host)
+	local, _ := url.Parse(s.config.LocalURL)
+	if err != nil || ip == nil || !ip.IsLoopback() || r.Host != local.Host {
+		fail(w, http.StatusForbidden, "desktop control requires the local computer")
+		return false
+	}
+	return s.owner(w, r)
+}
+
+func (s *Server) desktopStatus(w http.ResponseWriter, r *http.Request) {
+	if !s.desktopOwner(w, r) {
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"desktop": true, "instanceId": s.config.Desktop.InstanceID, "publicUrl": s.config.PublicURL, "localOnly": s.config.PublicURL == s.config.LocalURL})
+}
+
+func (s *Server) desktopQuit(w http.ResponseWriter, r *http.Request) {
+	if !s.desktopOwner(w, r) {
+		return
+	}
+	var body struct{}
+	if !readJSON(w, r, &body) {
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]string{"state": "stopping"})
+	s.config.Desktop.Quit()
 }
 
 func validToken(r *http.Request, expected string) bool {

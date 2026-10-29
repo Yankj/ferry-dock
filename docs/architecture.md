@@ -1,6 +1,6 @@
 # Architecture and trust boundary
 
-Ferry Dock's text alpha uses one Go process with in-memory ordinary sessions and collection requests. The binary embeds the browser UI and QR generator. It has no database, external runtime requirement, remote QR renderer, or model dependency. The CLI adapts this service rather than keeping a second request store.
+Ferry Dock's text alpha uses one Go service with in-memory ordinary sessions and collection requests. Desktop adds a short-lived launcher that starts or verifies the same executable's background service, opens the system browser, and exits. The binary embeds the browser UI and QR generator. It has no database, external runtime requirement, remote QR renderer, or model dependency. The CLI adapts this service rather than keeping a second request store.
 
 This is the architecture for the delivered text scope. [Request v1](contracts/request-v1.md) defines the collection schema and authority; implementation and recorded checks establish its evidence. Unimplemented integrations are not implied by this document.
 
@@ -19,7 +19,8 @@ computer browser (owner)                phone browser (sender)
            lifecycle, ordered messages, deduplication
 ```
 
-- **Command entry point:** validates configuration, selects listening and advertised addresses, starts the HTTP server, and handles shutdown. LAN mode requires an explicitly configured phone origin reachable from the phone; local-only mode uses loopback. The advertised origin is never derived from an untrusted request's `Host` value.
+- **Command entry point:** validates configuration, selects listening and advertised addresses, starts the HTTP server, and handles shutdown. Foreground `serve` requires an explicit phone origin for LAN use. Desktop selects a private IPv4 on the macOS primary interface, or the sole eligible private IPv4; ambiguity/unavailability falls back to local-only mode. An eligible address leads to a wildcard IPv4 listener on a free port, with that address used in the phone invitation. Phone reachability still requires LAN testing. The advertised origin is never derived from an untrusted request's `Host` value.
+- **Desktop launcher:** serializes startup with a private directory lock and verifies a saved owner capability plus random instance ID before reusing a process. Only connection refusal permits removing stale control state; a responding unknown service is left untouched. The local owner can quit through the browser, which shuts down the relay and loses temporary content. Closing the browser alone keeps the service running. No login item, installed daemon, automatic update or global PATH/Skill configuration is created.
 - **Embedded web UI:** serves the local receiver and phone sender views. A bundled QR generator encodes the phone link without a network request to another service. Browser code renders received text as text, never as executable HTML.
 - **HTTP boundary:** restricts methods and origins, authenticates each protected operation, parses bounded requests, and maps lifecycle and validation failures to explicit errors.
 - **Session store:** owns state transitions and atomic duplicate detection. HTTP handlers do not bypass it to read or mutate message state.

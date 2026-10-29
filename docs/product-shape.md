@@ -6,11 +6,11 @@ This document records the delivered text scope. [Request v1](contracts/request-v
 
 ## Two useful paths, one local service
 
-**Ordinary transfer:** run the Go service, open the private computer page, scan its QR, paste and send on the phone, then copy on the computer. It needs no AI component. The phone page stays ready for subsequent messages within the temporary session.
+**Ordinary transfer:** open the prebuilt macOS app or native CLI's desktop command, scan the browser page's QR, paste and send on the phone, then copy on the computer. It needs no Git, Go, Node, account, or AI component at runtime. The phone page stays ready for subsequent messages within the temporary session. Source building is a contributor path.
 
 **Task collection:** an Agent needs one piece of phone-side text. It creates a request naming the work and missing input, displays a QR, and reads only that request's result through a private handle. The original task interprets the feedback and continues. The first collection format is one plain-text response.
 
-The service and phone page do the transfer. The CLI gives a shell-capable Agent a machine-readable interface. A repository-local Codex Skill explains when to collect information, how to handle waiting, and how to use the result safely. The Skill is not a daemon, an automatic installation, or a host notification mechanism.
+The service and phone page do the transfer. The CLI gives a shell-capable Agent a machine-readable interface. A manual local Codex Skill, included in native archives and the app's Resources, explains when to collect information, how to wait, and how to use results safely. It does not require a source checkout, install itself globally, or wake a host.
 
 ## The proposal scenario
 
@@ -23,17 +23,29 @@ A second task can request different text at the same time. Its reader and sender
 
 ## Deliberate form
 
-The current product is **Go CLI + scan-to-open web pages + an optional Codex Skill**. It has one local request store and one set of transfer semantics.
+The current product is **one Go core + prebuilt macOS app/native CLI + scan-to-open web pages + an optional local Codex Skill**. The app is a Go launcher for the existing browser UI, compiled from the same command with `DefaultMode=desktop`; it is not another backend or a separate Swift/Electron UI. State and transfer semantics remain shared.
+
+Version `0.1.0-alpha.1` is a local packaging preview under validation. No GitHub Release or public artifact URL has been published. [Distribution](distribution.md) separates actual local artifacts from public availability and native/first-launch acceptance.
+
+For users, the `.app` is Ferry Dock itself: first ZIP extraction → open → QR, then open → QR on later use. It adds no installation wizard, registration, login item, or additional desktop platform/runtime.
 
 | Form | Decision | Evidence that would justify revisiting |
 | --- | --- | --- |
-| Native Go executable and web pages | Current delivery form | Keep until a concrete user problem calls for another entry point. |
-| Repository-local Codex Skill | Current optional workflow guide | Validate a real Codex task; do not require it for ordinary transfer. |
+| Prebuilt macOS launcher app, native Go CLI, and web pages | Current distribution form; local packaging validation is separate from publication | Default users should not need a compiler, Git checkout, or Node. Preserve one Go core. |
+| Bundled/manual local Codex Skill | Current optional workflow guide | Validate a real Codex task; do not require it for ordinary transfer or install it globally. |
 | npm/npx launcher | Not implemented or scheduled | Installation is demonstrated to be the main barrier for intended users. |
 | MCP adapter | Not implemented or scheduled | An identified client needs collection tools and has no usable shell interface. |
 | Browser extension or plugin | Not implemented or scheduled | Desktop selected-text sharing becomes an independent primary use case. |
 
 This is not a plan to accumulate all five forms. Another adapter must reuse the existing core and earn its maintenance cost with a specific access problem.
+
+## Desktop lifecycle
+
+The short-lived launcher starts its own background Go service, waits for private control readiness, opens the system browser, and exits. Reopening verifies the saved owner capability and instance ID before returning to the known service. Startup is serialized; an unknown service is not automatically changed.
+
+Closing the browser leaves the service running. **Quit Ferry Dock** on the owner/loopback computer page stops it and discards every in-memory session/request; private cache directories or `startup.log` may remain. Ending a session or canceling one task request has a narrower scope. There is no automatic global PATH, login item, Agent configuration, or system-service installation in this packaging scope.
+
+Default desktop LAN mode listens on all IPv4 interfaces at a free port and advertises an eligible private IPv4 address, or visibly falls back to a loopback listener when the address is ambiguous/unavailable. Reopening a verified instance retains its current configuration. Operator `serve` keeps its explicit configuration. Neither selection nor a QR guarantees phone reachability or encryption.
 
 ## What makes it different
 
@@ -55,6 +67,6 @@ Local operation describes the Ferry Dock service. Once a result is passed into a
 
 ## Completion evidence
 
-The release should demonstrate both ordinary transfer and a synthetic compiled-CLI proposal loop, plus negative tests for cross-request reads/writes, labels, bounds, expiry, cancellation, retry deduplication, stable input IDs, and interrupted waits. Synthetic tests must be labeled synthetic. Real browser, Android/iOS LAN, and actual Codex-host acceptance remain `NOT_RUN` until their specific evidence is recorded.
+The release should demonstrate both ordinary transfer and a synthetic compiled-CLI proposal loop, plus negative tests for cross-request reads/writes, labels, bounds, expiry, cancellation, retry deduplication, stable input IDs, and interrupted waits. Synthetic tests must be labeled synthetic. Actual Safari loopback UI checks have recorded scoped passes, including same-tab request switching on a fresh binary. Finder/default-browser auto-opening, Android/iOS LAN/QR, Gatekeeper, and actual Codex-host acceptance remain `NOT_RUN` until their own evidence exists.
 
 Performance ambition is expressed through [budgets and reproducible measurements](performance.md), not a claim that Go alone makes the product fastest. Do not publish startup, memory, tail-latency, or mobile-compatibility results that have not been measured.

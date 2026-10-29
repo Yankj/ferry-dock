@@ -57,9 +57,11 @@ function boot({ hash = "#request=r1&key=sender", stored = {}, fetches = [] } = {
   const calls = [];
   const responses = [...fetches];
   let random = 0;
+  const windowHandlers = {};
+  let reloads = 0;
   const context = {
     document: { getElementById: element, body: { classList: { add() {} } } },
-    location: { pathname: "/send", hash },
+    location: { pathname: "/send", hash, reload() { reloads++; } },
     history: { replaceState() {} },
     sessionStorage: {
       getItem: (key) => memory.get(key) || null,
@@ -70,7 +72,7 @@ function boot({ hash = "#request=r1&key=sender", stored = {}, fetches = [] } = {
     TextEncoder,
     Uint8Array,
     AbortSignal: { timeout() {} },
-    window: { isSecureContext: false },
+    window: { isSecureContext: false, addEventListener(name, handler) { windowHandlers[name] = handler; } },
     navigator: {},
     // Deterministic IDs let tests compare retries; this is not a random source
     // used by the application, which retains the browser's crypto API.
@@ -93,8 +95,19 @@ function boot({ hash = "#request=r1&key=sender", stored = {}, fetches = [] } = {
     },
     submit() { return element("send-form").handlers.submit({ preventDefault() {} }); },
     retry() { return element("retry-request").handlers.click(); },
+    navigateHash(hash) { context.location.hash = hash; windowHandlers.hashchange(); },
+    get reloads() { return reloads; },
   };
 }
+
+test("a new invitation in the same tab reloads before using another capability", async () => {
+  const ui = boot({ fetches: [reply(200, snapshot())] });
+  await settle();
+  ui.navigateHash("#request=r2&key=another-sender");
+  assert.equal(ui.reloads, 1);
+  ui.navigateHash("#section");
+  assert.equal(ui.reloads, 1);
+});
 
 test("request details use text content; custom UTF-8 limit rejects without truncation", async () => {
   const ui = boot({ fetches: [reply(200, snapshot({ maxTextBytes: 8 }))] });

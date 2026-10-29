@@ -1,4 +1,9 @@
 /bin/
+/dist/
+/ferry-dock
+/ferry-dock.exe
+__pycache__/
+*.pyc
 /coverage.out
 *.test
 .DS_Store

@@ -1,5 +1,32 @@
 # Claims and evidence
 
+## Local packaging preview, 2026-10-29
+
+The next delivery uses one Go command for both native CLI archives and the macOS
+app, with `DefaultMode=desktop` for the app. Version `0.1.0-alpha.1` is a local
+preview, not a published GitHub Release. Final artifact validation is pending;
+actual Safari loopback S1–S6 observations are recorded in
+[verification](verification.md). They do not establish Finder/default-cache,
+default-browser auto-opening, Gatekeeper, physical-phone/LAN/QR, or real
+Codex-host acceptance. [Distribution](distribution.md) records final artifact
+evidence separately. Earlier executions keep their source/binary identities.
+
+| Packaging/runtime claim | Source or evidence | Current status and limit |
+| --- | --- | --- |
+| Preview users can run a prebuilt app/CLI without installing Git, Go, or Node. | [Same Go command](../cmd/ferry-dock/main.go), [build metadata](../internal/buildinfo/version.go), [packager](../scripts/package.py). | SOURCE_REVIEWED for runtime design. Actual archives/native execution are pending; packagers still need developer tools. |
+| The macOS app is the same Go executable with desktop as its no-argument default, not a Swift/Node backend. | `DefaultMode` dispatch in [main.go](../cmd/ferry-dock/main.go), linker flags and bundle executable in [package.py](../scripts/package.py). | SOURCE_REVIEWED. App path is `Ferry Dock.app/Contents/MacOS/ferry-dock`; native launch and Finder/browser acceptance are separate. |
+| Native archives and app Resources include docs and a manual local Skill. | `documentation()` and archive entries in [package.py](../scripts/package.py); [Skill path resolution](../skills/ferry-dock/SKILL.md). | SOURCE_REVIEWED. No global Skill, PATH, login item, or Agent configuration is installed. Inspect actual archives before recording an artifact pass. |
+| The launcher starts/reopens its own background Go service, opens the browser, and exits. Closing the browser does not quit. | `Run`, detached child, private readiness and `openBrowser` in [desktop.go](../internal/desktop/desktop.go); desktop controls in [app.js](../internal/relay/web/app.js). | SOURCE_REVIEWED for launch. Safari UI Quit has RECORDED_PASS S5; automatic default-browser opening and Finder/default-cache launch remain NOT_RUN. |
+| Relaunch verifies the owner capability/instance ID and serializes startup instead of taking over an unknown service. | Startup lock, `readState`, `existing`, and `verify` in [desktop.go](../internal/desktop/desktop.go). | SOURCE_REVIEWED; concurrency, stale/unknown-service and reuse tests are pending in this packaging record. |
+| Default desktop LAN mode listens on all IPv4 interfaces at a free port, advertises an eligible private IPv4, and falls back visibly to a loopback listener when ambiguous/unavailable. | `lanAddress`, `primaryInterface`, `runService` and [desktop network UI](../internal/relay/web/app.js). | SOURCE_REVIEWED. Selection controls the advertised URL; this is not phone reachability or LAN acceptance. Reused instances retain their configuration; foreground `serve` retains its loopback default. |
+| Quit is an owner/loopback-authenticated operation and clears the service's in-memory sessions/requests. | Desktop handlers in [server.go](../internal/relay/server.go), `DesktopConfig.Quit`, `runService`, and Safari S5. | RECORDED_PASS for actual Safari click → stopped message, socket refusal and owned control-file cleanup. Final package checks remain separate; private cache/startup.log may remain. |
+| `version` returns version, commit, OS, architecture and default mode without a model/network call. | `buildinfo.Current` and command dispatch in [cli.go](../cmd/ferry-dock/cli.go). | SOURCE_REVIEWED; actual archive identities pending. A version label is not Release publication or publisher identity. |
+| Local artifacts have public Release/download URLs. | Packaging has no upload/publication step. | NOT_PUBLISHED. Do not fabricate links or call a generated local archive a public release. |
+| Local app generation proves Developer ID signing, Apple notarization or Gatekeeper/Finder acceptance. | Packager performs no publisher signing or notarization; signature metadata is recorded separately. | Unsupported. Ad-hoc linker signing is not verified publisher identity. Finder/default-browser auto-opening/quarantine/Gatekeeper remain NOT_RUN; separate Safari UI evidence does not establish them. |
+| Earlier HTTP/CLI tests and performance results validate the new app's launch/first-use experience. | Historic source/binary records below and [prior baseline](performance-baseline.md). | Unsupported. Preserve those scopes; new packaging/native/UI results need their own evidence. |
+
+## Earlier text/request audit
+
 This audit maps public product statements to implementation and verification.
 It does not turn a design contract, a test definition, or an intended command
 into an executed result. Audit date: 2026-10-28. The independent local checks below
@@ -7,7 +34,8 @@ used macOS arm64 and Go 1.27.3 against the collection-request working tree based
 on `13e5b27435c3f35578398570667328396b41ff88`. The final CLI changes were rebuilt
 and checked separately at frozen commit
 `5d3caff0833ff52e805a4a874e7f07d82e39c624` (E8). Browser, real-phone, and actual
-Codex-host acceptance remain **NOT_RUN**.
+Codex-host acceptance were **NOT_RUN** during those earlier executions; later
+Safari-only observations are recorded separately in verification S1–S6.
 
 ## Reading the status column
 
@@ -96,26 +124,26 @@ latency, or Agent/model processing speed.
 | Claim | Source or test evidence | Status and limit |
 | --- | --- | --- |
 | Basic phone-to-computer text transfer does not require AI, an Agent account, or a Skill. | [Service entry point](../cmd/ferry-dock/main.go), [ordinary session routes](../internal/relay/server.go), [browser UI](../internal/relay/web/app.js). | SOURCE_REVIEWED. A running program on the computer is required. |
-| The phone uses its browser; no phone app installation is required. | [Embedded HTML](../internal/relay/web/index.html) and JavaScript implement the sender form. | SOURCE_REVIEWED. Real Android/iOS browser and LAN acceptance is NOT_RUN. Phone installation-free does not mean the computer needs no executable or build tooling. |
+| The phone uses its browser; no phone app installation is required. | [Embedded HTML](../internal/relay/web/index.html) and JavaScript implement the sender form. | SOURCE_REVIEWED. Real Android/iOS browser and LAN acceptance is NOT_RUN. The computer runs an executable; build tooling is for contributors, not prebuilt-preview runtime use. |
 | One Go service embeds its browser assets and generates the QR locally. | `//go:embed` and `qrcode.Encode` in [server.go](../internal/relay/server.go) and [requests.go](../internal/relay/requests.go); dependency in [go.mod](../go.mod). | SOURCE_REVIEWED. No remote QR renderer is involved. |
 | The running Ferry Dock service/UI do not need a cloud relay, analytics endpoint, model call, Node runtime, or database. | [HTML](../internal/relay/web/index.html) loads local assets; [app.js](../internal/relay/web/app.js) uses same-origin API fetches; reviewed Go runtime paths contain no analytics/model client. | SOURCE_REVIEWED for this service/UI boundary. Installing Go or downloading dependencies may need the network. This is not a claim that a clean source build works offline. |
 | The complete optional Agent workflow is guaranteed to remain local or never send feedback to a cloud model. | [Skill](../skills/ferry-dock/SKILL.md), [product shape](product-shape.md), and the README distinguish service transfer from Agent consumption. | Unsupported. Once CLI output is supplied to an Agent, model transmission and retention depend on that host. Ferry Dock does not control that separate data path. Ordinary non-AI transfer still needs no AI account. |
 | State is temporary and is discarded when the process exits. | In-memory maps in [server.go](../internal/relay/server.go) and [requests.go](../internal/relay/requests.go). | SOURCE_REVIEWED. Restart/crash recovery and durable delivery are not provided. Browser session storage, history, clipboard managers, OS swap, and crash dumps are separate from server retention. |
 | Parallel requests return input to the originating request, rather than reading a global latest message. | `RequestSnapshot.RequestID`, `readerRequestLocked`, and `ReadRequest` in [requests.go](../internal/relay/requests.go). | SOURCE_REVIEWED. Request/handle selection is explicit. A matching task label is not permission. |
-| A repository-local Skill explains an optional Codex workflow. | [Skill](../skills/ferry-dock/SKILL.md). | SOURCE_REVIEWED as workflow text. Manual loading is required; real Codex-host execution is NOT_RUN. It does not install global configuration or wake a paused host. |
+| A manual local Skill explains an optional Codex workflow. | [Skill](../skills/ferry-dock/SKILL.md); it is included in the source and packaged documentation. | SOURCE_REVIEWED as workflow text. Manual loading is required; real Codex-host execution is NOT_RUN. It does not install global configuration, require a source checkout, or wake a paused host. |
 | npm/npx, MCP, browser extensions, file/image/audio transfer, remote phone control, and continuous clipboard synchronization are provided. | [Product shape](product-shape.md) and [request contract](contracts/request-v1.md) explicitly exclude them. | OUT_OF_SCOPE. Do not present these as current capabilities or scheduled deliverables. |
 
 ## Ordinary text sessions
 
 | Claim | Source or test evidence | Status and limit |
 | --- | --- | --- |
-| Computer creation, phone text submission, incremental retrieval, and closure are implemented. | `create`, `submit`, `list`, `close` in [server.go](../internal/relay/server.go); `TestSessionTextRoundTrip` in [server_test.go](../internal/relay/server_test.go). | PASS_LOCAL: E4 and E6. Browser and phone behavior remain NOT_RUN. |
+| Computer creation, phone text submission, incremental retrieval, and closure are implemented. | `create`, `submit`, `list`, `close` in [server.go](../internal/relay/server.go); `TestSessionTextRoundTrip` in [server_test.go](../internal/relay/server_test.go). | PASS_LOCAL: E4/E6 at their revisions; RECORDED_PASS Safari loopback ordinary send/receive S1. Physical-phone/LAN/QR remains NOT_RUN. |
 | The phone can submit but cannot read/manage sessions, and A's sender key cannot submit to B. | `owner`/`validToken` and session-key checks; `TestCapabilitiesAreScoped`. | PASS_LOCAL: E4/E6. Ordinary computer authority is process-wide, not a separate reader capability per ordinary session. |
-| Text is preserved, including meaningful leading/trailing whitespace. | Nonblank validation is separate from the stored `Message.Text`; `TestSessionTextRoundTrip`. | PASS_LOCAL: E4/E6 for the API. Text must fit the decoded 64 KiB limit. Browser copy/paste fidelity is NOT_RUN. |
+| Text is preserved, including meaningful leading/trailing whitespace. | Nonblank validation is separate from stored `Message.Text`; `TestSessionTextRoundTrip`; Safari S1. | PASS_LOCAL: E4/E6 API; RECORDED_PASS Safari Copy plus actual system Cmd+V with whitespace/newlines/Chinese/emoji/literal HTML. Other browsers and phone clipboard behavior remain NOT_RUN. |
 | Lost-response retries do not create duplicate messages. | Session-scoped idempotency map; `TestIdempotencyAndCursorRecovery`, `TestConcurrentRetriesProduceOneReceipt`. | PASS_LOCAL: E4/E6. Same key with changed text conflicts; retry deduplication lasts only as long as in-memory session state. |
 | Closing or expiring a session revokes access and removes retained content. | `close`, `purgeLocked`, `PurgeExpired`; `TestCloseAndExpiryRevokeContent`. | PASS_LOCAL: E4/E6. Application-state removal is not cryptographic memory erasure. |
 | Ordinary input is bounded to 64 KiB/text, 128 messages/session, 1 MiB/session, and 16 active sessions. | Constants and limit checks in [server.go](../internal/relay/server.go); `TestSessionResourceLimits`, `TestRejectsMalformedAndOversizedInput`. | PASS_LOCAL: E6. These are payload/count limits, not a measured RSS guarantee. |
-| The computer offers Copy with a selectable-text fallback; phone clipboard reading is optional. | Clipboard functions and click handlers in [app.js](../internal/relay/web/app.js). | SOURCE_REVIEWED. Browser permission prompts, actual copy/paste and responsive rendering remain NOT_RUN. No background clipboard monitoring is implemented. |
+| The computer offers Copy with a selectable-text fallback; phone clipboard reading is optional. | Clipboard functions and click handlers in [app.js](../internal/relay/web/app.js); Safari S1/S4. | RECORDED_PASS for successful system copy/paste and one 390×844 Safari RDM layout sample. Clipboard permission/failure/fallback paths and physical-phone clipboard reading were not exercised. No background monitoring is implemented. |
 
 ## Collection requests and authority
 
@@ -124,7 +152,8 @@ latency, or Agent/model processing speed.
 | The server assigns a request ID; task ID and prompt supply context. | `CreateRequestInput`, `RequestSnapshot`, `CreateRequest` in [requests.go](../internal/relay/requests.go); `TestRequestCreateSeparatesCapabilitiesAndMetadata`. | SOURCE_REVIEWED. `taskId` is caller-controlled correlation metadata, not an authenticated host task identity. |
 | Each request has independent reader and sender capabilities. The computer token creates requests but is not returned as request-consumer authority. | `CreateRequest`, `readerRequestLocked`, `senderRequestLocked`; `TestRequestCreateSeparatesCapabilitiesAndMetadata`. | PASS_LOCAL: E3/E6. The control file still contains process-level computer authority. Normal service startup prints the owner URL; an Agent launching it must redirect logs privately as the Skill requires. |
 | A/B readers and senders cannot cross-read/write, even when task labels match. | Per-record capability checks; `TestRequestDeliveryIsScopedAndReadsAreRepeatable` in [requests_test.go](../internal/relay/requests_test.go). | PASS_LOCAL: E3/E6. Capability isolation is an application boundary, not OS isolation between programs running as the same user. |
-| A phone can inspect its prompt and submit one text response, but cannot read the result or cancel collection. | `requestInfoHTTP`, `submitRequestHTTP`, reader-only result/cancel paths in [requests.go](../internal/relay/requests.go); request role-negative tests. | PASS_LOCAL: E3/E6 at the API; E5 at the script layer. The sender URL/QR carries sender authority and remains sensitive. |
+| A phone can inspect its prompt and submit one text response, but cannot read the result or cancel collection. | `requestInfoHTTP`, `submitRequestHTTP`, reader-only result/cancel paths in [requests.go](../internal/relay/requests.go); request role-negative tests. | PASS_LOCAL: E3/E6 API, E5 script; RECORDED_PASS Safari prompt/submit/received form and refresh lock S2. This used a desktop loopback page, not a physical phone. |
+| Changing A to B in one sender tab binds subsequent submission to B rather than stale A. | `hashchange` reload handling in [app.js](../internal/relay/web/app.js), the eleventh VM regression, and fresh-binary Safari S6. | RECORDED_PASS: no manual reload, B prompt shown; A remained pending/no input and only B received target text. Owned service/window/files were cleaned. |
 | The request accepts one response. Same-key/same-text retry returns the original receipt; another delivery conflicts. | `deliveryKey`, stored input, and the received-state branch of `submitRequestHTTP`; `TestRequestDeliveryIsScopedAndReadsAreRepeatable`. | PASS_LOCAL: E3/E6. This is delivery deduplication, not exactly-once Agent execution. |
 | Repeated reads return the same stable input ID and do not consume the input. | `ReadRequest` returns the retained value; `TestRequestDeliveryIsScopedAndReadsAreRepeatable`. | PASS_LOCAL: E3/E6. The consumer must deduplicate downstream effects by request/input identity. |
 | Phone feedback is marked `untrusted_user_input`. | `RequestInput.Trust` construction in [requests.go](../internal/relay/requests.go); trust-marker assertion in request tests; [Skill result checks](../skills/ferry-dock/SKILL.md). | SOURCE_REVIEWED. The marker does not itself stop an Agent; the consumer must treat text as task data and must not execute embedded commands, follow embedded links, or change Agent configuration because that text requests it. |
@@ -138,9 +167,10 @@ latency, or Agent/model processing speed.
 
 ## Commands and end-to-end evidence
 
-All command rows below are current-revision audit gates. Placeholder LAN addresses
-and private runtime paths must be replaced; do not paste secret control/handle
-contents into a prompt or a public log.
+The command rows below record the earlier text/request CLI audits and retain
+their named revisions. Packaging and desktop changes have separate gates above.
+Placeholder LAN addresses and private runtime paths must be replaced; do not
+paste secret control/handle contents into a prompt or a public log.
 
 | Command or scenario | Expected evidence | Status |
 | --- | --- | --- |
@@ -155,7 +185,7 @@ contents into a prompt or a public log.
 | Served sender/computer script → compiled service → CLI continuation | Exercise actual embedded `app.js` and HTTP boundaries, exact text, authority rejection, expired drafts, response-loss deduplication, poll recovery and normal cleanup. | PASS_LOCAL: E10 with a DOM adapter. It is not browser E2E or an actual OS clipboard test. |
 | README Banner at the head with theme variants and a narrow preview | Check both root README-relative paths and inspect 320×100 light/dark vector renders. | PASS_LOCAL for static paths and visual render. Actual GitHub rendering and a physical phone viewport are NOT_RUN; the batch was not yet public during this audit. |
 | Synthetic proposal → submitted feedback → current-request read → consumer edit | A compiled CLI harness must assert task/request identity, stable input ID, and a second read without a duplicate consumer effect. | PASS_LOCAL: E3, 27 checks. The sample consumer uses deterministic code; a synthetic HTTP sender is not a physical phone, LLM, or Agent host. |
-| Real desktop browser copy/paste | Run the actual UI, permission/failure paths and responsive rendering. | NOT_RUN. |
+| Actual desktop Safari copy/paste and scoped request UI | Safari 27.0.1 private window, real system clipboard, request/read/reload, one RDM viewport, ended-page states, UI Quit, fresh-binary same-tab A→B change. | RECORDED_PASS S1–S6. No blanket permission/fallback, in-flight outage, default-browser auto-open, Finder, or other-browser pass is inferred. |
 | Real Android Chrome and iOS Safari LAN scan/send | Record device, OS/browser, network reachability, QR, request prompt, submit, retry, expiry and isolation. | NOT_RUN. |
 | A real Codex task manually loads the repository Skill and continues the same proposal | Record the actual host's tool/image/wait behavior and resulting artifact. | NOT_RUN. The Skill file and synthetic harness are not substitutes. |
 | Cross-compilation or CI across operating systems | [Verification](verification.md) records final `CGO_ENABLED=0` Windows/Linux amd64 builds. | RECORDED_PASS for cross-builds reported by the implementation worker. Native Windows/Linux execution and remote CI of this collection slice are NOT_RUN; earlier text-alpha CI does not apply to this revision. |
@@ -175,9 +205,11 @@ contents into a prompt or a public log.
 
 ## Remaining acceptance gates
 
-1. If runtime code changes after frozen commit `5d3caff`, repeat checks affected
-   by those changes. E8 completes the final CLI check for that freeze.
-2. Keep browser, Android/iOS LAN, and real Codex-host acceptance marked NOT_RUN
-   unless their actual evidence is available.
+1. E8 completed the final CLI check for the earlier `5d3caff` freeze. The new
+   desktop/packaging runtime requires its own affected regression and artifact
+   checks; it is not recertified by E8 or the prior performance run.
+2. Preserve the scope of Safari S1–S6; keep Finder/default-cache/default-browser
+   auto-opening, Android/iOS LAN/QR and real Codex-host acceptance NOT_RUN until
+   their own evidence exists.
 3. Publish performance numbers only with a named reference environment and raw
    samples. The product ambition alone is not evidence of a budget being met.

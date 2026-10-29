@@ -6,7 +6,7 @@ Ferry Dock lets a person bring text from a phone into a computer inbox or the ta
 
 In the task flow, an Agent working on a proposal asks for the comments held in a phone chat. The phone page names that proposal and asks for the missing text. The user pastes and sends. Only the request's reader can retrieve the result, and the original task uses the feedback to revise the proposal.
 
-**Delivery status:** ordinary temporary text sessions, one-response collection requests, the JSON CLI, and a repository-local Codex Skill are implemented. Automated HTTP tests and a synthetic compiled-CLI proposal scenario provide separate evidence from browser, real-phone, and actual Codex-host acceptance, which remain `NOT_RUN` until recorded. This document does not turn unverified behavior into a shipped compatibility claim.
+**Delivery status:** the text/request core and JSON CLI are implemented. Version `0.1.0-alpha.1` adds a local prebuilt macOS app/native-CLI preview; final archive validation is pending. Actual Safari 27.0.1 loopback UI checks have passed within the scope recorded in [verification](docs/verification.md), including a fresh-binary same-tab invitation-switch check. Finder/default-browser auto-opening, Gatekeeper, real-phone/LAN/QR scan, and actual Codex-host acceptance remain `NOT_RUN`. There is no published GitHub Release or public binary download URL.
 
 ## Who is it for?
 
@@ -28,21 +28,47 @@ Ferry Dock's intended distinction is the optional task-bound loop: a shell-capab
 
 ## Is this a cloud drive or a general Agent platform?
 
-No. The accepted form is a Go executable, small web pages, and an optional repository-local Codex Skill. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
+No. The accepted form is one Go core, distributed as a macOS browser-launcher app or portable native CLI, with small web pages and an optional bundled local Codex Skill. These packages do not introduce another backend. There is no hosted account, durable file library, team workspace, or catalogue of Agent integrations in this scope.
 
 npm/npx, MCP, and a browser extension are not implemented or scheduled. Revisit them only when installation is the main demonstrated barrier, a specific client lacks shell access, or desktop selected-text sharing becomes a separate primary need. See [the product-shape decision](docs/product-shape.md).
 
 ## How does the ordinary mode work?
 
-Start the service and open its private computer URL. The page creates a temporary session and shows a locally generated QR. Scan it on the phone, paste text, and send. The computer retrieves it and offers Copy. End the session when finished, or let it expire.
+Open the prebuilt macOS app, or explicitly run `desktop` from an extracted native CLI package. The launcher starts/reopens its verified Go service and opens the system browser. The page creates a temporary session and shows a locally generated QR. Scan it on the phone, paste text, and send. The computer retrieves it and offers Copy. End the session when finished, or let it expire.
 
 Ordinary sessions allow repeated text submissions and remain separate from one-response collection requests. No model or Skill is required to run the service or transfer text.
 
 ## What must be installed, and where can it run?
 
-The phone uses a browser with JavaScript; it does not install a Ferry Dock app. The computer must obtain or build the executable. Source builds need Go and may download dependencies; this slice does not provide a binary release or package installer. After building, the application's pages, QR generation, and brand assets are local, without a runtime cloud API or telemetry call in the transfer code.
+The default user path is a prebuilt app or native CLI, not a Git clone or a Go/Node installation. The phone uses a browser with JavaScript. Local preview recipients extract the package matching their OS/architecture; no global PATH or Agent configuration is changed. Public binary downloads have not been published, so a version label must not be turned into an invented Release link.
+
+The `.app` is this product, not an extra desktop platform. The first-use path is ZIP extraction → open the app → scan; subsequent use is open → scan. There is no installation wizard, registration, or login item to configure.
+
+Git and Go are contributor/source-build prerequisites. The packaging script also uses Python's standard library, but preview users do not run that script. After packaging, the application's pages, QR generation, and brand assets are local, without a runtime cloud API or telemetry call in the Ferry Dock service/UI.
 
 Build and CI platform results are not evidence that a physical phone, mobile clipboard permission, camera scanner, or network works. Real Android/iOS and actual Codex-host acceptance must name the tested device or host and remain `NOT_RUN` when not exercised.
+
+## Is the app a second native UI or another backend?
+
+No. `Ferry Dock.app/Contents/MacOS/ferry-dock` is built from the same Go command as the standalone CLI, with desktop as its no-argument default. It launches the existing browser interface; no Swift, Electron, or second request store is introduced. The app's executable also supports `version` and `request` commands. Usage documents and the manual Skill are bundled under `Contents/Resources`.
+
+## Does closing the browser quit the app?
+
+No. The short-lived launcher exits after starting/reopening its own background service and opening the browser. Close the browser and the service keeps running. Reopen the app to return to the verified instance. **Quit Ferry Dock** on the local computer page authenticates the computer capability and loopback request, then stops the service and clears all in-memory sessions and collection requests.
+
+The desktop launcher serializes startup and checks its saved owner capability and instance ID before reusing a service. An unknown service is an error, not something to kill or replace automatically. Quitting a shared service affects other tasks; canceling one request does not.
+
+## Must I enter an IP address?
+
+Default desktop LAN mode listens on all IPv4 interfaces at a free port and advertises a private IPv4 address from the OS primary interface, or the only eligible private address. If no choice is unambiguous, it binds loopback and reports **Local only**. A physical phone cannot reach loopback. Advanced `--listen` and `--public-url` configuration uses a verified origin and applies only to a new instance, not one reused on relaunch. Selection does not bypass Wi-Fi isolation, VPN routing, or a firewall.
+
+Foreground `serve` retains its explicit operator configuration and loopback default. Neither entry point makes HTTP encrypted.
+
+Desktop listener overrides are limited to `127.0.0.1:PORT` or `0.0.0.0:PORT`, with numeric ports 0–65535; other configurations use `serve`. Automatic candidates exclude point-to-point VPN interfaces.
+
+## Is the preview signed, notarized, or accepted by Gatekeeper?
+
+The packaging script performs no Developer ID signing or Apple notarization. A linker ad-hoc signature is not publisher identity. Local bundle/version/HTTP or Safari loopback checks do not prove downloaded-file first launch, Finder/default-browser auto-opening, or Gatekeeper acceptance. The project does not provide a procedure to disable those protections. Artifact hashes, signature metadata, and actual acceptance scopes belong in [distribution](docs/distribution.md) and the verification record.
 
 ## What exactly is a collection request?
 
@@ -52,11 +78,11 @@ The phone can see its question and submit once. It cannot read the result or can
 
 ## Where does the text go, and how long does it stay?
 
-The phone submits directly to the computer's configured local HTTP service. Ordinary sessions retain text in memory until ended or expired, with a default 15-minute lifetime. A collection request inherits service retention unless given its own lifetime, at most 24 hours. Its reader can retrieve the input until cancellation or observed expiry removes it; terminal metadata can remain for at most two minutes.
+The phone submits directly to the computer's local HTTP service. Ordinary sessions retain text in memory until ended or expired, with a default 15-minute lifetime. A collection request inherits service retention unless given its own lifetime, at most 24 hours. Its reader can retrieve the input until cancellation or observed expiry removes it; terminal metadata can remain for at most two minutes. Closing the browser does not end desktop service retention; **Quit Ferry Dock** does.
 
 The no-cloud/model-call description applies to the Ferry Dock service. When the optional Skill hands a CLI result to an Agent, that host determines whether content reaches a cloud model and how it is retained. The complete Agent workflow is not guaranteed to stay local; ordinary transfer still requires no AI account.
 
-Stopping or restarting the service loses in-memory content. A control file or request handle holds authority and connection information, not a backup of the phone's text. The user's browser, clipboard, logs they explicitly produce, and a proposal edited from the feedback may retain their own copies; temporary service retention is not secure erasure or a promise that all copies disappear.
+Stopping or restarting the service loses in-memory content. A control file or request handle holds authority and connection information, not a backup of the phone's text. Private cache directories and `startup.log` may remain after Quit; shutdown is not an uninstall or a zero-residue promise. The user's browser, clipboard and an edited proposal may retain their own copies; temporary service retention is not secure erasure.
 
 ## What happens if nobody answers within the wait?
 
@@ -92,9 +118,9 @@ Not in this slice. Both ordinary sessions and collection requests currently targ
 
 ## How fast and reliable is it?
 
-The implementation uses one Go process and embedded browser assets. The existing automated suite exercises temporary text sessions, fidelity, retry deduplication, cursor retrieval, capabilities, expiry, and limits; a compiled-program smoke test exercises the HTTP path.
+One Go service owns the state and embedded browser assets; a short-lived desktop launcher starts or reopens it. The existing automated suite exercises temporary text sessions, fidelity, retry deduplication, cursor retrieval, capabilities, expiry, and limits; a compiled-program smoke test exercises the HTTP path.
 
-Those are correctness checks, not a performance ranking or mobile acceptance. The first [measured baseline](docs/performance-baseline.md), with [raw samples](docs/benchmarks/2026-10-28-macos-arm64.json), records one macOS arm64 / Go 1.27.3 run of startup, RSS, and synthetic loopback API workloads against a frozen binary. Read startup percentiles with the observed maximum and note that closing inboxes did not immediately lower RSS. This is not a clean tagged-release build, a mobile tap-to-display measurement, Agent execution speed, or a cross-language ranking.
+Those are correctness checks, not a performance ranking or mobile acceptance. The earlier [measured baseline](docs/performance-baseline.md), with [raw samples](docs/benchmarks/2026-10-28-macos-arm64.json), records one macOS arm64 / Go 1.27.3 run against a specific prior CLI/core binary. Read startup percentiles with the observed maximum and note that closing inboxes did not immediately lower RSS. It does not measure this app's launch, browser opening, downloaded-file trust checks, mobile interaction, or Agent execution speed, and is not a clean tagged-release build or cross-language ranking.
 
 See [performance budgets](docs/performance.md), [verification](docs/verification.md), and [claims and evidence](docs/claims-evidence.md) for the conditions and remaining acceptance gaps. Do not interpret an ambition or a test fixture as a measured production result.
 
@@ -102,4 +128,6 @@ See [performance budgets](docs/performance.md), [verification](docs/verification
 
 The collection slice must pass request isolation, limits, expiry/cancellation, retry and repeated-read behavior, timeout/interruption, and regression checks for ordinary transfer. A compiled-CLI synthetic proposal scenario must show the request, feedback, and a consumer that avoids repeating the effect for the same input ID.
 
-Synthetic execution must be labeled as such. Browser copying/pasting, a real phone scanning the QR, and an actual Codex task continuing require separate recorded acceptance. They stay `NOT_RUN` when the environment cannot exercise them.
+Synthetic execution must be labeled as such. Recorded Safari loopback acceptance includes real copy/paste and the specific UI cases in [verification](docs/verification.md). It is not physical-phone QR/LAN, Finder/default-browser auto-opening, or actual Codex-host acceptance; those stay `NOT_RUN` until their own evidence exists.
+
+Packaging additionally needs checks against the actual archives: version/commit/architecture, bundled binary and documents, checksums, native executable behavior, desktop start/reopen/quit, CLI use of the desktop control file, and cleanup. Generating a `.app` is not all of those checks, and a local preview is not public distribution.
