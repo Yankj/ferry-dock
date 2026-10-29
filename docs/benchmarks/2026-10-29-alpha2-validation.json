@@ -1,0 +1,251 @@
+{
+  "artifacts": [
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-darwin-arm64/ferry-dock",
+        "sha256": "de875b08929fa3dc86557a6bf1164d043232c5078f7fb1958e46f61db0764d6c",
+        "size": 7387650
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz",
+      "goarch": "arm64",
+      "goos": "darwin",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "32221968d78612bfc4234701874201ab0e37c8dd10337db795021d4fb4230796",
+      "signing": {
+        "adHoc": true,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3260347
+    },
+    {
+      "binary": {
+        "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+        "sha256": "4086b2bf52061088c1b69bf3959d7ec1c9fd6aa60ad6d82af2f4ebac4122733a",
+        "size": 7387650
+      },
+      "defaultMode": "desktop",
+      "file": "ferry-dock-0.1.0-alpha.2-darwin-arm64-app.zip",
+      "goarch": "arm64",
+      "goos": "darwin",
+      "kind": "app",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "5c872fa71f6376344397fbec91cf24d7f5e68c75a700a6227ee3ac8fc2c15051",
+      "signing": {
+        "adHoc": true,
+        "bundleSigned": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3290056
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-darwin-amd64/ferry-dock",
+        "sha256": "d8d2994de7957e0e1c669221d8376bcbb6b41f30e622d026195d2402b3df1501",
+        "size": 7969712
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-darwin-amd64.tar.gz",
+      "goarch": "amd64",
+      "goos": "darwin",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "6825a61725e96da10b323b891fc4c76ba8cdb36eb6c589c36f7538ee921ad651",
+      "signing": {
+        "adHoc": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3529954
+    },
+    {
+      "binary": {
+        "path": "Ferry Dock.app/Contents/MacOS/ferry-dock",
+        "sha256": "daa7861c5b5ff906fd8d456fa084b0d6b0940f01f0ddab107804a7f886fb0a6c",
+        "size": 7969712
+      },
+      "defaultMode": "desktop",
+      "file": "ferry-dock-0.1.0-alpha.2-darwin-amd64-app.zip",
+      "goarch": "amd64",
+      "goos": "darwin",
+      "kind": "app",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "aa3b301003d0072e91ca4351d40ecdeb451c9bd4499ef20ed35b17054cab3545",
+      "signing": {
+        "adHoc": false,
+        "bundleSigned": false,
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3560691
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-linux-amd64/ferry-dock",
+        "sha256": "4ad68724682b15b106d090f01dbae4723869c00c5037389d843e66f5b4dd1f50",
+        "size": 7803004
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-linux-amd64.tar.gz",
+      "goarch": "amd64",
+      "goos": "linux",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "2961dbe9c11df342b4a7733f8813ec633395c8d56f0594bc22a87c82624d1f64",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3482298
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-linux-arm64/ferry-dock",
+        "sha256": "0838c8ce681edb5409ac3587c03c2ae41da8d101dfb87d116b3644a9de495111",
+        "size": 7209084
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-linux-arm64.tar.gz",
+      "goarch": "arm64",
+      "goos": "linux",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "cf134e661310bae931f63093d0a7b7c260fa56e00201947670162faa072ec6de",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3155650
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-windows-amd64/ferry-dock.exe",
+        "sha256": "7ff6b44ee112d49f48701ea26ee997b40577a4c0192dfd8dbf53e2d5b22b8ca9",
+        "size": 8028160
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-windows-amd64.zip",
+      "goarch": "amd64",
+      "goos": "windows",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "548894d86e365ddcaf01026687dccbbaaeecaf2c36be3910834d80fd005c3778",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3581387
+    },
+    {
+      "binary": {
+        "path": "ferry-dock-0.1.0-alpha.2-windows-arm64/ferry-dock.exe",
+        "sha256": "37b44e669929cba2f77673ae26a01364655f41e2d54c8d2df7b977a7b8a29130",
+        "size": 7288320
+      },
+      "defaultMode": "serve",
+      "file": "ferry-dock-0.1.0-alpha.2-windows-arm64.zip",
+      "goarch": "arm64",
+      "goos": "windows",
+      "kind": "cli",
+      "nativeValidation": "NOT_RUN",
+      "sha256": "b86e5aed3d8da7a09a12cd7b9fe330aca1d8122fe66b5f9b487482d07787765f",
+      "signing": {
+        "adHoc": "NOT_APPLICABLE",
+        "developerIdSigned": false,
+        "notarized": false,
+        "publisherSigned": false,
+        "scope": "executable"
+      },
+      "size": 3216317
+    }
+  ],
+  "command": "python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.2 --require-all",
+  "createdAt": "2026-10-29T03:57:37.184858+00:00",
+  "environment": {
+    "listen": "127.0.0.1:0",
+    "machine": "arm64",
+    "nativeTestHOME": "private temporary directory",
+    "nativeTestPATH": "/nonexistent",
+    "opensBrowser": false,
+    "python": "3.9.6",
+    "release": "27.0.0",
+    "stateDirectory": "explicit private temporary directory",
+    "system": "Darwin"
+  },
+  "errors": [],
+  "exitCode": 0,
+  "finishedAt": "2026-10-29T03:57:39.879558+00:00",
+  "limitations": [
+    "This harness tests the packaged binary directly with --no-open; it does not launch Finder or a browser",
+    "Zero-argument Finder app launch, default cache-directory discovery, real phone/LAN and downloaded Gatekeeper acceptance: NOT_RUN",
+    "Windows/Linux and macOS amd64 native runtime: NOT_RUN; archive header checks are not native execution",
+    "Per main-task report, Safari dark/mobile screenshots are BLOCKED at LocalAuthenticationRemoteService; GUI testing was paused without bypass",
+    "Per main-task report, desktop-light Safari interaction and Copy-label feedback were checked separately; those are not evidence produced by this harness",
+    "Local alpha packages are not Developer ID signed or Apple notarized; no publication or security-setting changes are performed"
+  ],
+  "manifest": {
+    "build": {
+      "cgoEnabled": false,
+      "pgo": false,
+      "trimpath": true,
+      "vcsStamping": false
+    },
+    "path": "0.1.0-alpha.2/manifest.json",
+    "sha256": "7118721719e37696f8d721017fa9cd8be11901e717cc682d2924ed3569ba7f47",
+    "source": {
+      "binaryCommit": "a351555ccd1615795bc2a6c10dd7e97a633a074f",
+      "commit": "a351555ccd1615795bc2a6c10dd7e97a633a074f",
+      "dirty": false,
+      "epoch": 1793246091,
+      "treeSha256": "66cdce9dd13a72becb20fd2fc056c64c0289b9484c101ea308b61fbaeb284bbc"
+    },
+    "toolchain": {
+      "go": "go version go1.27.3 darwin/arm64",
+      "goamd64": "v1",
+      "goarm64": "v8.0",
+      "goenv": "off",
+      "goexperiment": "",
+      "python": "3.9.6",
+      "zlib": "1.2.12"
+    },
+    "version": "0.1.0-alpha.2"
+  },
+  "schema": 1,
+  "smokeScriptSha256": "53c72519ea3b48097f137531d80060d564a4fb5d9d8da82a7c301e1ac6ce8191",
+  "startupBenchmark": {
+    "reason": "No alpha.2 startup timing claimed; alpha.1 measurements remain pinned to alpha.1",
+    "status": "NOT_REPEATED"
+  },
+  "status": "success",
+  "stderrLines": [],
+  "stdoutLines": [
+    "PASS PACKAGE: all 8 archive hashes, binary hashes/target headers, metadata, permissions, and layouts verified.",
+    "PASS PACKAGE_NATIVE: app default-mode flag dispatch, Chinese/space path + private HOME + PATH=/nonexistent, version metadata, readiness, CLI compatibility, reuse, quit, and stale recovery.",
+    "PASS PACKAGE_SAFETY: explicit occupied port fails without taking it over; unknown recorded service and private state remain untouched.",
+    "PASS PACKAGE_CLEANUP: verified owned processes stopped; private extracted/runtime files removed.",
+    "NOT_RUN: Finder double-click, browser rendering, real phone/LAN, downloaded Gatekeeper acceptance, notarization, Windows/Linux native runtime and Windows clean PATH.",
+    "NOT_RUN: zero-argument Finder app launch and OS-default cache-directory discovery; lifecycle uses app --no-open --state-dir.",
+    "Local archives only: no installation, global Agent configuration, security-setting change, or publication occurred."
+  ],
+  "versionDirectoryUnchanged": true
+}

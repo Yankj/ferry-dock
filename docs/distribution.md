@@ -4,7 +4,32 @@ Ferry Dock's user path is a prebuilt macOS app or native CLI archive. Git, Go, a
 
 ## Availability
 
-Current preview `0.1.0-alpha.2` is being prepared with the black, white, and gray visual revision. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks are blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed, while final artifacts, native package checks and rebuild evidence remain pending. [Verification](verification.md) preserves these scopes. The transfer/request API and install form remain unchanged. No alpha.1 byte size, hash, readiness timing, or pass is a claim about alpha.2. No public binary download has been published.
+Current local preview `0.1.0-alpha.2` is frozen at clean source `a351555ccd1615795bc2a6c10dd7e97a633a074f`, with the black, white, and gray visual revision. All eight archives passed package checks, Mac arm64 packaged lifecycle/CLI/safety checks passed, and a same-input rebuild matched all ten outputs byte-for-byte. Real Safari desktop-light ordinary send/receive and the **Copied** label passed; system paste was not repeated. Dark/phone-size GUI checks remain blocked by an interactive authentication boundary. Go tests and the 12 HTTP / 27 synthetic request / 11 VM / SCRIPT_HTTP checks passed. [Verification](verification.md) preserves these scopes. The transfer/request API and install form remain unchanged. No public binary download has been published.
+
+## Frozen alpha.2 artifact snapshot
+
+The [artifact manifest](benchmarks/2026-10-29-alpha2-artifacts.json) records source, toolchain, targets, sizes, binary/archive hashes and signing metadata. These are local archive identities, not public download links:
+
+| Local archive | Bytes |
+| --- | ---: |
+| `ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz` | 3,260,347 |
+| `ferry-dock-0.1.0-alpha.2-darwin-arm64-app.zip` | 3,290,056 |
+| `ferry-dock-0.1.0-alpha.2-darwin-amd64.tar.gz` | 3,529,954 |
+| `ferry-dock-0.1.0-alpha.2-darwin-amd64-app.zip` | 3,560,691 |
+| `ferry-dock-0.1.0-alpha.2-linux-amd64.tar.gz` | 3,482,298 |
+| `ferry-dock-0.1.0-alpha.2-linux-arm64.tar.gz` | 3,155,650 |
+| `ferry-dock-0.1.0-alpha.2-windows-amd64.zip` | 3,581,387 |
+| `ferry-dock-0.1.0-alpha.2-windows-arm64.zip` | 3,216,317 |
+
+Apple Silicon app ZIP SHA-256: `5c872fa71f6376344397fbec91cf24d7f5e68c75a700a6227ee3ac8fc2c15051`.
+
+The [validation receipt](benchmarks/2026-10-29-alpha2-validation.json) records exit-zero `smoke-package.py --require-all`: all eight archive/binary hashes, actual Mach-O/ELF/PE target headers, metadata, permissions and layouts passed. Mac arm64 native checks passed implicit app flag dispatch without a `desktop` subcommand, a Chinese/space extraction path, private HOME with `PATH=/nonexistent`, readiness, CLI compatibility, reuse, Quit, stale recovery, occupied-port/unknown-service safety and owned cleanup. Invocation used `--no-open --state-dir ... --listen 127.0.0.1:0`; it was not zero-argument Finder/default-cache launch or default-browser auto-opening. Intel Mac, Windows and Linux native execution remain **NOT_RUN**.
+
+The [rebuild receipt](benchmarks/2026-10-29-alpha2-reproducibility.json) records two complete builds from the same clean source/toolchain into different directories: all eight archives, `manifest.json` and `SHA256SUMS` matched byte-for-byte. All ten alpha.1 output hashes remained unchanged. This is not an arbitrary cross-toolchain reproducibility guarantee.
+
+These archives and their bundled snapshot documentation stay fixed at `a351555`; later evidence-document commits do not rebuild them. Manifest `nativeValidation: NOT_RUN` describes generation time, while the separate validation receipt records the subsequent scoped pass. **No new alpha.2 startup timing is claimed.** The alpha.1 measurements below remain historical and must not be applied to alpha.2.
+
+Finder/default-cache discovery, default-browser auto-opening, downloaded Gatekeeper acceptance, physical-phone LAN/QR, actual Codex-host and other-platform native acceptance remain **NOT_RUN**. Dark/phone-size GUI is **BLOCKED** as described above; calculated contrast is not an actual dark render or a full accessibility audit.
 
 ## Frozen alpha.1 artifact snapshot
 

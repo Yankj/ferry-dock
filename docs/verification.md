@@ -1,21 +1,36 @@
 # Verification record
 
-## Current alpha.2 visual revision
+## Current alpha.2 preview
 
-Version `0.1.0-alpha.2` is being prepared with black, white, and gray styling and
-translucent UI layers. Transfer/request contracts and the one-Go-core install
-form are unchanged. QR backgrounds and quiet zones remain opaque. The
-implementation lead recorded the following current-revision results:
+Version `0.1.0-alpha.2` is a local preview frozen at clean source
+`a351555ccd1615795bc2a6c10dd7e97a633a074f`, with black, white, and gray styling
+and translucent UI layers. Transfer/request contracts and the one-Go-core
+install form are unchanged. QR backgrounds and quiet zones remain opaque. The
+implementation lead and package validator recorded these current-revision results:
 
 | Alpha.2 check | Status and scope |
 | --- | --- |
 | Actual Safari desktop light | RECORDED_PASS: the black/white/gray desktop UI rendered; synthetic ordinary text sent through the UI appeared as one received item, and clicking Copy showed **Copied**. Actual OS paste was not repeated for this revision. |
 | Local screenshot | An original CUA JPEG was saved at ignored `bin/previews/desktop-light.jpg`. It is a local evidence file, not a published image or package asset. The pictured QR was revoked by the later service shutdown. |
-| Dark and phone-size GUI | BLOCKED at an unsupported interactive authentication boundary. GUI work paused without a retry or bypass; neither rendering mode is recorded as passed. |
-| Owned-service cleanup | RECORDED_PASS: API Quit returned 202, the socket closed, the control file was removed, and the owned QA files were cleaned. This was not the alpha.1 UI Quit case or zero-argument Finder acceptance. |
+| Dark and phone-size GUI | BLOCKED at an interactive desktop authentication boundary. A read-only inventory recheck did not restore interactive access; GUI work remains paused without a retry or bypass. Neither rendering mode is recorded as passed. This is not a code or package failure. |
+| Owned-service cleanup | RECORDED_PASS: API Quit returned 202, the socket closed, the control file was removed, and the owned QA files were cleaned. Private browser-window closure is deferred at the same GUI boundary. This was not the alpha.1 UI Quit case or zero-argument Finder acceptance. |
 | Automated regression | RECORDED_PASS: Go tests, 12 compiled-program HTTP checks, 27 synthetic request checks, 11 UI VM checks, and SCRIPT_HTTP. These do not replace rendered mobile/dark UI or physical-phone/Agent-host acceptance. |
 | Contrast | [Calculated source contrast](ui-contrast.md), not a pass for actual dark-mode browser rendering. |
-| Final artifacts | Archive/native/reproducible-build checks are **pending** for alpha.2; alpha.1 receipts below do not establish them. |
+| All eight final archives | RECORDED_PASS: archive/binary hashes, actual Mach-O/ELF/PE target headers, metadata, permissions and layouts. See the [manifest](benchmarks/2026-10-29-alpha2-artifacts.json) and [validation receipt](benchmarks/2026-10-29-alpha2-validation.json). |
+| Mac arm64 packaged native lifecycle | RECORDED_PASS: app implicit flag dispatch without a `desktop` subcommand, Chinese/space path, private HOME and `PATH=/nonexistent`, readiness, CLI compatibility, reuse, Quit, stale recovery, occupied-port rejection, unknown-service/private-state preservation and owned cleanup. `smoke-package.py --require-all` exited zero; `--no-open --state-dir ... --listen 127.0.0.1:0` does not establish zero-argument Finder/default-cache or automatic browser opening. |
+| Same-input rebuild and preservation | RECORDED_PASS: [two complete builds](benchmarks/2026-10-29-alpha2-reproducibility.json) from the same clean source/toolchain into different directories produced identical bytes for eight archives, manifest and checksums. All ten alpha.1 output hashes were unchanged. |
+
+The Apple Silicon alpha.2 app ZIP is **3,290,056 bytes**, SHA-256
+`5c872fa71f6376344397fbec91cf24d7f5e68c75a700a6227ee3ac8fc2c15051`.
+Its manifest's `nativeValidation` fields are generation-time state; the separate
+validation receipt records the later pass. Subsequent evidence-document commits
+do not rebuild the artifacts or their bundled snapshot documentation.
+
+No new alpha.2 startup timing is claimed; the 20-sample alpha.1 measurement below
+belongs only to clean `3d6fca8`. Finder/default-cache discovery, default-browser
+auto-opening, downloaded Gatekeeper acceptance, actual phone/LAN/QR, actual
+Codex-host, and Intel Mac/Windows/Linux native execution remain **NOT_RUN**.
+The blocked GUI checks were paused without a retry or bypass.
 
 The complete alpha.1 Safari/system-copy-paste observations below remain historical
 evidence for that revision, not a substitute for the unexecuted alpha.2 cases.
