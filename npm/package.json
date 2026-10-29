@@ -1,36 +1,23 @@
 {
   "name": "ferry-dock",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.4",
   "description": "Send phone text to your computer or the task that requested it.",
   "license": "MIT",
-  "bin": {
-    "ferry-dock": "bin/ferry-dock.cjs"
+  "bin": { "ferry-dock": "bin/ferry-dock.cjs" },
+  "files": ["bin/ferry-dock.cjs", "core.json", "skills/ferry-dock/SKILL.md", "docs/contracts/request-v1.md", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md"],
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["arm64", "x64"],
+  "engines": { "node": ">=22" },
+  "optionalDependencies": {
+    "ferry-dock-darwin-arm64": "0.1.0-alpha.4",
+    "ferry-dock-darwin-x64": "0.1.0-alpha.4",
+    "ferry-dock-linux-arm64": "0.1.0-alpha.4",
+    "ferry-dock-linux-x64": "0.1.0-alpha.4",
+    "ferry-dock-win32-arm64": "0.1.0-alpha.4",
+    "ferry-dock-win32-x64": "0.1.0-alpha.4"
   },
-  "files": [
-    "bin/ferry-dock.cjs",
-    "core.json",
-    "native/ferry-dock",
-    "skills/ferry-dock/SKILL.md",
-    "docs/contracts/request-v1.md",
-    "README.md",
-    "LICENSE",
-    "THIRD_PARTY_NOTICES.md"
-  ],
-  "os": ["darwin"],
-  "cpu": ["arm64"],
-  "engines": {
-    "node": ">=22"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Yankj/ferry-dock.git"
-  },
+  "repository": {"type": "git", "url": "git+https://github.com/Yankj/ferry-dock.git"},
   "homepage": "https://github.com/Yankj/ferry-dock#readme",
-  "bugs": {
-    "url": "https://github.com/Yankj/ferry-dock/issues"
-  },
-  "publishConfig": {
-    "access": "public",
-    "tag": "next"
-  }
+  "bugs": {"url": "https://github.com/Yankj/ferry-dock/issues"},
+  "publishConfig": {"access": "public", "tag": "next"}
 }

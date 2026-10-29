@@ -58,18 +58,18 @@ Closing the browser tab keeps the Go service running. Run `./ferry-dock desktop`
 
 ## Already use Node? Local package preview
 
-An npm package wraps the **same bundled Go binary**; it does not download a backend during installation or startup. This preview requires **arm64 Node.js 22+ on an Apple Silicon Mac**; use a supported LTS. The candidate package name `ferry-dock` is **not reserved or published on npm**, and the TGZ is not a GitHub Release asset. Do not run an unverified registry `npx ferry-dock` command.
+The new **unpublished `0.1.0-alpha.4` candidate** has one small Node.js 22+ entry and six matching native packages: macOS, Windows and Linux, each for x64 and arm64. It selects the package for the running Node process and executes that same Go core. Installation has no lifecycle scripts; startup never downloads a binary. Package selection and cross-compilation do not establish native acceptance on every platform. See the [platform matrix](docs/distribution.md#alpha4-platform-matrix).
 
-If you have been given the verified local `ferry-dock-0.1.0-alpha.2.tgz`, replace its absolute path below. This installs only into a new local directory:
+The package names are candidates, **not reserved or published on npm**. There is no working public `npx ferry-dock` recipe yet. For a local preview, obtain both the entry TGZ and the matching platform TGZ, with their checksum manifest. For example, on an arm64 Mac, replace both absolute paths:
 
 ```sh
-npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz /absolute/path/ferry-dock-0.1.0-alpha.4.tgz
 cd ferry-dock-node
 npm exec --offline --yes=false -- ferry-dock version
 npm exec --offline --yes=false -- ferry-dock
 ```
 
-For this npm entry only, no arguments map to **`desktop`**. Explicit `version`, `desktop`, `serve` and `request ...` pass through to the native command. The bundled manual Skill is at `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. There are no runtime dependencies or lifecycle install scripts. Use the public native download above if you do not have the local TGZ or Node. [Local-package instructions](docs/usage.md#node-users-local-package-only).
+For this npm entry, no arguments map to **`desktop`**; explicit command arguments pass through. The manual Skill remains at `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. Omitting optional dependencies may leave the native package absent: the launcher stops with a diagnostic rather than fetching one. A package update never kills or replaces a shared running service. [All platform names, local commands and limits](docs/usage.md#node-users-local-package-only).
 
 ## Already use Go?
 
@@ -82,20 +82,15 @@ GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-d
 
 This route compiles source. It was tested with Go 1.27.3 on Mac arm64; Go 1.26 native execution was not repeated. The installed command's `version` reports `dev` / `unknown` because this tag has no release linker metadata. Use `go version -m ./ferry-dock-bin/ferry-dock` to verify module `github.com/Yankj/ferry-dock` at `v0.1.0-alpha.2`. Do not interpret that development label as a different requested module version. Source installation is not promised to work offline. [Install details](docs/distribution.md#go-install-from-the-fixed-tag).
 
-## Other local preview entry points
+## Other platforms: local alpha.4 candidates
 
-Intel Mac/Linux/Windows CLI packages have been built locally but are **not uploaded in this prerelease**. If you have separately received a matching native CLI preview, run from its package root in a macOS/Linux POSIX shell:
+The alpha.4 packaging target is six native CLI archives: macOS `darwin` arm64/amd64, Windows arm64/amd64, and Linux arm64/amd64. **They are not public Release downloads.** The [matrix](docs/distribution.md#alpha4-platform-matrix) separates build inspection, native execution and publication. Only use a preview separately supplied for your platform, with its matching manifest/checksum file.
 
-```sh
-./ferry-dock version
-./ferry-dock desktop
-```
+On macOS/Linux, extract the matching `.tar.gz`, enter its version/platform directory, then run `./ferry-dock version` and `./ferry-dock desktop`. On Windows, extract the matching `.zip`, enter its version/platform directory in PowerShell, then run `.\ferry-dock.exe version` and `.\ferry-dock.exe desktop`. The [guide](docs/usage.md#2-other-local-preview-entry-points) gives exact examples and update/stop steps. Neither route needs Go, Git or Node. Native CLI without a subcommand defaults to foreground `serve`; use `desktop` explicitly.
 
-Windows uses `.\ferry-dock.exe` in PowerShell. Archive creation or cross-compilation does not establish native execution on every platform. The CLI defaults to foreground `serve` if run with no subcommand; use `desktop` explicitly for the browser launcher/background lifecycle.
+Linux desktop opening needs an available system opener and browser; headless machines can use foreground `serve` with an explicit reachable origin. No Windows or Linux GUI app is introduced. Minimum OS/kernel and downloaded-file trust acceptance are separate from archive construction.
 
-Do not follow the old alpha.1/alpha.2 App ZIP's “extract and open” instructions. Its complete-bundle signing defect is separate from archive corruption. Repairing the bundle and passing local strict signature verification would still not provide Developer ID signing, Apple notarization or downloaded-file Gatekeeper acceptance. Use the native CLI path above for the current published package.
-
-Both the CLI and app executable support JSON `version` and `request` commands. Version output includes `version`, `commit`, `os`, `arch`, and `defaultMode`. See [distribution](docs/distribution.md) for package layout and advanced `serve --listen ... --public-url ...` use.
+The old alpha.1/alpha.2 Mac App launch recommendation is withdrawn. The alpha.3 structural repair is retained; ad-hoc bundle validation is not Developer ID signing, notarization or Gatekeeper acceptance. [Incident evidence](docs/packaging-incident.md).
 
 ## Ordinary transfer stays simple
 
@@ -107,7 +102,7 @@ Ordinary text is limited to 64 KiB per message, 1 MiB and 128 messages per sessi
 
 Use an already running desktop instance and its private control path. On macOS the default is `~/Library/Caches/ferry-dock/runtime/control.json`; `desktop` also returns `controlPath`. Do not print the file: it contains process management authority.
 
-Set `ferry_bin` to the **absolute** prebuilt executable path: the extracted `ferry-dock`, or the verified local npm package's `native/ferry-dock`. Do not use a withdrawn alpha.1/alpha.2 App as the launcher. The following POSIX example assumes the desktop instance is ready and uses a new private directory:
+Set `ferry_bin` to the **absolute** prebuilt executable path: the extracted `ferry-dock`, or the verified local npm entry at `node_modules/.bin/ferry-dock` (with Node 22+ available in PATH). Do not use a withdrawn alpha.1/alpha.2 App as the launcher. The following POSIX example assumes the desktop instance is ready and uses a new private directory:
 
 ```sh
 ferry_bin="/absolute/path/to/ferry-dock"

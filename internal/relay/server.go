@@ -21,6 +21,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/Yankj/ferry-dock/brand"
+	"github.com/Yankj/ferry-dock/internal/buildinfo"
 	qrcode "github.com/skip2/go-qrcode"
 )
 
@@ -179,7 +180,8 @@ func (s *Server) desktopStatus(w http.ResponseWriter, r *http.Request) {
 	if !s.desktopOwner(w, r) {
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"desktop": true, "instanceId": s.config.Desktop.InstanceID, "publicUrl": s.config.PublicURL, "localOnly": s.config.PublicURL == s.config.LocalURL})
+	build := buildinfo.Current()
+	writeJSON(w, http.StatusOK, map[string]any{"desktop": true, "instanceId": s.config.Desktop.InstanceID, "publicUrl": s.config.PublicURL, "localOnly": s.config.PublicURL == s.config.LocalURL, "version": build.Version, "commit": build.Commit})
 }
 
 func (s *Server) desktopQuit(w http.ResponseWriter, r *http.Request) {

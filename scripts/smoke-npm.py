@@ -1,437 +1,319 @@
 #!/usr/bin/env python3
-"""Exercise a local npm tarball without registry login, publication or GUI.
+"""Native acceptance of seven local npm tarballs, offline and scripts disabled.
 
-Uses an existing Node/npm runtime and Python's standard library. npm installs
-only the supplied local package with scripts disabled, isolated empty config,
-private cache/HOME/prefix and offline mode. Every service belongs to this run.
-This is not registry distribution, a phone test, or browser acceptance.
+No registry writes/login, browser, phone or global configuration. Actual foreign
+platforms are not executed; VM checks are explicitly labeled dispatch simulation.
 """
 from __future__ import annotations
-
 import argparse
-import errno
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
 import re
-import select
 import shutil
 import signal
-import stat
 import subprocess
 import tarfile
 import tempfile
 import time
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, urlsplit
-from urllib.request import Request, urlopen
-
+from urllib.request import Request, urlopen, build_opener, ProxyHandler
 
 class Failure(Exception):
-    """Messages are fixed labels, never capability-bearing child output."""
-
+    pass
 
 def digest(data):
     return hashlib.sha256(data).hexdigest()
 
-
 def package_files(path):
-    entries = {}
-    total = 0
+    entries, total = {}, 0
     with tarfile.open(path, 'r:gz') as archive:
         for item in archive:
             name = item.name.rstrip('/')
             parts = name.split('/')
-            if (not name or '\\' in name or name.startswith('/')
-                    or parts[0] != 'package' or any(p in ('', '.', '..') for p in parts)):
-                raise Failure('npm archive contains an unsafe member name')
+            if not name or '\\' in name or name.startswith('/') or parts[0] != 'package' or any(p in ('','.','..') for p in parts):
+                raise Failure('unsafe npm archive member')
             if item.isdir():
                 continue
-            if not item.isfile() or name in entries:
-                raise Failure('npm archive contains a duplicate or non-regular member')
+            relative = '/'.join(parts[1:])
+            if not item.isfile() or relative in entries:
+                raise Failure('duplicate or nonregular npm member')
             total += item.size
             if total > 32 << 20 or len(entries) >= 100:
-                raise Failure('npm archive exceeds the acceptance bound')
-            relative = '/'.join(parts[1:])
+                raise Failure('npm archive exceeds acceptance bound')
             entries[relative] = (archive.extractfile(item).read(), item.mode & 0o777)
     return entries
 
+@contextmanager
+def private_directory():
+    directory = Path(tempfile.mkdtemp(prefix='ferry-dock-npm-check-'))
+    cleanup = {'preserve':False}
+    try:
+        yield directory,cleanup
+    finally:
+        if not cleanup['preserve']:
+            shutil.rmtree(directory)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--package', required=True, help='local npm pack .tgz file')
-    parser.add_argument('--node', required=True, help='existing supported Node executable')
-    parser.add_argument('--npm-cli', required=True, help='existing npm-cli.js, run by --node')
-    parser.add_argument('--receipt', default='bin/npm-validation.json')
+    parser.add_argument('--dist', required=True, type=Path)
+    parser.add_argument('--node', default=shutil.which('node'))
+    parser.add_argument('--npm-cli', type=Path)
+    parser.add_argument('--receipt', default='bin/npm-validation.json', type=Path)
     options = parser.parse_args()
-    archive = Path(options.package).resolve()
     node = Path(options.node).resolve()
-    npm_cli = Path(options.npm_cli).resolve()
-    receipt_path = Path(options.receipt).resolve()
-    checks = []
-    processes = []
-
-    def check(value, label):
+    if options.npm_cli is None:
+        candidates = [node.parent/'node_modules/npm/bin/npm-cli.js',node.parent.parent/'lib/node_modules/npm/bin/npm-cli.js']
+        if shutil.which('npm'):
+            candidates.append(Path(shutil.which('npm')).resolve())
+        options.npm_cli = next((p for p in candidates if p.is_file() and p.name == 'npm-cli.js'),None)
+    if options.npm_cli is None:
+        raise Failure('specify existing npm-cli.js with --npm-cli')
+    npm_cli = options.npm_cli.resolve()
+    distribution = options.dist.resolve()
+    manifest = json.loads((distribution/'npm-manifest.json').read_text())
+    checks, skips, processes = [], [], []
+    def check(value,label):
         if not value:
             raise Failure(label)
         checks.append(label)
-
-    files = package_files(archive)
-    check('package.json' in files, 'local tarball contains package metadata')
-    metadata = json.loads(files['package.json'][0])
-    package_name = metadata['name']
-    package_version = metadata['version']
-    check(metadata.get('os') == ['darwin'] and metadata.get('cpu') == ['arm64'],
-          'package declares only darwin/arm64 support')
-    check(not metadata.get('scripts') and not metadata.get('dependencies')
-          and not metadata.get('optionalDependencies'),
-          'package needs no lifecycle scripts or runtime dependency downloads')
-    check(metadata.get('bin', {}).get('ferry-dock') == 'bin/ferry-dock.cjs',
-          'package exposes the documented command')
-    allow_roots = {'package.json', 'core.json', 'LICENSE', 'README.md',
-                   'README.zh-CN.md', 'THIRD_PARTY_NOTICES.md', 'SECURITY.md'}
-    allow_prefixes = ('skills/ferry-dock/', 'docs/')
-    for name, (data, mode) in files.items():
-        check(name in allow_roots or name in ('bin/ferry-dock.cjs', 'native/ferry-dock')
-              or name.startswith(allow_prefixes), 'tarball allowlist: ' + name)
-        check(not any(p.startswith('.') for p in PurePosixPath(name).parts),
-              'tarball contains no dotfiles: ' + name)
-        if name != 'native/ferry-dock':
-            check(not re.search(rb'(?:npm_[A-Za-z0-9]{36}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|#owner=[A-Za-z0-9_-]{32,})', data),
-                  'text artifact has no credential pattern: ' + name)
-    check(files['native/ferry-dock'][1] & 0o111 != 0,
-          'packed Go executable retains executable mode')
-    check(files['bin/ferry-dock.cjs'][1] & 0o111 != 0,
-          'packed npm entry retains executable mode')
-
-    with tempfile.TemporaryDirectory(prefix='ferry-dock-npm-check-') as temporary:
-        private = Path(temporary)
-        prefix = private / '中文 package with spaces'
+    check(len(manifest['packages']) == 7, 'exactly one thin entry and six native platform packages')
+    records, packed_files = {}, {}
+    for record in manifest['packages']:
+        target = record['target']
+        archive = distribution/record['file']
+        check(archive.stat().st_size == record['size'] and digest(archive.read_bytes()) == record['sha256'], target+' tarball size and checksum')
+        files = package_files(archive)
+        check(sorted(files) == record['files'], target+' exact file allowlist')
+        package = json.loads(files['package.json'][0])
+        check(package['version'] == manifest['version'] and package['name'] == record['name'], target+' package identity/version')
+        check(not package.get('scripts') and not package.get('dependencies'),target+' has no install scripts or nonoptional dependencies')
+        if target == 'entry':
+            check(package['bin'] == {'ferry-dock':'bin/ferry-dock.cjs'} and len(package['optionalDependencies']) == 6
+                  and set(package['optionalDependencies'].values()) == {manifest['version']}, 'entry pins all six optional packages to exactly its version')
+            check(not any(name.startswith('native/') for name in files), 'thin entry contains no native executable')
+        else:
+            check(package['os'] == [target.split('-')[0]] and package['cpu'] == [target.split('-')[1]], target+' npm platform constraints')
+            core = json.loads(files['core.json'][0])
+            binary_name = 'native/ferry-dock.exe' if target.startswith('win32-') else 'native/ferry-dock'
+            check(len(files[binary_name][0]) == core['binarySize'] and digest(files[binary_name][0]) == core['binarySha256'],target+' executable identity')
+        for name,(data,mode) in files.items():
+            check(not any(p.startswith('.') for p in PurePosixPath(name).parts), target+' no dotfiles: '+name)
+            if not name.startswith('native/'):
+                check(not re.search(rb'(?:npm_[A-Za-z0-9]{36}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|#owner=[A-Za-z0-9_-]{32,})',data), target+' no credential pattern: '+name)
+        records[target],packed_files[target] = record,files
+    sums = (distribution/'SHA256SUMS').read_text().splitlines()
+    expected_sums = {p['file']:p['sha256'] for p in manifest['packages']}
+    expected_sums['npm-manifest.json'] = digest((distribution/'npm-manifest.json').read_bytes())
+    check(len(sums) == len(expected_sums) and {row.split('  ',1)[1]:row.split('  ',1)[0] for row in sums} == expected_sums,'checksums cover exactly seven packages and npm provenance manifest')
+    check(manifest['entrySource']['commit'] == manifest['coreCommit'] and manifest['entrySource']['dirty'] is False,'entry and native code share the same clean source identity')
+    with private_directory() as (private,cleanup):
+        prefix = private/'中文 package with spaces'
         prefix.mkdir(mode=0o700)
-        home = private / 'home'
-        home.mkdir(mode=0o700)
-        cache = private / 'cache'
-        cache.mkdir(mode=0o700)
-        configs = []
-        for label in ('user', 'global'):
-            config = private / (label + '.npmrc')
-            config.touch(mode=0o600)
-            configs.append(config)
-        environment = {
-            'HOME': str(home), 'PATH': str(node.parent) + os.pathsep + '/usr/bin:/bin',
-            'TMPDIR': str(private), 'LANG': 'en_US.UTF-8', 'TERM': 'xterm-256color',
-            'NPM_CONFIG_USERCONFIG': str(configs[0]),
-            'NPM_CONFIG_GLOBALCONFIG': str(configs[1]),
-            'NPM_CONFIG_CACHE': str(cache), 'NPM_CONFIG_OFFLINE': 'true',
-            'NPM_CONFIG_IGNORE_SCRIPTS': 'true', 'NPM_CONFIG_AUDIT': 'false',
-            'NPM_CONFIG_FUND': 'false', 'NPM_CONFIG_UPDATE_NOTIFIER': 'false',
-            'NPM_CONFIG_REGISTRY': 'https://registry.npmjs.org/',
-        }
-
-        def run(command, label, timeout=20, cwd=prefix, env=environment, success=True):
+        home,cache = private/'home',private/'cache'
+        home.mkdir(mode=0o700);cache.mkdir(mode=0o700)
+        configs = [private/'user.npmrc',private/'global.npmrc']
+        for path in configs:
+            path.touch(mode=0o600)
+        environment = {'HOME':str(home),'USERPROFILE':str(home),'PATH':str(node.parent)+os.pathsep+os.defpath,
+                       'TMPDIR':str(private),'TMP':str(private),'TEMP':str(private),'LANG':'en_US.UTF-8','TERM':'xterm-256color',
+                       'NPM_CONFIG_USERCONFIG':str(configs[0]),'NPM_CONFIG_GLOBALCONFIG':str(configs[1]),
+                       'NPM_CONFIG_CACHE':str(cache),'NPM_CONFIG_OFFLINE':'true','NPM_CONFIG_IGNORE_SCRIPTS':'true',
+                       'NPM_CONFIG_AUDIT':'false','NPM_CONFIG_FUND':'false','NPM_CONFIG_UPDATE_NOTIFIER':'false',
+                       'NPM_CONFIG_REGISTRY':'https://registry.npmjs.org/'}
+        for key in ('SystemRoot','WINDIR','COMSPEC','PATHEXT','LOCALAPPDATA'):
+            if key in os.environ:
+                environment[key] = os.environ[key]
+        def run(command,label,timeout=30,cwd=prefix,success=True):
             try:
-                result = subprocess.run([str(p) for p in command], cwd=cwd, env=env,
-                                        capture_output=True, timeout=timeout)
+                value = subprocess.run([str(p) for p in command],cwd=cwd,env=environment,capture_output=True,timeout=timeout)
             except subprocess.TimeoutExpired:
-                raise Failure(label + ': timed out') from None
+                raise Failure(label+': timed out') from None
             if success:
-                check(result.returncode == 0, label)
-            return result
+                check(value.returncode == 0,label)
+            return value
+        observed = json.loads(run([node,'-p','JSON.stringify({node:process.versions.node,os:process.platform,cpu:process.arch})'],'inspect existing Node runtime').stdout)
+        target = observed['os']+'-'+observed['cpu']
+        check(target in records and int(observed['node'].split('.')[0]) >= 22,'actual runtime is one supported Node22+ platform')
+        npm = [node,npm_cli]
+        npm_version = run(npm+['--version'],'inspect existing npm runtime').stdout.decode().strip()
+        host,entry_record = records[target],records['entry']
+        install = npm+['install','--offline','--ignore-scripts','--no-audit','--no-fund','--package-lock=false','--prefix',prefix,
+                       distribution/host['file'],distribution/entry_record['file']]
+        run(install,'offline local install with explicit native and entry tarballs; scripts disabled',timeout=90)
+        installed = prefix/'node_modules'/entry_record['name']
+        native_package = prefix/'node_modules'/host['name']
+        entry = installed/'bin/ferry-dock.cjs'
+        binary_name = 'ferry-dock.exe' if target.startswith('win32-') else 'ferry-dock'
+        binary = native_package/'native'/binary_name
+        check(entry.is_file() and binary.is_file(),'matching platform package installed beside thin entry')
+        omitted = private/'omitted optional dependencies'
+        run(npm+['install','--offline','--ignore-scripts','--omit=optional','--no-audit','--no-fund','--package-lock=false','--prefix',omitted,distribution/entry_record['file']],'entry can install offline with optional packages deliberately omitted')
+        missing = run([node,omitted/'node_modules'/entry_record['name']/'bin/ferry-dock.cjs','version'],'omitted optional package runtime rejection',success=False)
+        check(missing.returncode == 127 and not missing.stdout and b'optional' in missing.stderr,'--omit=optional produces actionable error without binary download')
 
-        observed = json.loads(run([node, '-p', 'JSON.stringify({node:process.versions.node,os:process.platform,cpu:process.arch})'],
-                                  'inspect existing Node runtime').stdout)
-        check(int(observed['node'].split('.')[0]) >= 22 and observed['os'] == 'darwin'
-              and observed['cpu'] == 'arm64', 'runtime is existing Node 22+ on darwin/arm64')
-        npm_version = run([node, npm_cli, '--version'], 'inspect existing npm runtime').stdout.decode().strip()
-        npm = [node, npm_cli]
-        run(npm + ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund',
-                   '--package-lock=false', '--prefix', prefix, archive],
-            'local offline npm install with scripts disabled', timeout=30)
-        installed = prefix / 'node_modules' / package_name
-        entry = installed / 'bin/ferry-dock.cjs'
-        binary = installed / 'native/ferry-dock'
-        check(entry.is_file() and binary.is_file(), 'local package installed under private prefix')
-        check(digest(binary.read_bytes()) == digest(files['native/ferry-dock'][0]),
-              'installed executable equals packed executable')
-        check((prefix / 'node_modules/.bin/ferry-dock').exists(), 'npm created the executable command link')
-        repack = private / 'repack'
-        repack.mkdir(mode=0o700)
-        packed = run(npm + ['pack', installed, '--offline', '--ignore-scripts', '--json',
-                            '--pack-destination', repack], 'local npm pack with scripts disabled')
-        pack_result = json.loads(packed.stdout)[0]
-        repacked = package_files(repack / pack_result['filename'])
-        check(set(repacked) == set(files), 'npm repack preserves the exact content allowlist')
-        check(all(repacked[name][0] == value[0] for name, value in files.items()),
-              'npm repack preserves all packaged file bytes')
-
-        def cli(*args, success=True, timeout=20):
-            return run([node, entry, *args], 'wrapper command exit zero',
-                       timeout=timeout, success=success)
-
-        result = run(npm + ['exec', '--offline', '--yes=false', '--prefix', prefix,
-                            '--', 'ferry-dock', 'version'],
-                     'installed npm exec works offline without registry download')
+        check(digest(binary.read_bytes()) == digest(packed_files[target]['native/'+binary_name][0]),'installed native executable equals tarball')
+        def cli(*args,success=True,timeout=30):
+            return run([node,entry,*args],'wrapper command exit zero',timeout=timeout,success=success)
+        result = run(npm+['exec','--offline','--yes=false','--prefix',prefix,'--','ferry-dock','version'],'local npm exec stays offline')
         version = json.loads(result.stdout)
-        check(version.get('version') == '0.1.0-alpha.2'
-              and version.get('commit') == 'a351555ccd1615795bc2a6c10dd7e97a633a074f',
-              'npm execution returns the exact frozen core identity')
-        invalid = cli('not-a-command', success=False)
-        check(invalid.returncode == 2 and not invalid.stdout,
-              'native invalid-command exit code and stdout survive wrapper')
-        check(cli('request', 'create', '--help').stdout == b'',
-              'help diagnostics do not pollute JSON stdout')
-
-        # VM execution is explicitly a dispatch/guard unit check, not another OS.
-        vm_script = private / 'wrapper-vm.cjs'
-        vm_script.write_text(r'''const fs = require('node:fs');
-const vm = require('node:vm');
-const path = require('node:path');
-const source = fs.readFileSync(process.argv[2], 'utf8');
-const dirname = path.dirname(process.argv[2]);
-function inspect(platform, arch, nodeVersion, args) {
-  let spawned = null, exit = null, stderr = '';
-  const stop = new Error('expected VM stop');
-  const fake = Object.create(process);
-  Object.defineProperties(fake, {
-    platform: {value: platform}, arch: {value: arch},
-    versions: {value: {...process.versions, node: nodeVersion}},
-    version: {value: 'v' + nodeVersion},
-    argv: {value: [process.execPath, process.argv[2], ...args]},
-    stderr: {value: {write(s) { stderr += s; }}},
-    stdout: {value: {write() { throw new Error('unexpected stdout'); }}},
-    exit: {value(code) { exit = code; throw stop; }},
-    on: {value() { return fake; }}, once: {value() { return fake; }},
-    removeListener: {value() { return fake; }}
-    ,exitCode: {value: undefined, writable: true}
-  });
-  function load(name) {
-    if (name === 'node:child_process' || name === 'child_process') return {
-      spawn(file, argv, options) { spawned = {file, argv, options}; throw stop; }
-    };
-    return require(name);
-  }
-  try { vm.runInNewContext(source, {require: load, process: fake, __dirname: dirname,
-    __filename: process.argv[2], console, Buffer, setTimeout, clearTimeout}); }
-  catch (error) { if (error !== stop) throw error; }
-  return {spawned, exit: exit === null ? fake.exitCode : exit, stderr};
-}
-const defaults = inspect('darwin', 'arm64', process.versions.node, []);
-const literal = ['request', 'create', '--prompt', 'literal $(touch NEVER_RUN); 中文'];
-const forwarded = inspect('darwin', 'arm64', process.versions.node, literal);
-const wrongOS = inspect('linux', 'x64', process.versions.node, ['version']);
-const wrongCPU = inspect('darwin', 'x64', process.versions.node, ['version']);
-const oldNode = inspect('darwin', 'arm64', '18.0.0', ['version']);
-if (!defaults.spawned || JSON.stringify(defaults.spawned.argv) !== '["desktop"]') throw new Error('no-argument dispatch');
-if (!forwarded.spawned || JSON.stringify(forwarded.spawned.argv) !== JSON.stringify(literal)) throw new Error('argv forwarding');
-if (forwarded.spawned.options.shell !== false || forwarded.spawned.options.stdio !== 'inherit') throw new Error('spawn safety');
-if (!path.isAbsolute(forwarded.spawned.file)) throw new Error('binary path');
-for (const state of [wrongOS, wrongCPU, oldNode]) if (state.spawned || !state.exit || !state.stderr) throw new Error('guard');
-process.stdout.write(JSON.stringify({noArgsToDesktop:true,argvLiteral:true,noShell:true,stdioInherited:true,
-  unsupportedOSGuard:true,unsupportedCPUGuard:true,oldNodeGuard:true,scope:'VM only'}));
-''')
-        vm = json.loads(run([node, vm_script, entry], 'VM no-arg/argv/platform/runtime dispatch guards').stdout)
-        check(vm.get('noArgsToDesktop') and vm.get('unsupportedOSGuard')
-              and vm.get('unsupportedCPUGuard') and vm.get('oldNodeGuard'),
-              'VM guards passed without claiming native other-platform execution')
-
-        for kind in ('missing', 'tampered', 'unexecutable'):
-            clone = private / ('package-' + kind)
-            shutil.copytree(installed, clone)
-            target = clone / 'native/ferry-dock'
-            if kind == 'missing':
-                target.unlink()
+        check(version['version'] == manifest['version'] and version['commit'] == manifest['coreCommit'],'exact clean native version/commit through npm')
+        invalid = cli('not-a-command',success=False)
+        check(invalid.returncode == 2 and not invalid.stdout,'native stderr/exit2 preserved without stdout pollution')
+        check(not cli('request','create','--help').stdout,'help does not pollute JSON stdout')
+        # Repack root and selected platform: exact file bytes, never install scripts.
+        repack = private/'repack';repack.mkdir()
+        for package_dir,expected,target_label in ((installed,packed_files['entry'],'entry'),(native_package,packed_files[target],target)):
+            info = json.loads(run(npm+['pack',package_dir,'--offline','--ignore-scripts','--json','--pack-destination',repack],target_label+' local repack').stdout)[0]
+            actual = package_files(repack/info['filename'])
+            check(set(actual) == set(expected) and all(actual[n][0] == expected[n][0] for n in expected),target_label+' repack preserves allowlist and bytes')
+        # Clone only this run's node_modules for negative installation tests.
+        for kind in ('missing-optional','wrong-version','tampered','missing-binary','unexecutable'):
+            if kind == 'unexecutable' and os.name == 'nt':
+                skips.append('POSIX executable mode rejection: not applicable on Windows')
+                continue
+            clone = private/('negative-'+kind)
+            shutil.copytree(prefix/'node_modules',clone/'node_modules')
+            p = clone/'node_modules'/host['name']
+            b = p/'native'/binary_name
+            if kind == 'missing-optional':
+                shutil.rmtree(p)
+            elif kind == 'wrong-version':
+                meta = json.loads((p/'package.json').read_text());meta['version']='0.0.0';(p/'package.json').write_text(json.dumps(meta))
             elif kind == 'tampered':
-                with target.open('ab') as stream:
-                    stream.write(b'not-the-approved-core')
+                data = b.read_bytes(); b.write_bytes(bytes([data[0]^1])+data[1:])
+            elif kind == 'missing-binary':
+                b.unlink()
             else:
-                target.chmod(0o600)
-            bad = run([node, clone/'bin/ferry-dock.cjs', 'version'], kind+' binary failure',
-                      success=False)
-            expected = {'missing': 127, 'tampered': 1, 'unexecutable': 126}[kind]
-            check(bad.returncode == expected and not bad.stdout and bool(bad.stderr),
-                  kind + ' binary is rejected clearly without stdout contamination')
-
-        # Real lifecycle stays isolated, explicitly suppressing the OS browser.
-        state_dir = private / 'desktop-state'
+                b.chmod(0o600)
+            bad = run([node,clone/'node_modules'/entry_record['name']/'bin/ferry-dock.cjs','version'],kind+' rejects',success=False)
+            expected = 127 if kind in ('missing-optional','missing-binary') else 126 if kind == 'unexecutable' else 1
+            check(bad.returncode == expected and not bad.stdout and bad.stderr,kind+' actionable failure without download/stdout')
+        # Native process/HTTP acceptance with synthetic non-sensitive input only.
         state = None
+        control = None
+        opener = build_opener(ProxyHandler({}))
+        def api(method,route,token,payload=None):
+            body = json.dumps(payload).encode() if payload is not None else None
+            request = Request(state['serverUrl']+route,data=body,method=method,headers={'Authorization':'Bearer '+token,'Content-Type':'application/json'})
+            try:
+                response = opener.open(request,timeout=5)
+            except HTTPError as error:
+                response=error
+            with response:
+                raw=response.read(); return response.status,json.loads(raw) if raw else None
         try:
-            started = json.loads(cli('desktop', '--no-open', '--state-dir', state_dir,
-                                     '--listen', '127.0.0.1:0').stdout)
-            check(started.get('state') == 'ready' and not started.get('reused'),
-                  'real explicit no-GUI desktop starts and launcher returns')
-            control = Path(started['controlPath'])
-            state = json.loads(control.read_text())
-
-            def api(method, route, token, payload=None):
-                body = json.dumps(payload).encode() if payload is not None else None
-                request = Request(state['serverUrl']+route, data=body, method=method,
-                                  headers={'Authorization': 'Bearer '+token,
-                                           'Content-Type': 'application/json'})
+            state_dir = private/'desktop 状态 with spaces'
+            control = state_dir/'control.json'
+            started = json.loads(cli('desktop','--no-open','--state-dir',state_dir,'--listen','127.0.0.1:0').stdout)
+            check(started.get('state') == 'ready' and not started.get('reused'),'owned no-browser desktop starts and launcher returns')
+            control = Path(started['controlPath']);state=json.loads(control.read_text())
+            check(api('GET','/api/desktop',state['ownerToken'])[0] == 200,'Go service survives Node launcher completion')
+            again=json.loads(cli('desktop','--no-open','--state-dir',state_dir,'--listen','127.0.0.1:0').stdout)
+            check(again.get('reused') is True,'same-version authenticated desktop reused')
+            handle=private/'中文 request handle with spaces.json'
+            marker=private/'SHELL_MUST_NOT_RUN'
+            prompt='中文 "quoted" ; $(touch '+str(marker)+') `touch '+str(marker)+'`'
+            created=json.loads(cli('request','create','--control',control,'--task-id','npm-literal','--prompt',prompt,'--handle',handle,'--ttl','15m').stdout)
+            check(created['request']['prompt']==prompt and not marker.exists(),'Unicode quotes and shell metacharacters remain literal argv')
+            waited=json.loads(cli('request','wait','--handle',handle,'--timeout','100ms').stdout)
+            check(waited['request']['state']=='pending' and waited['timedOut'] is True,'bounded wait times out without canceling request')
+            if os.name != 'nt':
+                for sig in (signal.SIGINT,signal.SIGTERM):
+                    process=subprocess.Popen([str(node),str(entry),'request','wait','--handle',str(handle),'--timeout','10s'],cwd=prefix,env=environment,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True)
+                    processes.append(process);time.sleep(.3);process.send_signal(sig)
+                    output,_=process.communicate(timeout=15)
+                    check(process.returncode==130 and json.loads(output)['error']['code']=='wait_canceled',signal.Signals(sig).name+' forwarded to Go wait, exit130')
+                    check(json.loads(cli('request','status','--handle',handle).stdout)['state']=='pending','signal interrupted wait only')
+                # PTY console generated Ctrl+C on real POSIX host.
+                import errno, fcntl, select, termios
+                master,slave=os.openpty();attrs=termios.tcgetattr(slave);attrs[3]=(attrs[3]|termios.ISIG)&~termios.ECHO;termios.tcsetattr(slave,termios.TCSANOW,attrs)
+                def terminal_child():
+                    os.setsid();fcntl.ioctl(slave,termios.TIOCSCTTY,0)
                 try:
-                    response = urlopen(request, timeout=5)
-                except HTTPError as error:
-                    response = error
-                with response:
-                    raw = response.read()
-                    return response.status, json.loads(raw) if raw else None
-
-            code, info = api('GET', '/api/desktop', state['ownerToken'])
-            check(code == 200 and info.get('desktop') is True,
-                  'Go service survives npm/Node launcher completion')
-            again = cli('desktop', '--no-open', '--state-dir', state_dir,
-                        '--listen', '127.0.0.1:0')
-            check(json.loads(again.stdout).get('reused') is True,
-                  'relaunch reuses the authenticated owned service')
-            check(b'reus' in again.stderr.lower() or b'existing' in again.stderr.lower(),
-                  'desktop warns that reused service may have a different package version')
-            handle = private / '中文 request with spaces.json'
-            marker = prefix / 'SHELL_MUST_NOT_RUN'
-            prompt = '中文 feedback "quoted" ; $(touch '+str(marker)+') `touch '+str(marker)+'`'
-            created = json.loads(cli('request', 'create', '--control', control,
-                                     '--task-id', 'npm-literal-task', '--prompt', prompt,
-                                     '--handle', handle, '--ttl', '15m', '--max-bytes', '16384').stdout)
-            check(created['request']['prompt'] == prompt and not marker.exists(),
-                  'real quoted Unicode/shell metacharacter argv remains literal task data')
-
-            def pending():
-                return json.loads(cli('request', 'status', '--handle', handle).stdout)['state'] == 'pending'
-
-            for sig in (signal.SIGINT, signal.SIGTERM):
-                process = subprocess.Popen([str(node), str(entry), 'request', 'wait',
-                                            '--handle', str(handle), '--timeout', '10s'],
-                                           cwd=prefix, env=environment, stdout=subprocess.PIPE,
-                                           stderr=subprocess.PIPE, start_new_session=True)
-                processes.append(process)
-                time.sleep(.25)
-                process.send_signal(sig)
-                output, _ = process.communicate(timeout=15)
-                check(process.returncode == 130 and json.loads(output)['error']['code'] == 'wait_canceled',
-                      signal.Signals(sig).name+' reaches Go wait and preserves numeric exit 130')
-                check(pending(), signal.Signals(sig).name+' interrupts only waiting, not the request')
-
-            # A separate controlling terminal tests terminal-generated Ctrl+C.
-            import fcntl
-            import termios
-            master, slave = os.openpty()
-            attrs = termios.tcgetattr(slave)
-            attrs[3] = (attrs[3] | termios.ISIG) & ~termios.ECHO
-            termios.tcsetattr(slave, termios.TCSANOW, attrs)
-
-            def terminal_child():
-                os.setsid()
-                fcntl.ioctl(slave, termios.TIOCSCTTY, 0)
-
-            pty_process = None
-            try:
-                pty_process = subprocess.Popen([str(node), str(entry), 'request', 'wait',
-                                                '--handle', str(handle), '--timeout', '10s'],
-                                               cwd=prefix, env=environment, stdin=slave,
-                                               stdout=slave, stderr=slave, preexec_fn=terminal_child)
-                processes.append(pty_process)
-                os.close(slave)
-                slave = None
-                time.sleep(.3)
-                os.write(master, b'\x03')
-                captured = b''
-                deadline = time.monotonic()+15
-                while time.monotonic() < deadline:
-                    readable, _, _ = select.select([master], [], [], .1)
-                    if readable:
-                        try:
-                            piece = os.read(master, 65536)
-                        except OSError as error:
-                            if error.errno == errno.EIO:
-                                break
-                            raise
-                        if not piece:
-                            break
-                        captured += piece
-                    elif pty_process.poll() is not None:
-                        break
-                pty_process.wait(timeout=1)
-                rows = [line for line in captured.splitlines() if line.startswith(b'{')]
-                check(pty_process.returncode == 130 and rows
-                      and json.loads(rows[-1])['error']['code'] == 'wait_canceled',
-                      'PTY terminal Ctrl+C forwards once and keeps wait cancellation result')
-                check(pending(), 'PTY Ctrl+C leaves request pending')
-            finally:
-                if slave is not None:
-                    os.close(slave)
-                os.close(master)
-
-            fragment = parse_qs(urlsplit(created['sendUrl']).fragment)
-            text = '  npm phone → same task\n客户：增加两周试点。  '
-            code, _ = api('POST', '/api/requests/'+fragment['request'][0]+'/input',
-                          fragment['key'][0], {'idempotencyKey':'npm-check-one','text':text})
-            check(code == 201, 'synthetic phone submission through npm-created request')
-            result = json.loads(cli('request', 'read', '--handle', handle).stdout)
-            repeat = json.loads(cli('request', 'read', '--handle', handle).stdout)
-            check(result['input']['text'] == text and result['input']['trust'] == 'untrusted_user_input'
-                  and result['input']['id'] == repeat['input']['id'],
-                  'same npm request reads exact untrusted text with stable repeated input ID')
-            code, session = api('POST', '/api/sessions', state['ownerToken'], {})
-            check(code == 201, 'ordinary transfer remains available')
-            sender = parse_qs(urlsplit(session['sendUrl']).fragment)['key'][0]
-            route = '/api/sessions/'+session['id']
-            check(api('POST', route+'/messages', sender,
-                      {'idempotencyKey':'npm-ordinary-one','text':text})[0] == 201,
-                  'ordinary sender accepted while npm entry is installed')
-            code, inbox = api('GET', route, state['ownerToken'])
-            check(code == 200 and inbox['messages'][0]['text'] == text,
-                  'ordinary computer read preserves text')
-            check(api('POST', '/api/desktop/quit', state['ownerToken'], {})[0] == 202,
-                  'own desktop Quit accepted')
-            deadline = time.monotonic()+5
-            while control.exists() and time.monotonic() < deadline:
-                time.sleep(.02)
-            check(not control.exists(), 'own service control file removed after Quit')
-            try:
-                urlopen(state['serverUrl']+'/healthz', timeout=1)
-            except OSError:
-                check(True, 'own service socket closed after Quit')
+                    process=subprocess.Popen([str(node),str(entry),'request','wait','--handle',str(handle),'--timeout','10s'],cwd=prefix,env=environment,stdin=slave,stdout=slave,stderr=slave,preexec_fn=terminal_child)
+                    processes.append(process);os.close(slave);slave=None;time.sleep(.3);os.write(master,b'\x03');captured=b'';deadline=time.monotonic()+15
+                    while time.monotonic()<deadline:
+                        ready,_,_=select.select([master],[],[],.1)
+                        if ready:
+                            try: piece=os.read(master,65536)
+                            except OSError as error:
+                                if error.errno==errno.EIO:break
+                                raise
+                            if not piece:break
+                            captured+=piece
+                        elif process.poll() is not None:break
+                    process.wait(timeout=2)
+                    rows=[line for line in captured.splitlines() if line.startswith(b'{')]
+                    check(process.returncode==130 and rows and json.loads(rows[-1])['error']['code']=='wait_canceled','real POSIX PTY Ctrl+C cancellation')
+                finally:
+                    if slave is not None:os.close(slave)
+                    os.close(master)
             else:
-                raise Failure('owned service remained alive after Quit')
-            state = None
+                skips.append('Windows real console Ctrl+C/CTRL_BREAK: needs interactive console; bounded wait and explicit request cancel tested')
+            fragment=parse_qs(urlsplit(created['sendUrl']).fragment)
+            text='  npm phone → same task\n客户：增加两周试点。  '
+            check(api('POST','/api/requests/'+fragment['request'][0]+'/input',fragment['key'][0],{'idempotencyKey':'npm-one','text':text})[0]==201,'synthetic sender submission')
+            read=json.loads(cli('request','read','--handle',handle).stdout);repeat=json.loads(cli('request','read','--handle',handle).stdout)
+            check(read['input']['text']==text and read['input']['trust']=='untrusted_user_input' and read['input']['id']==repeat['input']['id'],'request exact untrusted text and stable repeated read')
+            canceled_handle=private/'cancel.json'
+            cli('request','create','--control',control,'--task-id','npm-cancel','--prompt','cancel example','--handle',canceled_handle)
+            canceled=json.loads(cli('request','cancel','--handle',canceled_handle).stdout)
+            check(canceled['state']=='canceled','explicit request cancellation remains distinct')
+            code,session=api('POST','/api/sessions',state['ownerToken'],{})
+            check(code==201,'ordinary transfer still available')
+            token=parse_qs(urlsplit(session['sendUrl']).fragment)['key'][0];route='/api/sessions/'+session['id']
+            check(api('POST',route+'/messages',token,{'idempotencyKey':'npm-ordinary','text':text})[0]==201,'ordinary sender accepted')
+            code,inbox=api('GET',route,state['ownerToken']);check(code==200 and inbox['messages'][0]['text']==text,'ordinary read exact text')
+            check(api('POST','/api/desktop/quit',state['ownerToken'],{})[0]==202,'own desktop Quit accepted')
+            deadline=time.monotonic()+5
+            while control.exists() and time.monotonic()<deadline:time.sleep(.02)
+            check(not control.exists(),'owned control removed after Quit')
+            try:opener.open(state['serverUrl']+'/healthz',timeout=1)
+            except OSError:check(True,'owned service socket closed after Quit')
+            else:raise Failure('owned socket still open after Quit')
+            state=None
         finally:
-            if state is not None:
-                try:
-                    api('POST', '/api/desktop/quit', state['ownerToken'], {})
+            if state is None and control is not None and control.exists():
+                try: state=json.loads(control.read_text())
                 except Exception:
-                    pass
+                    cleanup['preserve']=True
+                    raise Failure('private control unreadable; cleanup uncertain and artifacts retained at '+str(private)) from None
+            if state is not None:
+                stopped=False
+                for attempt in range(3):
+                    try:api('POST','/api/desktop/quit',state['ownerToken'],{})
+                    except Exception:pass
+                    deadline=time.monotonic()+2
+                    while time.monotonic()<deadline:
+                        try:
+                            with opener.open(state['serverUrl']+'/healthz',timeout=.3):pass
+                        except OSError:
+                            if not control.exists():stopped=True;break
+                        time.sleep(.05)
+                    if stopped:break
+                if not stopped:
+                    cleanup['preserve']=True
+                    raise Failure('owned service cleanup uncertain; private artifacts retained at '+str(private))
             for process in processes:
                 if process.poll() is None:
                     process.terminate()
-                    try:
-                        process.wait(timeout=15)
-                    except subprocess.TimeoutExpired:
-                        process.kill()
-                        process.wait(timeout=2)
+                    try:process.wait(timeout=15)
+                    except subprocess.TimeoutExpired:process.kill();process.wait(timeout=2)
+        # Dispatch VM covers all targets without misrepresenting foreign native tests.
+        vm=Path(__file__).resolve().parents[1]/'npm/test-dispatch.cjs'
+        dispatch=json.loads(run([node,vm,entry],'six-platform VM dispatch, guards and spawn semantics').stdout)
+        check(dispatch.get('scope')=='VM_ONLY' and dispatch.get('targets')==6,'VM dispatch explicitly separate from native acceptance')
+    receipt={'status':'PASS_LOCAL','platform':target,'node':observed['node'],'npm':npm_version,'version':manifest['version'],
+             'coreIdentity':version,'checks':checks,'skipped':skips,'scope':'local seven tarballs, offline install/exec on current host; no registry publication',
+             'notRun':['public registry/npx install','default browser opening','actual other OS/CPU in this run','browser download/Gatekeeper/SmartScreen first launch','real phone/LAN/QR','actual Codex host']}
+    options.receipt.parent.mkdir(parents=True,exist_ok=True);options.receipt.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n')
+    print(json.dumps({'status':'PASS_LOCAL','checks':len(checks),'platform':target,'receipt':str(options.receipt),'skipped':skips},ensure_ascii=False))
 
-    receipt = {
-        'status': 'PASS_LOCAL', 'packageNameCandidate': package_name,
-        'packageVersion': package_version, 'packageFilename': archive.name,
-        'packageBytes': archive.stat().st_size, 'packageSha256': digest(archive.read_bytes()),
-        'fileCount': len(files), 'files': sorted(files), 'node': observed['node'],
-        'npm': npm_version, 'platform': 'darwin/arm64',
-        'coreVersion': version, 'checks': checks,
-        'scope': 'local npm pack/install/exec only; no registry publish or authentication',
-        'notRun': ['public npx/registry installation', 'default no-argument browser opening',
-                   'actual other OS/CPU installation or signals', 'Gatekeeper/browser-download first launch',
-                   'real browser/clipboard/phone/LAN/QR', 'actual Codex host'],
-    }
-    receipt_path.parent.mkdir(parents=True, exist_ok=True)
-    receipt_path.write_text(json.dumps(receipt, ensure_ascii=False, indent=2)+'\n')
-    print(json.dumps({'status':'PASS_LOCAL','checks':len(checks),'package':package_name,
-                      'version':package_version,'bytes':archive.stat().st_size,
-                      'scope':receipt['scope'],'receipt':str(receipt_path)},ensure_ascii=False))
-
-
-if __name__ == '__main__':
-    try:
-        main()
-    except (Failure, OSError, ValueError, KeyError, subprocess.SubprocessError) as error:
-        # Do not print subprocess output, request/control objects or capability URLs.
-        message = str(error) if isinstance(error, Failure) else type(error).__name__
-        print(json.dumps({'status':'FAIL','reason':message}))
-        raise SystemExit(1)
+if __name__=='__main__':
+    try:main()
+    except (Failure,OSError,ValueError,KeyError,subprocess.SubprocessError) as error:
+        print(json.dumps({'status':'FAIL','reason':str(error) if isinstance(error,Failure) else type(error).__name__}));raise SystemExit(1)

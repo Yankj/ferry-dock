@@ -64,47 +64,46 @@ I want to move text from a phone chat into my desktop proposal using Ferry Dock'
 
 ## Node users: local package only
 
-The optional npm entry is implemented and locally tested, but **not published
-to npm**. The candidate name `ferry-dock` is not a confirmed registry identity;
-no public `npx ferry-dock` recipe is provided. The local TGZ is not one of the
-three GitHub Release assets. If you do not already have it, use the native
-download above rather than guessing a registry package.
+The new **unpublished alpha.4 candidate** uses a Node.js 22+ entry plus a matching native package for macOS, Linux or Windows, each for x64 and arm64. Names are candidates, not reserved npm identities. There is no public `npx ferry-dock` recipe or alpha.4 Release URL. Without separately supplied local packages, use the published Mac arm64 native download above.
 
-This preview supports **macOS Apple Silicon with arm64 Node.js 22+**; an x64
-Node process under Rosetta is outside its allowlist. Use a supported Node LTS.
-Given a verified local `ferry-dock-0.1.0-alpha.2.tgz`, replace the absolute path
-below and install into a new directory, without a global installation:
+Choose for the **Node process** you will use, not merely the hardware: Node `x64` maps to Go `amd64`; Node `arm64` maps to Go `arm64`. An x64 Node under Rosetta selects the x64 package; that selection is not native Rosetta acceptance evidence.
+
+| Node platform / arch | Local platform TGZ |
+| --- | --- |
+| `darwin / arm64` | `ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz` |
+| `darwin / x64` | `ferry-dock-darwin-x64-0.1.0-alpha.4.tgz` |
+| `linux / arm64` | `ferry-dock-linux-arm64-0.1.0-alpha.4.tgz` |
+| `linux / x64` | `ferry-dock-linux-x64-0.1.0-alpha.4.tgz` |
+| `win32 / arm64` | `ferry-dock-win32-arm64-0.1.0-alpha.4.tgz` |
+| `win32 / x64` | `ferry-dock-win32-x64-0.1.0-alpha.4.tgz` |
+
+Given verified local packages, install **both** the entry TGZ and the matching platform TGZ into a new local prefix. This arm64 Mac example uses POSIX shell; replace the paths and platform name for your supplied files:
 
 ```sh
-npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz /absolute/path/ferry-dock-0.1.0-alpha.4.tgz
 cd ferry-dock-node
 npm exec --offline --yes=false -- ferry-dock version
 npm exec --offline --yes=false -- ferry-dock
 ```
 
-No arguments select `desktop` in this npm wrapper. Explicit `version`,
-`desktop`, `serve` or `request ...` arguments go to the same bundled Go core
-unchanged. Its version is the native alpha.2/a351555 identity; `defaultMode`
-still describes the native executable's `serve` default, while the wrapper
-explicitly supplies `desktop`. The package has no runtime dependencies,
-optional dependency downloads, lifecycle scripts or runtime binary fetches.
+Windows PowerShell uses Windows paths; for example, after receiving the two x64 TGZs:
 
-The manual Skill is at
-`node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. For the request examples
-below, use an absolute `ferry_bin` pointing to
-`node_modules/ferry-dock/native/ferry-dock`, and give the Agent the actual
-Skill path. The wrapper does not install a Skill, MCP or Agent configuration
-globally. The service may reuse an already running instance whose version is
-not attested by this alpha; the startup warning is not version detection.
-Do not quit a service shared by other tasks just to upgrade a package.
+```powershell
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix .\ferry-dock-node "C:\absolute\ferry-dock-win32-x64-0.1.0-alpha.4.tgz" "C:\absolute\ferry-dock-0.1.0-alpha.4.tgz"
+Set-Location .\ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
 
-Node 22.17.1/npm 10.9.2 on Mac arm64 passed 79 local assertions, including
-offline install/exec with scripts disabled, argument/exit handling, real
-signal/PTY wait interruption and private-loopback lifecycle/reuse/cleanup.
-No-argument mapping and unsupported-platform guards were VM checks; automatic
-browser opening, public-registry `npx`, other systems, phone and actual Codex
-host were not exercised. The npm entry does not remove macOS signing,
-Gatekeeper or HTTP trust limits. [Packaging and artifact details](distribution.md#npm-packaging-preview-local-only).
+These are local-file installation examples, not registry commands or proof of Windows native execution. See the [platform matrix](distribution.md#alpha4-platform-matrix) for executed status.
+
+No arguments map to `desktop` in the wrapper. Explicit `version`, `desktop`, `serve` or `request ...` arguments pass to the selected Go core. The root package pins every optional platform dependency to its exact version, and the launcher checks package/core metadata, binary size and SHA-256 before execution. It contains no shell command assembly, install lifecycle scripts or runtime binary download. A missing optional dependency, unsupported platform or mismatched package version produces a diagnostic instead of a download. Do not use `--omit=optional` for a normal installation; the native package is required to run.
+
+The Skill remains at `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`. In the POSIX request examples below, `ferry_bin` can be the absolute local entry `node_modules/.bin/ferry-dock` while Node 22+ is in PATH. Native binaries live in the matching platform package, rather than in the root package. No Skill, MCP, global PATH, Agent configuration, login item or OS service is installed.
+
+The historical alpha.2 single-Mac TGZ and its [79-check receipt](benchmarks/2026-10-29-npm-validation.json) remain fixed evidence for that version only. New alpha.4 results belong in [verification](verification.md); package selection is not six-platform native acceptance. npm registry install/`npx`, default-browser opening, phone and actual Codex-host acceptance are separate uncompleted checks. Node packaging does not remove OS signing/reputation or HTTP trust limits.
+
+**Updating:** alpha.4 checks the authenticated running service's version and commit before reuse. A legacy service without this identity, or a mismatch, is left running and startup returns an error. Finish shared tasks and use **Quit Ferry Dock** before starting the new version, or intentionally use a different private `--state-dir` for another instance. Quitting discards all in-memory sessions/requests; do not quit someone else's work just to update. Matching build metadata is not proof of byte-identical binaries, especially for `dev`/`unknown` source builds.
 
 ## Go users: fixed source tag
 
@@ -135,25 +134,44 @@ details](distribution.md#go-install-from-the-fixed-tag).
 
 ## 2. Other local preview entry points
 
-These alternatives are **not uploaded in this prerelease**. They are useful only if you separately received a matching local preview; a platform label is not a public download link or native acceptance result.
+The six-platform **alpha.4 candidate is not published**. The following examples apply only after you separately receive and verify the matching native archive. [Distribution](distribution.md#alpha4-platform-matrix) separates archive inspection, native execution and actual availability. Alpha.2/alpha.3 and their frozen hashes are not replaced.
 
-The historical alpha.1/alpha.2 macOS App ZIPs are not recommended launchers: complete-bundle strict signature verification failed even though archive integrity and direct-executable checks passed. Do not follow their bundled “extract and open” steps. The private alpha.3 repair passed completed-bundle verification before and after archiving, expected failures for modified Info.plist/resource/deleted seal, and scoped Mac arm64 no-browser lifecycle checks. These ad-hoc structural checks do not establish Developer ID identity, notarization, browser-download Gatekeeper acceptance, Finder or automatic browser opening. No old archive is overwritten, and no protection-bypass procedure is provided.
-
-Other native CLI archives have an outer platform/version folder. From inside that folder, macOS/Linux use:
+For an Intel Mac, from the directory containing the supplied archive:
 
 ```sh
+tar -xzf ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz
+cd ferry-dock-0.1.0-alpha.4-darwin-amd64
 ./ferry-dock version
 ./ferry-dock desktop
 ```
 
-Windows uses PowerShell:
+For Linux x64, use the supplied Linux archive; arm64 uses `linux-arm64` in both names:
+
+```sh
+tar -xzf ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz
+cd ferry-dock-0.1.0-alpha.4-linux-amd64
+./ferry-dock version
+./ferry-dock desktop
+```
+
+For Windows x64, use PowerShell; Windows on arm64 uses `windows-arm64` in both names:
 
 ```powershell
+Expand-Archive -LiteralPath .\ferry-dock-0.1.0-alpha.4-windows-amd64.zip -DestinationPath .\ferry-dock-preview
+Set-Location .\ferry-dock-preview\ferry-dock-0.1.0-alpha.4-windows-amd64
 .\ferry-dock.exe version
 .\ferry-dock.exe desktop
 ```
 
-The package archives were checked structurally, and the source CI runs builds and automated CLI/HTTP checks across macOS, Linux and Windows. That is not user first-launch acceptance for every packaged OS/CPU. Advanced foreground `serve` and network overrides are described in [distribution](distribution.md).
+Check `version`, `commit`, `os`, `arch` and `defaultMode` against the supplied manifest. Use a fresh destination rather than extracting over a running version. For one supplied archive, compare its `shasum -a 256` (Mac), `sha256sum` (Linux), or PowerShell `Get-FileHash -Algorithm SHA256` value with its line in the supplied trusted checksum record. A full `SHA256SUMS` check requires all files listed there.
+
+These foreign-platform examples have not been executed natively on this Mac. Building a Windows PE or Linux ELF is not Windows/Linux lifecycle acceptance. Linux `CGO_ENABLED=0` packaging avoids a dynamic libc dependency; minimum kernel, DNS behavior, distro integration and system browser/opener remain separate runtime requirements. [Platform boundaries](distribution.md#os-runtime-and-trust-boundaries).
+
+**Stop:** use **Quit Ferry Dock** on the local owner page; closing the terminal or browser after the launcher returns does not stop the background core. For headless use, run foreground `serve` with explicit phone reachability, and stop that foreground command with Ctrl+C. An unknown/occupied port never grants permission to stop another process.
+
+**Update:** keep the old running instance until shared tasks are complete. Its control/handle files do not back up in-memory text. Alpha.4 refuses legacy or mismatched version/commit reuse, preserves the old service and suggests quitting deliberately or a separate private `--state-dir`. It does not auto-upgrade a live backend. Reusing the same version/commit proves matching metadata only.
+
+No Windows or Linux desktop app is added. The old alpha.1/alpha.2 Mac App launch recommendation remains withdrawn; the alpha.3 local resource-envelope repair and all downloaded-file trust limitations remain separate. Do not clear quarantine attributes or disable OS protections. [App incident](packaging-incident.md).
 
 ## 3. Collect feedback for a particular task
 
@@ -180,7 +198,7 @@ open "$runtime_dir/proposal.json.png"
 For the verified local npm package, replace the first assignment with its actual native-core path, keeping quotes around spaces:
 
 ```sh
-ferry_bin="/absolute/path/ferry-dock-node/node_modules/ferry-dock/native/ferry-dock"
+ferry_bin="/absolute/path/ferry-dock-node/node_modules/.bin/ferry-dock"
 ```
 
 Do not use the withdrawn alpha.1/alpha.2 App launcher for this workflow.

@@ -1,5 +1,18 @@
 # Claims and evidence
 
+## Alpha.4 cross-platform candidate
+
+Alpha.4 is a **local, unpublished candidate**. No new registry identity, tag, Release asset or public download is implied. Frozen alpha.2/alpha.3 evidence below remains version-specific. Build inspection, native execution and first-launch trust need independent results.
+
+| Claim | Implementation / check | Status and boundary |
+| --- | --- | --- |
+| Six native CLI targets share one Go core and explicit version/source metadata. | [package.py](../scripts/package.py), [native format parser](../scripts/native_format.py), [portable package checks](../scripts/smoke-package.py), platform matrix in [distribution](distribution.md#alpha4-platform-matrix). | Candidate validation in progress. Six target labels and archive parser tests do not establish six native runs. |
+| Linux packaging avoids dynamic libc linkage. | `CGO_ENABLED=0` build; actual ELF program-header inspection checks no interpreter/dynamic segment. | Requires the generated artifact's inspection record. This does not claim every distro/kernel, minimum OS or resolver setup is accepted. |
+| npm chooses a matching exact-version platform package without a postinstall/runtime download. | [entry](../npm/bin/ferry-dock.cjs), [package metadata](../npm/package.json), [npm packager](../scripts/package-npm.py), [local npm checks](../scripts/smoke-npm.py). | Candidate validation in progress; names unreserved/unpublished. Node process architecture governs selection. A missing optional dependency fails; no fallback fetch. |
+| Desktop refuses authenticated service version/commit mismatches without stopping shared work. | `verify`/`existing` in [desktop.go](../internal/desktop/desktop.go); desktop tests. | SOURCE_REVIEWED. Legacy/mismatched service remains running and control is retained; no new browser/start on mismatch. Matching metadata is not a binary-hash attestation, particularly `dev`/`unknown`. |
+| Windows detached launch and npm cancellation are fully accepted. | Windows process creation flags, generic native/npm smoke harnesses and planned native CI jobs. | NOT_RUN on native Windows at this stage. Caller Job Objects may still govern children; Node `process.kill` signal emulation is not a graceful Ctrl+C proof. Use bounded waits/status; explicit request cancellation is separate. |
+| All platforms now have a public download or working registry `npx` command. | Actual published Release remains alpha.2 Mac arm64 CLI only. | Unsupported. Local packaging does not grant npm name ownership, publish assets or establish downloaded-file trust. |
+
 ## App validity correction
 
 Original alpha.1/alpha.2 App bundles must not be recommended for downloaded use.
@@ -20,13 +33,13 @@ These establish the corrected bundle integrity, not publisher trust. A read-only
 query listed no valid signing identity; Developer ID use/notarization and real
 downloaded first launch remain separate, uncompleted gates.
 
-## npm implementation and Go-user installation
+## Historical alpha.2 npm implementation and fixed-tag Go installation
 
 | Claim | Evidence | Status and boundary |
 | --- | --- | --- |
-| A local npm package can start the existing Go desktop flow without a compiler or postinstall download. | [Entry](../npm/bin/ferry-dock.cjs), [pinned core](../npm/core.json), [packager](../scripts/package-npm.py), [79-check receipt](benchmarks/2026-10-29-npm-validation.json). | PASS_LOCAL for Mac arm64, Node 22.17.1/npm 10.9.2. Actual registry publication/installation and default-browser opening are NOT_RUN. Candidate name is not reserved; Node is required for this entry. |
+| A local npm package can start the existing Go desktop flow without a compiler or postinstall download. | [Entry](../npm/bin/ferry-dock.cjs), the frozen alpha.2 core metadata in its validation receipt, [packager](../scripts/package-npm.py), [79-check receipt](benchmarks/2026-10-29-npm-validation.json). | PASS_LOCAL for Mac arm64, Node 22.17.1/npm 10.9.2. Actual registry publication/installation and default-browser opening are NOT_RUN. Candidate name is not reserved; Node is required for this entry. |
 | npm arguments, stdio, exit codes and interrupted waits preserve the underlying interface. | [smoke-npm.py](../scripts/smoke-npm.py); npm receipt. | PASS_LOCAL including Unicode/space/shell-literal argv, numeric exits, direct signals and owned PTY Ctrl+C, pending request preserved, ordinary/request retrieval and cleanup. Other-platform signal behavior is NOT_RUN. |
-| An npm upgrade automatically upgrades a reused live service. | Current desktop verification checks owner/instance identity, not version; wrapper prints a notice before desktop startup. | Unsupported. Package version pins the bundled executable only. No automatic Quit or shared-service replacement is performed. |
+| An npm upgrade automatically upgrades a reused live service. | Frozen alpha.2 desktop verification checks owner/instance identity, not version; that wrapper prints a notice before desktop startup. | Unsupported. Package version pins the bundled executable only. No automatic Quit or shared-service replacement is performed. |
 | Go users can install the fixed public source tag without cloning this repository. | [31-check Go-install receipt](benchmarks/2026-10-29-go-install-validation.json). | PASS_LOCAL: Go 1.27.3/Mac arm64, fresh caches and network install, source/tag confirmed. Explicit `desktop` starts the user path. CLI `version` remains dev/unknown; `go version -m` records the module version. Not a compiler-free or guaranteed-offline route. |
 
 ## Published CLI availability

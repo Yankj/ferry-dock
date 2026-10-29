@@ -1,5 +1,20 @@
 # Verification record
 
+## Alpha.4 cross-platform packaging
+
+Alpha.4 is an **unpublished local candidate** for six native CLI targets and a thin npm entry with six exact-version native packages. The [distribution matrix](distribution.md#alpha4-platform-matrix) separates published availability, binary/archive inspection and actual OS/CPU execution. New checks below must identify their source and exact outputs; old alpha.2 npm/Go or alpha.3 App results do not validate this revision.
+
+Current alpha.4 validation is in progress. No passing native result is asserted here yet. The six-runner workflow is a test definition until a matching pushed commit has actually run; native Windows/Linux/Intel Mac and their default-browser/console/OS-trust acceptance remain NOT_RUN. Real phones and an actual Codex host are also NOT_RUN.
+
+The intended local reproduction, from a matching clean checkout and cached dependencies, is:
+
+```sh
+python3 scripts/package.py --all --cli-only --version 0.1.0-alpha.4 --go /absolute/path/go --offline
+python3 scripts/smoke-package.py --dist dist/0.1.0-alpha.4 --require-cli-targets --native-target darwin/arm64 --receipt /absolute/path/native-validation.json
+```
+
+Use only the target matching the **actual runner** for a native pass. `--archive-only` checks foreign artifacts without executing them. Native smoke uses private state/loopback and `--no-open`; it is not Finder, default-browser, real-phone LAN/QR or downloaded-file acceptance. The optional Mac App remains a separately sealed packaging choice, with Developer ID/notarization requirements unchanged.
+
 ## App signature incident and alpha.3 correction
 
 The supplied App-open screenshot led to a reproduced defect in the original
@@ -39,7 +54,7 @@ presented as a trusted ready-to-distribute application. No original archive,
 user download, quarantine attribute or security setting was changed. Remote CI
 for these local commits is NOT_RUN; no new public push was authorized.
 
-## Local npm entry and fixed-tag Go install, 2026-10-29
+## Historical alpha.2 local npm entry and fixed-tag Go install, 2026-10-29
 
 The npm entry is implemented and locally tested, **not published to a registry**.
 Candidate `ferry-dock@0.1.0-alpha.2` is not a reserved package name or ownership

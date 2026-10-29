@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Validate local archives and the native macOS desktop lifecycle, without a browser.
+"""Validate local archives and this runner's native CLI lifecycle, without a browser.
 
 Python standard library only. This does not install software, modify PATH or OS
-protections, sign/notarize packages, or validate Finder/phone/Windows behavior.
+protections, sign/notarize packages, or validate Finder/phone/download behavior.
 Capabilities, control-file contents, URLs, and child output are never printed.
 """
 
@@ -29,14 +29,18 @@ import tarfile
 import tempfile
 import threading
 import time
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 import zipfile
+
+from native_format import inspect_binary
 
 
 MAX_ARCHIVE_BYTES = 256 << 20
 MAX_RESPONSE_BYTES = 256 << 10
 TARGETS = {(goos, arch, "cli") for goos in ("darwin", "linux", "windows")
            for arch in ("arm64", "amd64")} | {("darwin", arch, "app") for arch in ("arm64", "amd64")}
+CLI_TARGETS = {target for target in TARGETS if target[2] == "cli"}
+CHECKS = []
 
 
 class Failure(Exception):
@@ -46,6 +50,7 @@ class Failure(Exception):
 def check(condition, message):
     if not condition:
         raise Failure(message)
+    CHECKS.append(message)
 
 
 def sha(data):
@@ -58,22 +63,31 @@ def validate_binary_header(data, goos, goarch):
     This is not a platform runtime test or a signature/loader acceptance check.
     Go's per-target artifacts are thin 64-bit little-endian executables.
     """
-    check(len(data) >= 64, "archived executable header is truncated")
-    if goos == "darwin":
-        check(data[:4] == b"\xcf\xfa\xed\xfe", "Darwin artifact is not a thin 64-bit Mach-O executable")
-        cpu, _, kind = struct.unpack_from("<III", data, 4)
-        check(cpu == {"arm64": 0x0100000C, "amd64": 0x01000007}[goarch] and kind == 2,
-              "Mach-O CPU/executable type differs from manifest target")
-    elif goos == "linux":
-        check(data[:6] == b"\x7fELF\x02\x01", "Linux artifact is not a 64-bit little-endian ELF executable")
-        machine = struct.unpack_from("<H", data, 18)[0]
-        check(machine == {"arm64": 183, "amd64": 62}[goarch], "ELF CPU differs from manifest target")
-    else:
-        check(data[:2] == b"MZ", "Windows artifact has no DOS/PE executable header")
-        offset = struct.unpack_from("<I", data, 60)[0]
-        check(offset <= len(data) - 24 and data[offset:offset + 4] == b"PE\0\0", "Windows artifact PE header is invalid")
-        machine = struct.unpack_from("<H", data, offset + 4)[0]
-        check(machine == {"arm64": 0xAA64, "amd64": 0x8664}[goarch], "PE CPU differs from manifest target")
+    try:
+        return inspect_binary(data, goos, goarch)
+    except (ValueError, struct.error):
+        raise Failure("archived executable format/target/static-link metadata is invalid") from None
+
+
+def host_target():
+    goos = {"darwin": "darwin", "win32": "windows"}.get(sys.platform,
+             "linux" if sys.platform.startswith("linux") else "unsupported")
+    machine = platform.machine().lower()
+    if goos == "windows":
+        # 64-bit Python may itself be emulated on Windows ARM64. This is the
+        # OS-provided native architecture, not Python's compile target.
+        class SystemInfo(ctypes.Structure):
+            _fields_ = [("architecture", ctypes.c_ushort), ("reserved", ctypes.c_ushort),
+                        ("pageSize", ctypes.c_ulong), ("minimumAddress", ctypes.c_void_p),
+                        ("maximumAddress", ctypes.c_void_p), ("processorMask", ctypes.c_size_t),
+                        ("processors", ctypes.c_ulong), ("processorType", ctypes.c_ulong),
+                        ("allocationGranularity", ctypes.c_ulong),
+                        ("processorLevel", ctypes.c_ushort), ("processorRevision", ctypes.c_ushort)]
+        value = SystemInfo()
+        ctypes.WinDLL("kernel32", use_last_error=True).GetNativeSystemInfo(ctypes.byref(value))
+        machine = {9: "amd64", 12: "arm64"}.get(value.architecture, "unsupported")
+    arch = {"x86_64": "amd64", "amd64": "amd64", "arm64": "arm64", "aarch64": "arm64"}.get(machine, "unsupported")
+    return goos, arch
 
 
 def private_write(path, data):
@@ -130,7 +144,36 @@ def members(archive):
     return entries
 
 
-def validate_archives(directory, require_all):
+def validate_contents(entries, docs_prefix, binary_path, is_app):
+    """Explicit public-product payload allowlist, independent of the builder."""
+    top_docs = {"README.md", "README.zh-CN.md", "PRFAQ.md", "SECURITY.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md"}
+    exact = {binary_path, "LICENSE", "README.txt"} if is_app else {binary_path, docs_prefix + "LICENSE", docs_prefix + "README.txt"}
+    if is_app:
+        exact |= {"Ferry Dock.app/Contents/Info.plist", "Ferry Dock.app/Contents/_CodeSignature/CodeResources",
+                  docs_prefix + "FerryDock.icns", docs_prefix + "LICENSE"}
+    text_suffixes = {".md", ".svg", ".html", ".json"}
+    secret = re.compile(rb"(?:-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|"
+                        rb"\bgh[pousr]_[A-Za-z0-9]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{40,}\b|"
+                        rb"\bnpm_[A-Za-z0-9]{30,}\b|\bBearer [A-Za-z0-9_-]{32,}\b|"
+                        rb"#(?:owner|key)=[A-Za-z0-9_-]{32,})")
+    index = []
+    for name, (data, mode) in sorted(entries.items()):
+        if name not in exact:
+            check(name.startswith(docs_prefix), "archive payload contains a file outside its public documentation prefix")
+            relative = name[len(docs_prefix):]
+            path = PurePosixPath(relative)
+            check(not any(part.startswith(".") for part in path.parts)
+                  and (relative in top_docs or (relative.startswith(("docs/", "skills/ferry-dock/", "brand/"))
+                       and path.suffix in text_suffixes | {".png"})),
+                  "archive payload contains an unapproved source/runtime/documentation file")
+            check(mode == 0o644, "archived documentation mode differs from the public payload contract")
+        if name != binary_path and PurePosixPath(name).suffix in text_suffixes | {".txt"}:
+            check(secret.search(data) is None, "archive text matches a credential or active-capability pattern")
+        index.append({"path": name, "mode": mode, "sha256": sha(data)})
+    return {"count": len(index), "sha256": sha(json.dumps(index, sort_keys=True, separators=(",", ":")).encode())}
+
+
+def validate_archives(directory, require_all, require_cli_targets=False, native_target=None):
     manifest_path = directory / "manifest.json"
     check(manifest_path.is_file() and manifest_path.stat().st_size <= (1 << 20), "package manifest is missing or oversized")
     manifest_data = manifest_path.read_bytes()
@@ -191,7 +234,15 @@ def validate_archives(directory, require_all):
         check(binary_path in entries, "manifest binary is missing from its archive")
         contents, mode = entries[binary_path]
         check(len(contents) == binary.get("size") and sha(contents) == binary.get("sha256"), "archived binary checksum/size differs from manifest")
-        validate_binary_header(contents, target[0], target[1])
+        observed_format = validate_binary_header(contents, target[0], target[1])
+        if "binaryFormat" in artifact or manifest["version"] not in ("0.1.0-alpha.1", "0.1.0-alpha.2", "0.1.0-alpha.3"):
+            check(artifact.get("binaryFormat") == observed_format,
+                  "executable header/linkage inspection differs from manifest")
+            check(artifact.get("runtimeRequirements") == {
+                "cpuBaseline": "x86-64-v1" if target[1] == "amd64" else "armv8.0",
+                "minimumOsAcceptance": "NOT_RUN",
+                "linuxLibc": "not dynamically linked" if target[0] == "linux" else "NOT_APPLICABLE"},
+                "runtime requirements claim differs from independently checked build metadata")
         check(mode & 0o111 != 0 and mode & 0o022 == 0, "archived binary executable permissions are invalid")
         if target[2] == "app":
             check(binary_path == "Ferry Dock.app/Contents/MacOS/ferry-dock", "app binary path differs from its bundle contract")
@@ -224,13 +275,18 @@ def validate_archives(directory, require_all):
         check(all(docs_prefix + relative in entries for relative in
                   ("README.md", "README.zh-CN.md", "SECURITY.md", "skills/ferry-dock/SKILL.md")),
               "archive is missing product/security documentation or its optional local Skill")
-        if target[0] == "darwin" and target[1] == ("arm64" if platform.machine() == "arm64" else "amd64"):
+        content_metadata = validate_contents(entries, docs_prefix, binary_path, target[2] == "app")
+        if "contents" in artifact or manifest["version"] not in ("0.1.0-alpha.1", "0.1.0-alpha.2", "0.1.0-alpha.3"):
+            check(artifact.get("contents") == content_metadata, "archive content allowlist metadata differs from its manifest")
+        if target[:2] == (native_target or host_target()):
             selected[target[2]] = (artifact, entries)
     check(set(sums) == names and sums.get("manifest.json") == sha(manifest_data), "checksum file does not cover exactly the manifest and all archives")
     actual_names = {item.name for item in directory.iterdir() if item.is_file()}
     check(actual_names == names | {"SHA256SUMS"}, "package directory contains unlisted files")
     if require_all:
         check(targets == TARGETS, "--require-all expected six CLI and two macOS app archives")
+    if require_cli_targets:
+        check(CLI_TARGETS <= targets, "--require-cli-targets expected all six CLI archives")
     print("PASS PACKAGE: all {} archive hashes, binary hashes/target headers, metadata, permissions, and layouts verified.".format(len(artifacts)))
     return manifest, selected
 
@@ -288,6 +344,33 @@ def process_matches(pid, executable):
             return Path("/proc/{}/exe".format(pid)).resolve() == executable.resolve()
         except OSError:
             return False
+    if sys.platform == "win32":
+        # Never truncate a 64-bit process HANDLE through ctypes' default int
+        # restype. Query only the PID named by this test's private state.
+        from ctypes import wintypes
+        library = ctypes.WinDLL("kernel32", use_last_error=True)
+        library.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+        library.OpenProcess.restype = wintypes.HANDLE
+        library.CloseHandle.argtypes = [wintypes.HANDLE]
+        library.CloseHandle.restype = wintypes.BOOL
+        library.QueryFullProcessImageNameW.argtypes = [wintypes.HANDLE, wintypes.DWORD,
+                                                       wintypes.LPWSTR, ctypes.POINTER(wintypes.DWORD)]
+        library.QueryFullProcessImageNameW.restype = wintypes.BOOL
+        library.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        library.GetExitCodeProcess.restype = wintypes.BOOL
+        handle = library.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not handle:
+            return False
+        try:
+            status = wintypes.DWORD()
+            if not library.GetExitCodeProcess(handle, ctypes.byref(status)) or status.value != 259:
+                return False
+            size = wintypes.DWORD(32768)
+            buffer = ctypes.create_unicode_buffer(size.value)
+            return (bool(library.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)))
+                    and os.path.normcase(os.path.realpath(buffer.value)) == os.path.normcase(str(executable.resolve())))
+        finally:
+            library.CloseHandle(handle)
     return False
 
 
@@ -303,7 +386,11 @@ class NativeCheck:
         self.home.mkdir(mode=0o700)
         self.env = os.environ.copy()
         self.env.update({"HOME": str(self.home), "PATH": "/nonexistent", "TMPDIR": str(self.base)})
+        if os.name == "nt":
+            self.env.update({"USERPROFILE": str(self.home), "LOCALAPPDATA": str(self.home / "Local"),
+                             "TEMP": str(self.base), "TMP": str(self.base)})
         self.binary = None
+        self.default_mode = None
 
     def remaining(self, maximum):
         value = min(maximum, self.deadline - time.monotonic())
@@ -337,7 +424,11 @@ class NativeCheck:
             data = stdout.read(MAX_RESPONSE_BYTES + 1)
             stderr.seek(0, os.SEEK_END)
             check(len(data) <= MAX_RESPONSE_BYTES and stderr.tell() <= MAX_RESPONSE_BYTES, "packaged command exceeded its output byte bound")
-            check((child.returncode == 0) == success, "packaged command returned an unexpected exit status")
+            operation = arguments[0] if arguments and arguments[0] in ("version", "--version", "desktop", "request", "--no-open") else "command"
+            if operation == "request" and len(arguments) > 1 and arguments[1] in ("create", "status", "wait", "read", "cancel"):
+                operation += " " + arguments[1]
+            check((child.returncode == 0) == success,
+                  "packaged {} returned unexpected exit status {}".format(operation, child.returncode))
             return json.loads(data) if data and success else None
 
     def state_path(self, name):
@@ -348,8 +439,9 @@ class NativeCheck:
     def read_state(self, directory):
         path = directory / "control.json"
         check(path.is_file() and path.stat().st_size <= 4096, "desktop did not publish bounded control state")
-        check(directory.stat().st_mode & 0o077 == 0 and path.stat().st_mode & 0o077 == 0,
-              "desktop runtime directory/control file is not private")
+        if os.name != "nt":
+            check(directory.stat().st_mode & 0o077 == 0 and path.stat().st_mode & 0o077 == 0,
+                  "desktop runtime directory/control file is not private")
         state = json.loads(path.read_bytes())
         origin = urlsplit(state.get("serverUrl", ""))
         check(state.get("schemaVersion") == 1 and origin.scheme == "http" and origin.hostname == "127.0.0.1"
@@ -360,7 +452,7 @@ class NativeCheck:
         check(process_matches(state["pid"], self.binary), "desktop state does not name the packaged executable owned by this test")
         return state
 
-    def request(self, state, route, method="GET", authorized=True, timeout=None):
+    def request(self, state, route, method="GET", authorized=True, timeout=None, payload=None, token=None):
         origin = urlsplit(state["serverUrl"])
         check(origin.scheme == "http" and origin.hostname == "127.0.0.1" and origin.port,
               "test refused an HTTP target outside numeric loopback")
@@ -368,8 +460,8 @@ class NativeCheck:
         try:
             headers = {"Origin": state["serverUrl"]}
             if authorized:
-                headers["Authorization"] = "Bearer " + state["ownerToken"]
-            body = b"{}" if method == "POST" else None
+                headers["Authorization"] = "Bearer " + (token or state["ownerToken"])
+            body = json.dumps(payload if payload is not None else {}).encode("utf-8") if method == "POST" else None
             if body is not None:
                 headers["Content-Type"] = "application/json"
             connection.request(method, route, body=body, headers=headers)
@@ -383,7 +475,8 @@ class NativeCheck:
     def launch(self, directory, port="127.0.0.1:0", success=True):
         # The app build must dispatch flags to its desktop default. An explicit
         # `desktop` subcommand would not exercise this packaged entry point.
-        return self.execute(self.binary, ["--no-open", "--state-dir", str(directory), "--listen", port], success)
+        prefix = [] if self.default_mode == "desktop" else ["desktop"]
+        return self.execute(self.binary, prefix + ["--no-open", "--state-dir", str(directory), "--listen", port], success)
 
     def wait_stopped(self, state, directory, timeout=6):
         deadline = time.monotonic() + min(timeout, self.remaining(timeout))
@@ -406,12 +499,13 @@ class NativeCheck:
             binary = destination / artifact["binary"]["path"]
             version = self.execute(binary, ["version"])
             check(version == {"version": self.manifest["version"], "commit": self.manifest["source"]["binaryCommit"],
-                              "os": "darwin", "arch": artifact["goarch"], "defaultMode": artifact["defaultMode"]},
+                              "os": artifact["goos"], "arch": artifact["goarch"], "defaultMode": artifact["defaultMode"]},
                   "native packaged version metadata differs from manifest")
             check(self.execute(binary, ["--version"]) == version, "--version and version disagree")
             binaries[kind] = binary
-        check(set(binaries) == {"app", "cli"}, "native validation requires both native macOS CLI and app archives")
-        self.binary = binaries["app"]
+        check("cli" in binaries, "native validation requires this host's CLI archive")
+        self.binary = binaries["cli"]
+        self.default_mode = "serve"
         directory = self.state_path("桌面 state")
         self.launch(directory)
         first = self.read_state(directory)
@@ -426,8 +520,14 @@ class NativeCheck:
         created = self.execute(binaries["cli"], ["request", "create", "--control", str(directory / "control.json"),
                                "--task-id", "package-smoke", "--prompt", "Synthetic package smoke input", "--handle", str(handle)])
         check(created.get("request", {}).get("taskId") == "package-smoke", "packaged CLI cannot use desktop control state")
+        self.transfer_scenario(first, binaries["cli"], created, handle, directory)
         canceled = self.execute(binaries["cli"], ["request", "cancel", "--handle", str(handle)])
         check(canceled.get("state") == "canceled", "packaged CLI could not cancel its synthetic request")
+        if "app" in binaries:
+            # App/CLI builds differ in default command only, and must share an
+            # equal-version service without replacing or ending it.
+            self.execute(binaries["app"], ["--no-open", "--state-dir", str(directory), "--listen", "127.0.0.1:0"])
+            check(self.read_state(directory) == first, "same-version App could not reuse CLI desktop service")
         self.launch(directory)
         reused = self.read_state(directory)
         check(reused == first, "repeated launcher did not reuse the same verified desktop instance")
@@ -439,8 +539,66 @@ class NativeCheck:
         check(second["instanceId"] != first["instanceId"], "stale private state reused an ended instance")
         self.quit(second, directory)
         check(not (directory / "launch.lock").exists(), "desktop startup lock remained after successful launch")
-        print("PASS PACKAGE_NATIVE: app default-mode flag dispatch, Chinese/space path + private HOME + PATH=/nonexistent, version metadata, readiness, CLI compatibility, reuse, quit, and stale recovery.")
+        print("PASS PACKAGE_NATIVE: packaged CLI, Chinese/space path + isolated home + PATH=/nonexistent, version metadata, readiness, request/ordinary transfer, reuse, quit, and stale recovery.")
+        if "app" in binaries:
+            self.binary, self.default_mode = binaries["app"], "desktop"
+            app_directory = self.state_path("App default startup")
+            self.launch(app_directory)
+            app_state = self.read_state(app_directory)
+            self.instances.append((app_state, app_directory, self.binary))
+            self.quit(app_state, app_directory)
+            self.binary, self.default_mode = binaries["cli"], "serve"
+            print("PASS PACKAGE_APP_NATIVE: optional macOS App flags dispatch to desktop mode; same-version App/CLI service reuse works.")
         self.unknown_service(first)
+
+    def transfer_scenario(self, state, binary, created, handle, directory):
+        def command(operation, path=handle, *options):
+            return self.execute(binary, ["request", operation, "--handle", str(path), *options])
+
+        pending = command("wait", handle, "--timeout", "10ms")
+        check(pending.get("timedOut") is True and pending.get("request", {}).get("state") == "pending"
+              and command("status").get("state") == "pending", "bounded native wait timeout canceled its request")
+        other_handle = self.base / "第二 task.json"
+        second = self.execute(binary, ["request", "create", "--control", str(directory / "control.json"),
+                              "--task-id", "independent-package-task", "--prompt", "Synthetic second task", "--handle", str(other_handle)])
+        fragment = parse_qs(urlsplit(created["sendUrl"]).fragment)
+        sender, identifier = fragment["key"][0], fragment["request"][0]
+        feedback = "  客户意见: add a pilot.\nquotes ' \" $HOME ; & | are data. 👋  "
+        payload = {"idempotencyKey": "native-package-once", "text": feedback}
+        route = "/api/requests/" + identifier
+        status, receipt = self.request(state, route + "/input", "POST", payload=payload, token=sender)
+        check(status == 201, "native request synthetic phone submission failed")
+        status, duplicate = self.request(state, route + "/input", "POST", payload=payload, token=sender)
+        check(status == 200 and duplicate.get("id") == receipt.get("id"), "native idempotent retry duplicated a receipt")
+        check(self.request(state, "/api/requests/" + second["request"]["requestId"] + "/input", "POST",
+                           payload=payload, token=sender)[0] == 401,
+              "native request A sender was allowed to submit to request B")
+        check(self.request(state, route + "/result", token=sender)[0] == 401,
+              "native request sender gained result reading authority")
+        waited = command("wait", handle, "--timeout", "1s")
+        read, repeated = command("read"), command("read")
+        check(waited.get("request", {}).get("state") == "received" and not waited.get("timedOut")
+              and read.get("input", {}).get("text") == feedback
+              and read.get("input", {}).get("trust") == "untrusted_user_input"
+              and read["input"]["id"] == repeated.get("input", {}).get("id") == receipt.get("id"),
+              "native wait/read changed exact untrusted input or its repeatable receipt")
+        check(command("read", other_handle).get("input") is None, "native second task received request A input")
+        check(command("cancel", other_handle).get("state") == "canceled", "native second task could not cancel")
+        short_handle = self.base / "short request.json"
+        short = self.execute(binary, ["request", "create", "--control", str(directory / "control.json"),
+                             "--task-id", "expiry", "--prompt", "Synthetic expiry", "--ttl", "1s", "--handle", str(short_handle)])
+        check(command("wait", short_handle, "--timeout", "2s").get("request", {}).get("state") == "expired",
+              "native request did not expire during bounded wait")
+        check(short["request"]["requestId"] != identifier, "native request IDs collided")
+        status, session = self.request(state, "/api/sessions", "POST")
+        check(status == 201, "ordinary session cannot be created by native package")
+        ordinary_sender = parse_qs(urlsplit(session["sendUrl"]).fragment)["key"][0]
+        ordinary_route = "/api/sessions/" + session["id"]
+        check(self.request(state, ordinary_route + "/messages", "POST", token=ordinary_sender, payload=payload)[0] == 201,
+              "ordinary text could not be submitted to native package")
+        status, inbox = self.request(state, ordinary_route)
+        check(status == 200 and inbox.get("messages", [{}])[0].get("text") == feedback,
+              "ordinary native inbox changed Unicode/whitespace text")
 
     def unknown_service(self, ended_state):
         class Sentinel(BaseHTTPRequestHandler):
@@ -479,35 +637,37 @@ class NativeCheck:
         # unique extracted app path. Never inspect or stop unrelated services.
         failures = []
         if self.binary is not None:
-            candidates = {state["pid"]: state for state, _ in self.instances}
+            candidates = {entry[0]["pid"]: (entry[0], entry[2] if len(entry) > 2 else self.binary) for entry in self.instances}
             for directory in self.state_directories:
                 try:
                     value = json.loads((directory / "control.json").read_bytes())
                     if isinstance(value.get("pid"), int):
-                        candidates[value["pid"]] = value
+                        if value["pid"] not in candidates:
+                            candidates[value["pid"]] = (value, self.binary)
                 except (OSError, ValueError, TypeError):
                     pass
-            for pid, state in candidates.items():
-                if not process_matches(pid, self.binary):
+            for pid, (state, binary) in candidates.items():
+                if not process_matches(pid, binary):
                     continue
                 try:
                     self.request(state, "/api/desktop/quit", "POST", timeout=0.5)
                 except Exception:
                     pass
                 deadline = time.monotonic() + 2
-                while process_matches(pid, self.binary) and time.monotonic() < deadline:
+                while process_matches(pid, binary) and time.monotonic() < deadline:
                     time.sleep(0.025)
-                for requested_signal in (signal.SIGTERM, signal.SIGKILL):
-                    if not process_matches(pid, self.binary):
+                signals = (signal.SIGTERM,) if os.name == "nt" else (signal.SIGTERM, signal.SIGKILL)
+                for requested_signal in signals:
+                    if not process_matches(pid, binary):
                         break
                     try:
                         os.kill(pid, requested_signal)
                     except ProcessLookupError:
                         break
                     deadline = time.monotonic() + 2
-                    while process_matches(pid, self.binary) and time.monotonic() < deadline:
+                    while process_matches(pid, binary) and time.monotonic() < deadline:
                         time.sleep(0.025)
-                if process_matches(pid, self.binary):
+                if process_matches(pid, binary):
                     failures.append(pid)
         check(not failures, "a verified owned package process remained alive after bounded cleanup")
         check(not self.cleanup_uncertain,
@@ -519,24 +679,52 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dist", type=Path, required=True, help="version directory containing manifest.json and SHA256SUMS")
     parser.add_argument("--require-all", action="store_true", help="require all six CLI and two app archives")
+    parser.add_argument("--require-cli-targets", action="store_true", help="require all six native CLI archives; macOS Apps are optional")
+    parser.add_argument("--native-target", choices=sorted("/".join(target[:2]) for target in CLI_TARGETS),
+                        help="expected actual runner OS/architecture; refuses a different native host")
     parser.add_argument("--archive-only", action="store_true", help="check archive metadata only; skip complete app signature and native lifecycle checks explicitly")
     parser.add_argument("--timeout", type=float, default=60, help="native scenario deadline in seconds, excluding bounded cleanup")
+    parser.add_argument("--receipt", type=Path, help="optional capability-free JSON validation receipt")
     args = parser.parse_args()
     check(1 <= args.timeout <= 300, "timeout must be between 1 and 300 seconds")
-    manifest, selected = validate_archives(args.dist.resolve(), args.require_all)
-    if args.archive_only or sys.platform != "darwin":
-        print("NOT_RUN: complete App codesign verification (archive-only option or non-macOS host).")
-        print("NOT_RUN: native macOS package lifecycle (archive-only option or non-macOS host).")
+    observed = host_target()
+    expected = tuple(args.native_target.split("/")) if args.native_target else observed
+    if not args.archive_only:
+        check(expected == observed, "requested native target differs from this runner's actual OS/CPU")
+    manifest, selected = validate_archives(args.dist.resolve(), args.require_all, args.require_cli_targets, expected)
+    has_apps = any(item.get("kind") == "app" for item in manifest["artifacts"])
+    if args.archive_only:
+        print("NOT_RUN: complete App codesign verification and native lifecycle (--archive-only).")
     else:
-        validate_app_signatures(args.dist.resolve(), manifest)
+        if has_apps and sys.platform == "darwin":
+            validate_app_signatures(args.dist.resolve(), manifest)
+        elif has_apps:
+            print("NOT_RUN: optional macOS App strict signature verification on this non-macOS runner.")
         native = NativeCheck(manifest, selected, args.timeout)
         try:
             native.run()
         finally:
             native.cleanup()
         print("PASS PACKAGE_CLEANUP: verified owned processes stopped; private extracted/runtime files removed.")
-    print("NOT_RUN: Finder double-click, browser rendering, real phone/LAN, downloaded Gatekeeper acceptance, notarization, Windows/Linux native runtime and Windows clean PATH.")
+    if os.name == "nt" and not args.archive_only:
+        print("NOT_RUN: Windows ACL privacy audit and console Ctrl+C; TerminateProcess cleanup is not graceful signal validation.")
+    print("NOT_RUN: Finder double-click, browser rendering, real phone/LAN, downloaded Gatekeeper/SmartScreen acceptance, notarization, and native runtimes other than this runner's target.")
     print("NOT_RUN: zero-argument Finder app launch and OS-default cache-directory discovery; lifecycle uses app --no-open --state-dir.")
+    if args.receipt:
+        receipt = {"schemaVersion": 1, "status": "PASS_ARCHIVE_ONLY" if args.archive_only else "PASS_NATIVE",
+                   "version": manifest["version"], "source": manifest["source"],
+                   "manifestSha256": sha((args.dist / "manifest.json").read_bytes()),
+                   "host": {"os": observed[0], "arch": observed[1], "python": platform.python_version()},
+                   "nativeTarget": None if args.archive_only else "/".join(expected),
+                   "archiveCount": len(manifest["artifacts"]), "checks": len(CHECKS),
+                   "requiredCliTargets": args.require_cli_targets,
+                   "nativeLifecycle": "NOT_RUN" if args.archive_only else "PASS",
+                   "nativeAppSignature": "PASS" if has_apps and not args.archive_only and sys.platform == "darwin" else "NOT_RUN",
+                   "notRun": ["actual phone/LAN/QR/clipboard/browser", "actual Codex host", "downloaded OS trust/first launch",
+                              "minimum upstream OS versions", "OS-default runtime directory", "other OS/CPU native execution"],
+                   "windowsAclAudit": "NOT_RUN", "windowsConsoleCtrlC": "NOT_RUN"}
+        args.receipt.parent.mkdir(parents=True, exist_ok=True)
+        args.receipt.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print("Local archives only: no installation, global Agent configuration, security-setting change, or publication occurred.")
 
 

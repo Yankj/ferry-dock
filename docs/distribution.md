@@ -80,91 +80,79 @@ verification fixes the reproduced resource-envelope defect, but does **not**
 make the candidate a trusted, ready-to-distribute Mac app. See
 [verification](verification.md) for the exact receipts and remaining gates.
 
+## Alpha.4 platform matrix
+
+`0.1.0-alpha.4` is the next **unpublished local candidate**, separate from the frozen alpha.2 Release and alpha.3 App repair. There is no alpha.4 tag, Release URL or published npm version. A source checkout does not contain generated `dist/` archives. This matrix does not convert a cross-build or test definition into native acceptance.
+
+| Native target | CLI archive | npm platform package candidate | Public download | Alpha.4 build / native status |
+| --- | --- | --- | --- | --- |
+| macOS arm64 | `ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz` | `ferry-dock-darwin-arm64` | Alpha.2 CLI only, linked above | Validation in progress; not yet accepted here |
+| macOS amd64 | `ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz` | `ferry-dock-darwin-x64` | None | Validation in progress; native amd64 NOT_RUN |
+| Linux amd64 | `ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz` | `ferry-dock-linux-x64` | None | Validation in progress; native NOT_RUN |
+| Linux arm64 | `ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz` | `ferry-dock-linux-arm64` | None | Validation in progress; native NOT_RUN |
+| Windows amd64 | `ferry-dock-0.1.0-alpha.4-windows-amd64.zip` | `ferry-dock-win32-x64` | None | Validation in progress; native NOT_RUN |
+| Windows arm64 | `ferry-dock-0.1.0-alpha.4-windows-arm64.zip` | `ferry-dock-win32-arm64` | None | Validation in progress; native NOT_RUN |
+
+Go `amd64` is Node/npm `x64`; Go `windows` is Node/npm `win32`. The native archive is chosen for the intended OS/CPU. The npm entry selects for the **running Node process**; hardware alone does not determine a Rosetta or emulation process architecture. A successful selection is not an emulation/runtime acceptance result.
+
+The common native CLI layout is one outer `ferry-dock-VERSION-OS-ARCH/` directory containing the executable (`ferry-dock.exe` on Windows), build metadata, usage documents, licenses and `skills/ferry-dock/SKILL.md`. A native package requires no Git, Go, Node or global installation at runtime. The CLI's no-argument default remains foreground `serve`; explicitly use `desktop` for the background service/browser path.
+
+The alpha.4 manifest/checksum record is generated alongside the new archives and identifies its source, toolchain, CGO setting, platform, bytes and hashes. Never apply an alpha.2 or alpha.3 checksum to alpha.4. Native and npm checksums describe their separate archive sets. Only files in the matching checksum list should be expected during a full-list check.
+
+## OS runtime and trust boundaries
+
+These are packaging constraints and upstream requirements, **not a tested product minimum-OS promise**:
+
+- Go 1.27 upstream lists macOS 13+, Windows 10+/Server 2016+, and a Linux kernel floor of 3.2, with architecture caveats. See [Go minimum requirements](https://go.dev/wiki/MinimumRequirements). This candidate has not been tested on those oldest versions. Its exact compiler and platform evidence belong to the manifest and receipts, not the version label alone.
+- Linux CLI builds use `CGO_ENABLED=0`; ELF inspection must confirm no interpreter/dynamic dependencies. This avoids a glibc-versus-musl binary dependency, but does not establish every distro/kernel, resolver configuration or browser integration. Native runtime results remain separate.
+- Windows archives contain a console `.exe`, not a GUI app or installer. Quoted PowerShell paths and `.exe`/npm `.cmd` handling are distinct from POSIX syntax. Private state/handles must live in a current-user directory with appropriate inherited ACLs; POSIX mode-bit checks on a Mac do not establish Windows ACL protection.
+- Windows background creation uses a detached new process group; a caller's Windows Job Object may still govern child lifetime. Console Ctrl+C delivery and Node's signal emulation require native Windows evidence. An `os.kill`/VM test elsewhere cannot establish that behavior.
+- `desktop` needs an available system browser/opener; Linux headless environments can use foreground `serve` and an explicit phone-reachable origin. Default-browser/Finder/shell integration and real-phone LAN/QR acceptance remain separate.
+- macOS candidates have no Developer ID signing or Apple notarization. Optional App bundles retain complete-bundle ad-hoc sealing, which fixes the reproduced resource defect without establishing publisher trust. Windows binaries are publisher-unsigned and may encounter SmartScreen/reputation checks. There is no quarantine removal, protection bypass or certificate enrollment in this packaging work.
+
 ## npm packaging preview: local only
 
-The optional npm entry is implemented as a small JavaScript launcher around the
-existing pinned Mac arm64 Go executable. It is not another transfer backend.
-Candidate package metadata is `ferry-dock@0.1.0-alpha.2`, with Node `>=22`,
-`os: darwin` and `cpu: arm64`. Use a supported Node LTS; an x64 Node process
-under Rosetta is outside this preview's allowlist. There is no confirmed npm
-registry ownership or publication, no global installation, and no new GitHub
-Release asset for this TGZ.
+The alpha.4 design has one thin entry candidate, `ferry-dock@0.1.0-alpha.4`, and six native platform candidates from the matrix, each pinned as an **exact same-version optional dependency**. It reuses the matching Go CLI, not another backend. Names are not reserved or published, and no public registry `npx` command is available.
 
-The validated local artifact is
-`dist/npm-verified/0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2.tgz`,
-**3,139,752 bytes**, SHA-256
-`5a50504b7d726fa1fa80a31d9aae776db6e57c1b02a8daa635d1dfd6fedfc680`.
-This is a local build-output path, not a file guaranteed to exist in a source
-checkout or a public download URL. A second pack from the same inputs produced
-identical bytes. The native binary inside remains the exact alpha.2/a351555
-binary recorded by the original release manifest.
+The entry requires a supported Node.js 22+ runtime. It resolves only the platform package for its Node process, verifies matching package/core version, binary size and SHA-256, then spawns the executable without a shell. No arguments supply `desktop`; explicit arguments are preserved. Platform packages carry the binaries directly. There are no install lifecycle scripts, custom postinstall downloads or startup fetches. A future npm registry install would still download the npm packages normally; no network-free installation from a registry is promised.
 
-Given that verified local TGZ, a Node user can install it into a new local
-directory without invoking lifecycle scripts or a registry:
+For a separately supplied, verified **local** preview, install both the entry TGZ and your platform TGZ. Example for arm64 Mac:
 
 ```sh
-npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz /absolute/path/ferry-dock-0.1.0-alpha.4.tgz
 cd ferry-dock-node
 npm exec --offline --yes=false -- ferry-dock version
 npm exec --offline --yes=false -- ferry-dock
 ```
 
-The npm entry maps no arguments to `desktop`; explicit `version`, `desktop`,
-`serve` and `request ...` arguments are passed unchanged to the native command.
-The native JSON `defaultMode: serve` remains accurate for that executable and
-does not describe the wrapper's no-argument mapping. The package carries its
-binary and checks its size/hash against bundled metadata before execution;
-there are no runtime dependencies, optional platform packages, install hooks,
-runtime binary downloads or compiler requirements for this local-package route.
-That integrity check is not publisher signing or transport encryption.
+Both-language guides list all platform filenames and PowerShell syntax: [English](usage.md#node-users-local-package-only), [中文](usage.zh-CN.md#node-用户仅本地包). A missing native optional dependency is an error, not permission to fetch a replacement. Do not use `--omit=optional` for a normal installation. Unknown OS/architecture, missing package, wrong package version, invalid metadata or altered binary must fail before launch.
 
-Installed locations beneath the chosen prefix:
+Locations under the chosen install prefix:
 
-- command: `node_modules/.bin/ferry-dock`;
-- native core: `node_modules/ferry-dock/native/ferry-dock`;
+- entry: `node_modules/.bin/ferry-dock` (npm creates platform-specific command shims);
+- Go core: `node_modules/ferry-dock-PLATFORM-ARCH/native/ferry-dock` or `ferry-dock.exe`;
 - manual Skill: `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`;
-- matching contract: `node_modules/ferry-dock/docs/contracts/request-v1.md`.
+- contract: `node_modules/ferry-dock/docs/contracts/request-v1.md`.
 
-No global Skill, MCP, Agent configuration, PATH entry, login item or OS service
-is installed. Runtime handles and control state belong outside the package.
-`desktop` may reuse a known running instance without verifying that service's
-binary version; the wrapper emits an advisory, not a version-detection result.
-Do not stop a service shared by other tasks just to replace a package.
+The entry carries no global Skill/MCP/Agent configuration, PATH change, login item or OS service. Runtime control/handle files belong outside the package. Installing new package files does not replace an already running service. Alpha.4 desktop verifies authenticated instance identity plus version/commit; a legacy or mismatched service is preserved and startup fails with deliberate Quit/separate-state guidance. Finish shared work before Quit; all in-memory sessions/requests are discarded. Matching metadata is not a binary-hash attestation, especially for source builds labeled `dev`/`unknown`.
 
-[Local validation](benchmarks/2026-10-29-npm-validation.json) passed 79 assertions
-on Mac arm64 with Node 22.17.1/npm 10.9.2: package allowlist and hashes, offline
-script-disabled install/exec, literal arguments and numeric exits, SIGINT/SIGTERM
-and actual PTY Ctrl+C ending only a wait, and explicit `desktop --no-open`
-readiness/reuse/owned Quit/cleanup. No-argument mapping and unsupported
-Node/OS/CPU guards were VM checks. Automatic browser opening, public registry
-installation or `npx`, other OS/CPU, physical phone and actual Codex-host
-acceptance remain NOT_RUN.
-
-Maintainers can reproduce a local pack from a source checkout, a previously
-verified native archive/manifest, Python 3 and an existing Node/npm installation:
+Maintainers can prepare local packages from a matching source checkout, verified alpha.4 native `dist` directory, Python and existing Node/npm:
 
 ```sh
 python3 scripts/package-npm.py \
-  --archive /absolute/path/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz \
-  --manifest /absolute/path/manifest.json \
+  --dist /absolute/path/native-dist/0.1.0-alpha.4 \
   --node /absolute/path/node \
   --npm-cli /absolute/path/npm-cli.js \
   --out dist/npm
 ```
 
-The builder verifies the pinned archive/manifest/binary identities, stages an
-explicit file allowlist, uses local offline `npm pack --ignore-scripts`, and
-refuses an existing output version directory. It does not log in or publish.
-After a registry owner/name, version and publication are confirmed, the intended
-registry shape would be the following placeholder, **not a working command
-today**:
+The builder is a local packaging operation, not login, publication or a release upload. Test installation with scripts disabled and empty configs/cache; do not substitute a cached registry package for the supplied TGZ. The packaging/validation receipts must report exact files, sizes/hashes and the OS/CPU that actually executed. A configured six-runner CI matrix is **NOT_RUN** until a matching commit has run remotely.
 
-```text
-npx <confirmed-package-name>@<published-version>
-```
+### Historical alpha.2 npm evidence
 
-The public native download remains the available fallback. Homebrew, MCP and
-browser extensions are not part of this installation work.
+The previous single-Mac TGZ remains fixed at `dist/npm-verified/0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2.tgz`, 3,139,752 bytes, SHA-256 `5a50504b7d726fa1fa80a31d9aae776db6e57c1b02a8daa635d1dfd6fedfc680`. This is an existing local artifact, not a guaranteed checkout file or public download. It bundles the exact alpha.2/a351555 native binary. Its [79-check receipt](benchmarks/2026-10-29-npm-validation.json) and two byte-identical packs establish scoped Mac arm64/Node 22.17.1/npm 10.9.2 offline install, argv/stdio/exits, signal/PTY wait interruption and no-browser lifecycle results for that version only. Its old live-service advisory did not check backend version. These results do not validate alpha.4 or all six platforms.
+
+Homebrew, MCP and browser extensions remain outside this work. The published native Mac download above remains available while npm ownership/authentication and release approval are unresolved.
 
 ## Go install from the fixed tag
 

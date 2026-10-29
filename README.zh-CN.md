@@ -58,18 +58,18 @@ cd ferry-dock-0.1.0-alpha.2-darwin-arm64
 
 ## 已经有 Node？本地包预览
 
-npm 包只是**同一 Go 二进制的薄入口**，不会在安装或启动时下载后端。当前要求 **Apple Silicon Mac 上的 arm64 Node.js 22+**，请使用受支持的 LTS。候选包名 `ferry-dock` **尚未在 npm 预留或发布**，TGZ 也不是 GitHub Release 下载项；不要运行未经核实的 registry `npx ferry-dock` 命令。
+新的 **`0.1.0-alpha.4` 未发布候选**使用一个很薄的 Node.js 22+ 入口，搭配 macOS、Windows、Linux 各 x64／arm64 的六个原生平台包。入口按当前 Node 进程的系统与架构选择包，执行同一 Go 核心；没有安装生命周期脚本，启动时不会下载二进制。平台选择与交叉编译通过，不等于每个平台都完成本机验收，见[平台矩阵](docs/distribution.md#alpha4-platform-matrix)。
 
-若你已经拿到核验后的本地 `ferry-dock-0.1.0-alpha.2.tgz`，替换下方绝对路径。安装仅写入新的本地目录：
+包名均为候选，**尚未在 npm 预留或发布**，目前没有可用的公开 `npx ferry-dock` 命令。本地预览需同时取得入口 TGZ、匹配平台 TGZ 与校验清单。例如 arm64 Mac 用户替换两个绝对路径后运行：
 
 ```sh
-npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz /absolute/path/ferry-dock-0.1.0-alpha.4.tgz
 cd ferry-dock-node
 npm exec --offline --yes=false -- ferry-dock version
 npm exec --offline --yes=false -- ferry-dock
 ```
 
-仅 npm 入口不带参数时会转为 **`desktop`**；明确传入 `version`、`desktop`、`serve`、`request ...` 时保持原生命令语义。手动 Skill 位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。包没有运行时依赖或安装生命周期脚本。没拿到本地 TGZ 或没有 Node 时，使用上方公开原生包即可。[本地包使用说明](docs/usage.zh-CN.md#node-用户仅本地包)。
+仅 npm 入口不带参数时转为 **`desktop`**；明确命令参数会传给原生程序。手动 Skill 仍位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。省略可选依赖可能缺少原生包，此时入口会报错，不会自行下载。升级包不会杀掉或替换共享运行服务。[各平台包名、命令与边界](docs/usage.zh-CN.md#node-用户仅本地包)。
 
 ## 已经在用 Go？
 
@@ -82,20 +82,15 @@ GOBIN="$(pwd)/ferry-dock-bin" go install github.com/Yankj/ferry-dock/cmd/ferry-d
 
 这条路径会编译源码，已用 Mac arm64／Go 1.27.3 实测，未重复 Go 1.26 本机验收。旧标签没有发行链接参数，因此安装后 `version` 显示 `dev`／`unknown`；使用 `go version -m ./ferry-dock-bin/ferry-dock` 核对模块 `github.com/Yankj/ferry-dock` 的版本为 `v0.1.0-alpha.2`，不能把开发元数据误读成安装了别的模块版本。源码安装不承诺离线可用。[安装详情](docs/distribution.md#go-install-from-the-fixed-tag)。
 
-## 其他本地预览入口
+## 其他平台：alpha.4 本地候选
 
-Intel Mac／Linux／Windows CLI 已在本地生成，**未上传到本次预发布**。如果你另外拿到了匹配系统与架构的原生 CLI 预览包，在包的根目录用 macOS/Linux POSIX shell 运行：
+alpha.4 打包目标为六个原生 CLI：macOS `darwin`、Windows、Linux，各 arm64／amd64。**它们尚不是公开 Release 下载项。**[平台矩阵](docs/distribution.md#alpha4-platform-matrix)分别列出构建检查、本机运行和发布状态。仅使用另外获得、匹配平台且附有 manifest／校验清单的预览包。
 
-```sh
-./ferry-dock version
-./ferry-dock desktop
-```
+macOS／Linux 解压对应 `.tar.gz`，进入版本／平台目录后，运行 `./ferry-dock version` 和 `./ferry-dock desktop`。Windows 解压对应 `.zip`，在 PowerShell 进入版本／平台目录后，运行 `.\ferry-dock.exe version` 和 `.\ferry-dock.exe desktop`。[指南](docs/usage.zh-CN.md#2-其他本地预览入口)给出完整示例、更新与退出步骤。两种原生路径均不需要 Go、Git 或 Node。CLI 不带子命令默认前台 `serve`；要启动桌面网页，请明确使用 `desktop`。
 
-Windows 在 PowerShell 中使用 `.\ferry-dock.exe`。生成或交叉编译出安装包，不代表每个平台都完成本机运行验收。CLI 无子命令时默认前台 `serve`；需要浏览器启动器和后台生命周期时，明确使用 `desktop`。
+Linux 桌面打开依赖系统中可用的 opener 和浏览器；无桌面环境可使用前台 `serve`，明确配置可访问地址。本轮没有新增 Windows／Linux GUI 应用。最低系统／内核和下载后的系统信任验收，与归档构建分开记录。
 
-不要继续按旧 alpha.1／alpha.2 应用 ZIP 的“解压后打开”说明使用。完整应用包签名缺陷与压缩文件损坏是不同问题；即使修正封装并通过本地严格签名校验，也不等于具备 Developer ID 签名、Apple 公证或下载后的 Gatekeeper 接受证明。当前公开包请使用上方原生 CLI 路径。
-
-CLI 和应用内的可执行文件都支持 JSON `version` 及 `request` 命令。版本输出含 `version`、`commit`、`os`、`arch`、`defaultMode`。包内布局与高级 `serve --listen ... --public-url ...` 用法见[分发说明](docs/distribution.md)。
+旧 alpha.1／alpha.2 Mac App 启动建议已撤回；alpha.3 结构修复保留，ad-hoc 封装验证不等于 Developer ID、Apple 公证或 Gatekeeper 通过。[事故证据](docs/packaging-incident.md)。
 
 ## 普通传输保持简单
 
@@ -107,7 +102,7 @@ CLI 和应用内的可执行文件都支持 JSON `version` 及 `request` 命令�
 
 复用已运行的桌面实例与私有控制文件。macOS 默认路径为 `~/Library/Caches/ferry-dock/runtime/control.json`，`desktop` 也会返回 `controlPath`。不要打印文件正文，它包含进程管理权限。
 
-将 `ferry_bin` 设置为预构建程序的**绝对路径**：原生包解压出的 `ferry-dock`，或已核验本地 npm 包内的 `native/ferry-dock`。不要使用已撤回启动建议的 alpha.1／alpha.2 App。下列 POSIX 示例假定桌面实例已就绪，并为当前任务创建新的私有目录：
+将 `ferry_bin` 设置为预构建程序的**绝对路径**：原生包解压出的 `ferry-dock`，或已核验本地 npm 入口 `node_modules/.bin/ferry-dock`（PATH 中需有 Node 22+）。不要使用已撤回启动建议的 alpha.1／alpha.2 App。下列 POSIX 示例假定桌面实例已就绪，并为当前任务创建新的私有目录：
 
 ```sh
 ferry_bin="/absolute/path/to/ferry-dock"

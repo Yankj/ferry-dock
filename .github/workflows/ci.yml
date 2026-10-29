@@ -22,8 +22,6 @@ jobs:
         go: ['1.26.x', '1.27.x']
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
-    env:
-      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.3'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -49,35 +47,96 @@ jobs:
       - run: node scripts/test-ui.cjs
       - name: Exercise served scripts against the compiled service
         run: node scripts/smoke-ui.cjs --binary ./ferry-dock${{ runner.os == 'Windows' && '.exe' || '' }}
-      - name: Package local macOS previews
-        if: runner.os == 'macOS' && matrix.go == '1.27.x'
-        run: python3 scripts/package.py --version "$FERRY_DOCK_PREVIEW_VERSION" --offline
-      - name: Check native packaged lifecycle
-        if: runner.os == 'macOS' && matrix.go == '1.27.x'
-        run: python3 scripts/smoke-package.py --dist "dist/$FERRY_DOCK_PREVIEW_VERSION"
-      - name: Reject altered app metadata and resource seals
-        if: runner.os == 'macOS' && matrix.go == '1.27.x'
-        run: python3 scripts/test-app-signature.py --archive "dist/$FERRY_DOCK_PREVIEW_VERSION/ferry-dock-$FERRY_DOCK_PREVIEW_VERSION-darwin-arm64-app.zip"
 
-  npm-preview:
-    name: Local npm package / macOS arm64 / Node 22
-    runs-on: macos-latest
-    timeout-minutes: 10
+  package-preview:
+    name: Build six CLI targets and local npm packages
+    runs-on: macos-15
+    timeout-minutes: 15
+    env:
+      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.4'
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.27.x'
+          cache: true
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '22'
-      - name: Obtain the pinned public Go artifact
-        run: |
-          mkdir -p bin/npm-input
-          curl --fail --location --proto '=https' --proto-redir '=https' --retry 2 --output bin/npm-input/core.tar.gz https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz
-          curl --fail --location --proto '=https' --proto-redir '=https' --retry 2 --output bin/npm-input/manifest.json https://github.com/Yankj/ferry-dock/releases/download/v0.1.0-alpha.2/manifest.json
-      - name: Pack the verified core with the npm entry
-        run: |
-          npm_preview_cli="$(node -p 'require("node:fs").realpathSync(process.argv[1])' "$(command -v npm)")"
-          python3 scripts/package-npm.py --archive bin/npm-input/core.tar.gz --manifest bin/npm-input/manifest.json --out dist/npm --node "$(command -v node)" --npm-cli "$npm_preview_cli"
-      - name: Check local install, exec, signals and lifecycle without registry writes
-        run: |
-          npm_preview_cli="$(node -p 'require("node:fs").realpathSync(process.argv[1])' "$(command -v npm)")"
-          python3 scripts/smoke-npm.py --package dist/npm/0.1.0-alpha.2/ferry-dock-0.1.0-alpha.2.tgz --node "$(command -v node)" --npm-cli "$npm_preview_cli"
+          architecture: arm64
+      - run: go mod download
+      - name: Test executable-format rejection fixtures
+        run: python3 scripts/test-native-format.py
+      - name: Build all CLI archives and sealed test Apps
+        run: python3 scripts/package.py --version "$FERRY_DOCK_PREVIEW_VERSION" --all --offline --out dist/native
+      - name: Check archive contracts and the native Mac lifecycle
+        run: python3 scripts/smoke-package.py --dist "dist/native/$FERRY_DOCK_PREVIEW_VERSION" --require-cli-targets
+      - name: Reject altered App metadata and resource seals
+        run: python3 scripts/test-app-signature.py --archive "dist/native/$FERRY_DOCK_PREVIEW_VERSION/ferry-dock-$FERRY_DOCK_PREVIEW_VERSION-darwin-arm64-app.zip"
+      - name: Pack the same-version npm entry and six platform packages
+        run: python3 scripts/package-npm.py --dist "dist/native/$FERRY_DOCK_PREVIEW_VERSION" --out dist/npm
+      - name: Preserve test artifacts for the native matrix
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cross-platform-preview
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  native-preview:
+    name: Packaged native lifecycle / ${{ matrix.target }} / Node 22
+    needs: package-preview
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-15
+            target: darwin-arm64
+            native-target: darwin/arm64
+            node-arch: arm64
+          - os: macos-15-intel
+            target: darwin-amd64
+            native-target: darwin/amd64
+            node-arch: x64
+          - os: ubuntu-24.04
+            target: linux-amd64
+            native-target: linux/amd64
+            node-arch: x64
+          - os: ubuntu-24.04-arm
+            target: linux-arm64
+            native-target: linux/arm64
+            node-arch: arm64
+          - os: windows-2025
+            target: windows-amd64
+            native-target: windows/amd64
+            node-arch: x64
+          - os: windows-11-arm
+            target: windows-arm64
+            native-target: windows/arm64
+            node-arch: arm64
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    env:
+      FERRY_DOCK_PREVIEW_VERSION: '0.1.0-alpha.4'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version: '1.27.x'
+          cache: true
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '22'
+          architecture: ${{ matrix.node-arch }}
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: cross-platform-preview
+          path: dist
+      - name: Check native process and service identity tests
+        run: go test ./internal/desktop ./internal/relay
+      - name: Validate native archives and owned service lifecycle
+        run: python scripts/smoke-package.py --dist dist/native/0.1.0-alpha.4 --require-cli-targets --native-target ${{ matrix.native-target }}
+      - name: Verify Node runs as the intended native architecture
+        run: node -e "const target=(process.platform==='win32'?'windows':process.platform)+'-'+(process.arch==='x64'?'amd64':process.arch);if(target!=='${{ matrix.target }}')throw new Error('Node architecture does not match the native test target')"
+      - name: Check offline npm install, platform selection and lifecycle
+        run: python scripts/smoke-npm.py --dist dist/npm/0.1.0-alpha.4

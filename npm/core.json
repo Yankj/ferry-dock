@@ -1,13 +1,5 @@
 {
-  "schemaVersion": 1,
-  "version": "0.1.0-alpha.2",
-  "commit": "a351555ccd1615795bc2a6c10dd7e97a633a074f",
-  "os": "darwin",
-  "arch": "arm64",
-  "defaultMode": "serve",
-  "archiveName": "ferry-dock-0.1.0-alpha.2-darwin-arm64.tar.gz",
-  "archiveSha256": "32221968d78612bfc4234701874201ab0e37c8dd10337db795021d4fb4230796",
-  "manifestSha256": "7118721719e37696f8d721017fa9cd8be11901e717cc682d2924ed3569ba7f47",
-  "binarySize": 7387650,
-  "binarySha256": "de875b08929fa3dc86557a6bf1164d043232c5078f7fb1958e46f61db0764d6c"
+  "schemaVersion": 2,
+  "version": "0.1.0-alpha.4",
+  "note": "The packager replaces this template with exact manifest, archive, binary identities for six platforms. This source template is not runnable distribution metadata."
 }

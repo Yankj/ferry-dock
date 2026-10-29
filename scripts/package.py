@@ -31,6 +31,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 import zlib
 
+from native_format import inspect_binary
+
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGETS = (
@@ -382,12 +384,31 @@ def documentation():
         for path in (ROOT / directory).rglob("*"):
             if path.is_file() and not path.is_symlink() and path.suffix in (".md", ".svg", ".png", ".html", ".json"):
                 files.append(path)
-    return {path.relative_to(ROOT).as_posix(): (path.read_bytes(), 0o644) for path in sorted(set(files))}
+    entries = {}
+    secret = re.compile(rb"(?:-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----|"
+                        rb"\bgh[pousr]_[A-Za-z0-9]{30,}\b|\bgithub_pat_[A-Za-z0-9_]{40,}\b|"
+                        rb"\bnpm_[A-Za-z0-9]{30,}\b|\bBearer [A-Za-z0-9_-]{32,}\b|"
+                        rb"#(?:owner|key)=[A-Za-z0-9_-]{32,})")
+    for path in sorted(set(files)):
+        relative = path.relative_to(ROOT).as_posix()
+        if any(part.startswith(".") for part in path.relative_to(ROOT).parts):
+            raise ValueError("hidden documentation files cannot be packaged")
+        data = path.read_bytes()
+        if path.suffix != ".png" and secret.search(data):
+            raise ValueError(f"documentation matches a credential/capability pattern; review before packaging: {relative}")
+        entries[relative] = (data, 0o644)
+    return entries
+
+
+def contents_metadata(entries):
+    index = [{"path": name, "mode": mode, "sha256": digest(data)}
+             for name, (data, mode) in sorted(entries.items())]
+    return {"count": len(index), "sha256": digest(json.dumps(index, sort_keys=True, separators=(",", ":")).encode())}
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", default="0.1.0-alpha.3", help="artifact/product version (default: %(default)s)")
+    parser.add_argument("--version", default="0.1.0-alpha.4", help="artifact/product version (default: %(default)s)")
     parser.add_argument("--target", action="append", choices=TARGETS, help="repeat for a subset (default: both Darwin architectures)")
     parser.add_argument("--all", action="store_true", help="build all six targets, including both macOS apps")
     parser.add_argument("--cli-only", action="store_true", help="omit macOS apps; permits native command cross-builds without codesign")
@@ -460,6 +481,7 @@ def main():
                 run([args.go, "build", "-mod=readonly", "-trimpath", "-buildvcs=false", "-pgo=off",
                      "-ldflags", flags, "-o", str(binary), "./cmd/ferry-dock"], env=environment)
                 binary_data = binary.read_bytes()
+                binary_format = inspect_binary(binary_data, goos, goarch)
                 stem = f"ferry-dock-{args.version}-{goos}-{goarch}"
                 if kind == "app":
                     binary_path = "Ferry Dock.app/Contents/MacOS/ferry-dock"
@@ -482,6 +504,7 @@ def main():
                     entries.update({"Ferry Dock.app/Contents/Resources/" + name: value for name, value in docs.items()})
                     entries, signing = seal_app(entries, temporary)
                     binary_data = entries[binary_path][0]
+                    binary_format = inspect_binary(binary_data, goos, goarch)
                     filename = stem + "-app.zip"
                 else:
                     binary_path = f"{stem}/{executable_name}"
@@ -497,6 +520,13 @@ def main():
                     "file": filename, "kind": kind, "goos": goos, "goarch": goarch,
                     "defaultMode": mode, "sha256": digest(data), "size": len(data),
                     "binary": {"path": binary_path, "sha256": digest(binary_data), "size": len(binary_data)},
+                    "contents": contents_metadata(entries),
+                    "binaryFormat": binary_format,
+                    "runtimeRequirements": {
+                        "cpuBaseline": "x86-64-v1" if goarch == "amd64" else "armv8.0",
+                        "minimumOsAcceptance": "NOT_RUN",
+                        "linuxLibc": "not dynamically linked" if goos == "linux" else "NOT_APPLICABLE",
+                    },
                     "signing": signing, "nativeValidation": "NOT_RUN",
                 })
         manifest_data = (json.dumps(manifest, indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()

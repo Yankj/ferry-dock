@@ -22,6 +22,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Yankj/ferry-dock/internal/buildinfo"
 	"github.com/Yankj/ferry-dock/internal/host"
 	"github.com/Yankj/ferry-dock/internal/relay"
 )
@@ -176,7 +177,8 @@ func Run(ctx context.Context, args []string, out, errOut io.Writer) error {
 			return errors.New("relay is running but the system browser could not open; retry desktop or use the private control file")
 		}
 	}
-	return json.NewEncoder(out).Encode(map[string]any{"state": "ready", "reused": reuse, "controlPath": control})
+	build := buildinfo.Current()
+	return json.NewEncoder(out).Encode(map[string]any{"state": "ready", "reused": reuse, "controlPath": control, "version": build.Version, "commit": build.Commit})
 }
 
 func privateDirectory(dir string) error {
@@ -242,10 +244,16 @@ func verify(ctx context.Context, s state) (bool, error) {
 	var status struct {
 		Desktop    bool   `json:"desktop"`
 		InstanceID string `json:"instanceId"`
+		Version    string `json:"version"`
+		Commit     string `json:"commit"`
 	}
 	data, err := io.ReadAll(io.LimitReader(response.Body, 4097))
 	if err != nil || len(data) > 4096 || response.StatusCode != 200 || json.Unmarshal(data, &status) != nil || !status.Desktop || status.InstanceID != s.InstanceID {
 		return false, errors.New("an unknown service occupies the recorded address; no existing process was changed")
+	}
+	build := buildinfo.Current()
+	if status.Version != build.Version || status.Commit != build.Commit {
+		return false, errors.New("the running Ferry Dock has a different or unknown version/commit; finish its tasks and use Quit Ferry Dock before retrying, or choose a different --state-dir; no existing process was changed")
 	}
 	return true, nil
 }

@@ -64,37 +64,46 @@ shasum -a 256 -c SHA256SUMS
 
 ## Node 用户：仅本地包
 
-可选 npm 入口已实现并完成本地测试，但**尚未发布到 npm**。候选名 `ferry-dock`
-不是已确认的 registry 身份，因此这里不提供公开 `npx ferry-dock` 命令。TGZ 也不是
-GitHub Release 的三个下载项之一；没有拿到该文件时，请用上方原生包，不要猜包名。
+新的 **alpha.4 未发布候选**使用 Node.js 22+ 薄入口，搭配 macOS、Linux、Windows 各 x64／arm64 的原生包。包名都是候选，尚未预留 npm 身份，目前没有公开 `npx ferry-dock` 命令或 alpha.4 Release 地址。没有另外获得本地包时，请用上方已发布的 Mac arm64 原生包。
 
-当前仅支持 **Apple Silicon Mac 上的 arm64 Node.js 22+**，Rosetta 下的 x64 Node
-不在允许范围；请使用受支持的 Node LTS。已有核验后的本地
-`ferry-dock-0.1.0-alpha.2.tgz` 时，替换绝对路径，安装到一个新目录，不做全局安装：
+按**实际运行的 Node 进程**选平台，不只看硬件：Node `x64` 对应 Go `amd64`，Node `arm64` 对应 Go `arm64`。Rosetta 中运行 x64 Node 会选择 x64 包；选择逻辑通过不等于 Rosetta 本机运行已验收。
+
+| Node 平台／架构 | 本地平台 TGZ |
+| --- | --- |
+| `darwin / arm64` | `ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz` |
+| `darwin / x64` | `ferry-dock-darwin-x64-0.1.0-alpha.4.tgz` |
+| `linux / arm64` | `ferry-dock-linux-arm64-0.1.0-alpha.4.tgz` |
+| `linux / x64` | `ferry-dock-linux-x64-0.1.0-alpha.4.tgz` |
+| `win32 / arm64` | `ferry-dock-win32-arm64-0.1.0-alpha.4.tgz` |
+| `win32 / x64` | `ferry-dock-win32-x64-0.1.0-alpha.4.tgz` |
+
+取得并核验本地文件后，将**入口 TGZ 和匹配的平台 TGZ 两个包**安装到新的本地目录。下面为 arm64 Mac 的 POSIX shell 示例，替换路径及平台包名：
 
 ```sh
-npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-0.1.0-alpha.2.tgz
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix ./ferry-dock-node /absolute/path/ferry-dock-darwin-arm64-0.1.0-alpha.4.tgz /absolute/path/ferry-dock-0.1.0-alpha.4.tgz
 cd ferry-dock-node
 npm exec --offline --yes=false -- ferry-dock version
 npm exec --offline --yes=false -- ferry-dock
 ```
 
-npm 包装入口无参数时选择 `desktop`；明确传入 `version`、`desktop`、`serve` 或
-`request ...` 时，保持同一内置 Go 核心的参数语义。版本为原生 alpha.2／a351555；
-JSON 中的 `defaultMode` 仍描述原生程序的 `serve` 默认值，包装器会明确补入
-`desktop`。包没有运行时依赖、可选依赖下载、生命周期脚本或运行时二进制下载。
+Windows PowerShell 使用 Windows 路径。取得两个 x64 TGZ 后，例如：
 
-手动 Skill 位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。执行下方
-请求示例时，将 `ferry_bin` 设为 `node_modules/ferry-dock/native/ferry-dock` 的
-绝对路径，向 Agent 提供真实 Skill 路径。不会全局安装 Skill、MCP 或 Agent 配置。
-服务可能复用已运行但版本未被此 alpha 核验的实例；启动提示不代表版本检测。
-不要为了升级包退出其他任务共享的服务。
+```powershell
+npm install --offline --ignore-scripts --no-audit --no-fund --package-lock=false --prefix .\ferry-dock-node "C:\absolute\ferry-dock-win32-x64-0.1.0-alpha.4.tgz" "C:\absolute\ferry-dock-0.1.0-alpha.4.tgz"
+Set-Location .\ferry-dock-node
+npm exec --offline --yes=false -- ferry-dock version
+npm exec --offline --yes=false -- ferry-dock
+```
 
-Mac arm64／Node 22.17.1／npm 10.9.2 通过了 79 项本地断言，包含禁用脚本的
-离线安装／exec、参数／退出处理、真实信号及 PTY 中断等待、私有 loopback 服务
-生命周期／复用／清理。无参数映射与不支持平台拒绝是 VM 检查；默认浏览器、公开
-registry `npx`、其他系统、真机及实际 Codex 宿主未验。此入口不会消除 macOS 签名、
-Gatekeeper 或 HTTP 信任边界。[打包与制品详情](distribution.md#npm-packaging-preview-local-only)。
+这些是本地文件安装示例，不是 registry 命令，也不是 Windows 本机运行通过证明。已执行范围见[平台矩阵](distribution.md#alpha4-platform-matrix)。
+
+包装入口不带参数时转为 `desktop`；明确的 `version`、`desktop`、`serve`、`request ...` 原样交给对应 Go 核心。入口把所有可选平台依赖固定为精确同版本，并在执行前核对包／核心元数据、二进制大小及 SHA-256。没有 shell 拼接、安装生命周期脚本或运行时二进制下载。缺少平台依赖、不支持的平台或版本不匹配都会明确报错，不会自动下载。正常安装不要使用 `--omit=optional`，运行需要匹配的原生包。
+
+Skill 仍位于 `node_modules/ferry-dock/skills/ferry-dock/SKILL.md`。下方 POSIX 请求命令的 `ferry_bin` 可指向本地 `node_modules/.bin/ferry-dock` 的绝对路径，PATH 中需有 Node 22+。原生程序放在匹配平台包内，已不在入口包内。不会安装全局 Skill、MCP、PATH、Agent 配置、登录启动项或系统服务。
+
+旧 alpha.2 单 Mac TGZ 与其 [79 项检查记录](benchmarks/2026-10-29-npm-validation.json)保持冻结，只证明该版本。alpha.4 新结果单列于[验证记录](verification.md)，平台选择不等于六平台本机验收。registry 安装／`npx`、默认浏览器、真机及实际 Codex 宿主是独立未完成项。Node 包装不会消除系统签名／信誉检查或 HTTP 信任边界。
+
+**更新：**alpha.4 在复用前检查已认证服务的版本与 commit。缺少这些身份字段的旧服务或不匹配服务会保持运行，启动返回错误。先完成共享任务，再从原页面 **Quit Ferry Dock** 后启动新版；或明确使用另一个私有 `--state-dir` 启动独立实例。退出会清空全部内存会话／请求，不应为了升级中断其他任务。构建元数据匹配不证明二进制字节相同，尤其源码构建的 `dev`／`unknown`。
 
 ## Go 用户：固定源码标签
 
@@ -120,25 +129,44 @@ Codex 宿主。源码安装需要 Go 工具链与网络，不承诺离线可用�
 
 ## 2. 其他本地预览入口
 
-以下形态**未上传到本次预发布**，仅供另外拿到对应本地预览包的人使用；平台名称不是公开下载链接，也不是本机验收证明。
+六平台 **alpha.4 候选尚未发布**。以下示例仅供另外取得并核验对应原生归档的人使用。[分发说明](distribution.md#alpha4-platform-matrix)区分归档检查、本机运行与实际公开状态；旧 alpha.2／alpha.3 及其哈希保持不变。
 
-历史 alpha.1／alpha.2 macOS App ZIP 不再推荐作为启动器：归档完整性和直接执行检查通过，但完整应用包严格签名校验失败。不要继续按其包内“解压后打开”步骤使用。alpha.3 私有修复候选已通过归档前后完整封装验证，修改 Info.plist／资源及删除资源签名均按预期校验失败，Mac arm64 无浏览器生命周期检查也通过；这些 ad-hoc 结构检查不代表 Developer ID 身份、Apple 公证、浏览器下载 Gatekeeper、Finder 或浏览器自动打开已通过。不会覆盖旧归档，也不提供绕过系统保护的流程。
-
-其他原生 CLI 包有一层平台／版本目录，在目录内，macOS／Linux 使用：
+Intel Mac 用户在收到的压缩包所在目录运行：
 
 ```sh
+tar -xzf ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz
+cd ferry-dock-0.1.0-alpha.4-darwin-amd64
 ./ferry-dock version
 ./ferry-dock desktop
 ```
 
-Windows 使用 PowerShell：
+Linux x64 使用对应归档；arm64 则把以下两个名称中的 `linux-amd64` 改为 `linux-arm64`：
+
+```sh
+tar -xzf ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz
+cd ferry-dock-0.1.0-alpha.4-linux-amd64
+./ferry-dock version
+./ferry-dock desktop
+```
+
+Windows x64 使用 PowerShell；arm64 将两个名称中的 `windows-amd64` 改为 `windows-arm64`：
 
 ```powershell
+Expand-Archive -LiteralPath .\ferry-dock-0.1.0-alpha.4-windows-amd64.zip -DestinationPath .\ferry-dock-preview
+Set-Location .\ferry-dock-preview\ferry-dock-0.1.0-alpha.4-windows-amd64
 .\ferry-dock.exe version
 .\ferry-dock.exe desktop
 ```
 
-归档已通过结构检查，源码 CI 在 macOS、Linux、Windows 执行构建和 CLI／HTTP 自动化检查；这不代表每个系统／CPU 的打包程序都通过用户首启验收。高级前台 `serve` 和网络配置见[分发说明](distribution.md)。
+将 `version`、`commit`、`os`、`arch`、`defaultMode` 与收到的 manifest 核对。解压到新目录，不要覆盖正在使用的旧版。仅收到一个归档时，用 Mac `shasum -a 256`、Linux `sha256sum` 或 PowerShell `Get-FileHash -Algorithm SHA256`，与可信校验清单中该文件对应值比较。完整运行 `SHA256SUMS` 校验需要拥有清单内的全部文件。
+
+这些其他平台示例未在本 Mac 上完成本机执行。构建 Windows PE／Linux ELF 不等于生命周期验收。Linux 采用 `CGO_ENABLED=0` 避免动态 libc 依赖，但最低内核、DNS、发行版集成和系统浏览器／opener 仍是独立运行条件。[平台边界](distribution.md#os-runtime-and-trust-boundaries)。
+
+**退出：**在电脑本地所有者页面点击 **Quit Ferry Dock**；启动命令返回后关闭终端或浏览器，不会停止后台核心。无桌面环境可用前台 `serve`，明确配置手机可访问地址，前台命令用 Ctrl+C 停止。端口被占或未知服务不代表可以停止其他进程。
+
+**更新：**共享任务完成前保留旧实例，控制／句柄文件不会备份内存文本。alpha.4 遇到旧版缺失身份字段或 version／commit 不匹配时会拒绝复用，保留原服务，提示主动退出或使用另一个私有 `--state-dir`。不会自动升级运行中的后端；相同 version／commit 只证明元数据一致。
+
+本轮没有新增 Windows／Linux 桌面 App。旧 alpha.1／alpha.2 Mac App 启动建议仍撤回；alpha.3 本地资源封装修复和下载信任验收是不同事项。不要清除隔离属性或关闭系统保护。[App 事故记录](packaging-incident.md)。
 
 ## 3. 把手机意见送给指定任务
 
@@ -165,7 +193,7 @@ open "$runtime_dir/proposal.json.png"
 若用的是已核验本地 npm 包，把第一行换成其原生核心的真实绝对路径，保留路径空格外的引号：
 
 ```sh
-ferry_bin="/absolute/path/ferry-dock-node/node_modules/ferry-dock/native/ferry-dock"
+ferry_bin="/absolute/path/ferry-dock-node/node_modules/.bin/ferry-dock"
 ```
 
 不要在此工作流使用已撤回启动建议的 alpha.1／alpha.2 App。
