@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager
 import hashlib
+import errno
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -56,6 +57,26 @@ def private_directory():
     finally:
         if not cleanup['preserve']:
             shutil.rmtree(directory)
+
+def wait_for_owned_stop(control, origin, opener, timeout=5):
+    """202 acknowledges stopping; require both state removal and refused socket.
+
+    The service can remove control.json before its deferred graceful shutdown
+    closes the listener. HTTP errors, resets and timeouts do not prove closure.
+    """
+    deadline = time.monotonic()+timeout
+    while time.monotonic() < deadline:
+        refused = False
+        try:
+            with opener.open(origin+'/healthz', timeout=min(.3, max(.001, deadline-time.monotonic()))):
+                pass
+        except OSError as error:
+            reason = getattr(error, 'reason', error)
+            refused = isinstance(reason, ConnectionRefusedError) or getattr(reason, 'errno', None) in (errno.ECONNREFUSED, 10061)
+        if refused and not control.exists():
+            return True
+        time.sleep(min(.02, max(0, deadline-time.monotonic())))
+    return False
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -274,12 +295,9 @@ def main():
             check(api('POST',route+'/messages',token,{'idempotencyKey':'npm-ordinary','text':text})[0]==201,'ordinary sender accepted')
             code,inbox=api('GET',route,state['ownerToken']);check(code==200 and inbox['messages'][0]['text']==text,'ordinary read exact text')
             check(api('POST','/api/desktop/quit',state['ownerToken'],{})[0]==202,'own desktop Quit accepted')
-            deadline=time.monotonic()+5
-            while control.exists() and time.monotonic()<deadline:time.sleep(.02)
+            stopped=wait_for_owned_stop(control,state['serverUrl'],opener)
             check(not control.exists(),'owned control removed after Quit')
-            try:opener.open(state['serverUrl']+'/healthz',timeout=1)
-            except OSError:check(True,'owned service socket closed after Quit')
-            else:raise Failure('owned socket still open after Quit')
+            check(stopped,'owned service socket refused connections after Quit')
             state=None
         finally:
             if state is None and control is not None and control.exists():
@@ -292,13 +310,7 @@ def main():
                 for attempt in range(3):
                     try:api('POST','/api/desktop/quit',state['ownerToken'],{})
                     except Exception:pass
-                    deadline=time.monotonic()+2
-                    while time.monotonic()<deadline:
-                        try:
-                            with opener.open(state['serverUrl']+'/healthz',timeout=.3):pass
-                        except OSError:
-                            if not control.exists():stopped=True;break
-                        time.sleep(.05)
+                    stopped=wait_for_owned_stop(control,state['serverUrl'],opener,timeout=2)
                     if stopped:break
                 if not stopped:
                     cleanup['preserve']=True
