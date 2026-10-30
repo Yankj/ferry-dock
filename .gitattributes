@@ -1,6 +1,6 @@
 * text=auto eol=lf
 
 # Receipt digests describe the original CI bytes, including Windows CRLF.
-docs/benchmarks/2026-10-30-ci/** -text
+docs/benchmarks/2026-10-30-ci/** -text whitespace=trailing-space,space-before-tab,cr-at-eol
 *.png binary
 *.ico binary
