@@ -58,22 +58,43 @@ def private_directory():
         if not cleanup['preserve']:
             shutil.rmtree(directory)
 
-def wait_for_owned_stop(control, origin, opener, timeout=5):
-    """202 acknowledges stopping; require both state removal and refused socket.
+def probe_owned_socket(origin, opener, timeout):
+    """Return only capability-free evidence; an HTTP error is an open socket."""
+    started = time.monotonic()
+    observation = {'connectionRefused':False, 'errorType':None, 'reasonType':None,
+                   'errno':None, 'winerror':None, 'probeTimeoutMs':round(timeout*1000)}
+    try:
+        with opener.open(origin+'/healthz', timeout=timeout):
+            pass
+    except OSError as error:
+        reason = getattr(error, 'reason', error)
+        observation.update({'errorType':type(error).__name__, 'reasonType':type(reason).__name__,
+                            'errno':getattr(reason, 'errno', None), 'winerror':getattr(reason, 'winerror', None)})
+        observation['connectionRefused'] = (isinstance(reason, ConnectionRefusedError)
+            or observation['errno'] in (errno.ECONNREFUSED, 10061)
+            or observation['winerror'] == 10061)
+    observation['probeElapsedMs'] = round((time.monotonic()-started)*1000)
+    return observation
 
-    The service can remove control.json before its deferred graceful shutdown
-    closes the listener. HTTP errors, resets and timeouts do not prove closure.
+
+def wait_for_owned_stop(control, origin, opener, timeout=5, observations=None):
+    """202 is asynchronous: require absent control and explicitly refused socket.
+
+    Give a refused connection enough time to be reported by the platform, while
+    preserving the total deadline. Timeouts, resets and HTTP errors never pass.
     """
-    deadline = time.monotonic()+timeout
+    started = time.monotonic()
+    deadline = started+timeout
+    attempts = 0
     while time.monotonic() < deadline:
-        refused = False
-        try:
-            with opener.open(origin+'/healthz', timeout=min(.3, max(.001, deadline-time.monotonic()))):
-                pass
-        except OSError as error:
-            reason = getattr(error, 'reason', error)
-            refused = isinstance(reason, ConnectionRefusedError) or getattr(reason, 'errno', None) in (errno.ECONNREFUSED, 10061)
-        if refused and not control.exists():
+        attempts += 1
+        observation = probe_owned_socket(origin, opener, min(3, max(.001, deadline-time.monotonic())))
+        observation.update({'controlPresent':control.exists(), 'attempts':attempts,
+                            'totalElapsedMs':round((time.monotonic()-started)*1000)})
+        if observations is not None:
+            observations.clear()
+            observations.update(observation)
+        if observation['connectionRefused'] and not observation['controlPresent']:
             return True
         time.sleep(min(.02, max(0, deadline-time.monotonic())))
     return False
@@ -216,6 +237,7 @@ def main():
         # Native process/HTTP acceptance with synthetic non-sensitive input only.
         state = None
         control = None
+        shutdown_observation = {}
         opener = build_opener(ProxyHandler({}))
         def api(method,route,token,payload=None):
             body = json.dumps(payload).encode() if payload is not None else None
@@ -295,9 +317,9 @@ def main():
             check(api('POST',route+'/messages',token,{'idempotencyKey':'npm-ordinary','text':text})[0]==201,'ordinary sender accepted')
             code,inbox=api('GET',route,state['ownerToken']);check(code==200 and inbox['messages'][0]['text']==text,'ordinary read exact text')
             check(api('POST','/api/desktop/quit',state['ownerToken'],{})[0]==202,'own desktop Quit accepted')
-            stopped=wait_for_owned_stop(control,state['serverUrl'],opener)
+            stopped=wait_for_owned_stop(control,state['serverUrl'],opener,observations=shutdown_observation)
             check(not control.exists(),'owned control removed after Quit')
-            check(stopped,'owned service socket refused connections after Quit')
+            check(stopped,'owned service socket refused connections after Quit: '+json.dumps(shutdown_observation,sort_keys=True))
             state=None
         finally:
             if state is None and control is not None and control.exists():
@@ -310,11 +332,11 @@ def main():
                 for attempt in range(3):
                     try:api('POST','/api/desktop/quit',state['ownerToken'],{})
                     except Exception:pass
-                    stopped=wait_for_owned_stop(control,state['serverUrl'],opener,timeout=2)
+                    stopped=wait_for_owned_stop(control,state['serverUrl'],opener,timeout=5,observations=shutdown_observation)
                     if stopped:break
                 if not stopped:
                     cleanup['preserve']=True
-                    raise Failure('owned service cleanup uncertain; private artifacts retained at '+str(private))
+                    raise Failure('owned service cleanup uncertain; observation='+json.dumps(shutdown_observation,sort_keys=True)+'; private artifacts retained at '+str(private))
             for process in processes:
                 if process.poll() is None:
                     process.terminate()
@@ -325,10 +347,10 @@ def main():
         dispatch=json.loads(run([node,vm,entry],'six-platform VM dispatch, guards and spawn semantics').stdout)
         check(dispatch.get('scope')=='VM_ONLY' and dispatch.get('targets')==6,'VM dispatch explicitly separate from native acceptance')
     receipt={'status':'PASS_LOCAL','platform':target,'node':observed['node'],'npm':npm_version,'version':manifest['version'],
-             'coreIdentity':version,'checks':checks,'skipped':skips,'scope':'local seven tarballs, offline install/exec on current host; no registry publication',
+             'coreIdentity':version,'shutdownObservation':shutdown_observation,'checks':checks,'skipped':skips,'scope':'local seven tarballs, offline install/exec on current host; no registry publication',
              'notRun':['public registry/npx install','default browser opening','actual other OS/CPU in this run','browser download/Gatekeeper/SmartScreen first launch','real phone/LAN/QR','actual Codex host']}
     options.receipt.parent.mkdir(parents=True,exist_ok=True);options.receipt.write_text(json.dumps(receipt,ensure_ascii=False,indent=2)+'\n')
-    print(json.dumps({'status':'PASS_LOCAL','checks':len(checks),'platform':target,'receipt':str(options.receipt),'skipped':skips},ensure_ascii=False))
+    print(json.dumps({'status':'PASS_LOCAL','checks':len(checks),'platform':target,'receipt':str(options.receipt),'skipped':skips,'shutdownObservation':shutdown_observation},ensure_ascii=False))
 
 if __name__=='__main__':
     try:main()

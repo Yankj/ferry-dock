@@ -2,9 +2,14 @@
 """Regress the npm harness's asynchronous owned-service shutdown observation."""
 import errno
 import importlib.util
+import json
+import socket
+import sys
+import time
 from pathlib import Path
 import unittest
 from urllib.error import HTTPError, URLError
+from urllib.request import build_opener, ProxyHandler
 
 SPEC = importlib.util.spec_from_file_location('ferry_npm_smoke', Path(__file__).with_name('smoke-npm.py'))
 SMOKE = importlib.util.module_from_spec(SPEC)
@@ -59,9 +64,44 @@ class ShutdownObservation(unittest.TestCase):
         failure = HTTPError('http://127.0.0.1:1', 503, 'fixture HTTP failure', {}, None)
         self.assertFalse(SMOKE.wait_for_owned_stop(Control(), 'http://127.0.0.1:1', Opener(error=failure), .04))
 
+    def test_delayed_refusal_needs_more_than_point_three_seconds(self):
+        class DelayedRefusal:
+            def open(self, *args, timeout, **kwargs):
+                if timeout < .35:
+                    time.sleep(timeout)
+                    raise URLError(TimeoutError('fixture refusal not reported within short budget'))
+                time.sleep(.35)
+                raise URLError(ConnectionRefusedError(errno.ECONNREFUSED, 'fixture delayed refusal'))
+        short = SMOKE.probe_owned_socket('http://127.0.0.1:1', DelayedRefusal(), .3)
+        self.assertFalse(short['connectionRefused'])
+        self.assertEqual(short['reasonType'], 'TimeoutError')
+        self.assertTrue(SMOKE.wait_for_owned_stop(Control(), 'http://127.0.0.1:1', DelayedRefusal(), 1))
+
+    def test_reset_is_not_refused(self):
+        failure = URLError(ConnectionResetError(errno.ECONNRESET, 'fixture reset'))
+        self.assertFalse(SMOKE.wait_for_owned_stop(Control(), 'http://127.0.0.1:1', Opener(error=failure), .04))
+
     def test_winsock_refused_socket(self):
         self.assertTrue(SMOKE.wait_for_owned_stop(Control(), 'http://127.0.0.1:1', Opener(error=URLError(OSError(10061, 'fixture Winsock refused'))), .04))
 
 
+def real_loopback_diagnostic():
+    # The port is allocated by this test and immediately closed. No external
+    # host, capability, private process or security setting is involved.
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as listener:
+        listener.bind(('127.0.0.1', 0))
+        port = listener.getsockname()[1]
+    origin = 'http://127.0.0.1:'+str(port)
+    opener = build_opener(ProxyHandler({}))
+    short = SMOKE.probe_owned_socket(origin, opener, .3)
+    portable = SMOKE.probe_owned_socket(origin, opener, 3)
+    return {'scope':'OWN_CLOSED_LOOPBACK_PORT', 'platform':sys.platform,
+            'shortBudget':short, 'portableBudget':portable}
+
+
 if __name__ == '__main__':
-    unittest.main()
+    diagnostic = real_loopback_diagnostic()
+    print(json.dumps({'shutdownProbeDiagnostic':diagnostic}), flush=True)
+    result = unittest.main(exit=False)
+    if not result.result.wasSuccessful() or not diagnostic['portableBudget']['connectionRefused']:
+        raise SystemExit(1)
