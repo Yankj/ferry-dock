@@ -1,3 +1,6 @@
 * text=auto eol=lf
+
+# Receipt digests describe the original CI bytes, including Windows CRLF.
+docs/benchmarks/2026-10-30-ci/** -text
 *.png binary
 *.ico binary
