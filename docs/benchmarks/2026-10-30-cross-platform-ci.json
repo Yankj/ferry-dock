@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "kind": "HOSTED_CI_ACCEPTANCE",
+  "runId": 41002898575,
+  "url": "https://github.com/Yankj/ferry-dock/actions/runs/41002898575",
+  "sourceCommit": "e08bbca4c1011700ac15230354181af0359f2168",
+  "version": "0.1.0-alpha.4",
+  "overall": "success",
+  "jobsPassed": 13,
+  "jobs": [
+    {
+      "id": 123891147865,
+      "name": "Go 1.27.x / windows-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148051,
+      "name": "Go 1.26.x / windows-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148091,
+      "name": "Go 1.26.x / ubuntu-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148095,
+      "name": "Go 1.27.x / ubuntu-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148096,
+      "name": "Go 1.27.x / macos-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148114,
+      "name": "Build six CLI targets and local npm packages",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891148115,
+      "name": "Go 1.26.x / macos-latest",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981161,
+      "name": "Packaged native lifecycle / darwin-amd64 / Node 22",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981162,
+      "name": "Packaged native lifecycle / linux-arm64 / Node 22",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981163,
+      "name": "Packaged native lifecycle / windows-amd64 / Node 22",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981186,
+      "name": "Packaged native lifecycle / darwin-arm64 / Node 22",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981207,
+      "name": "Packaged native lifecycle / linux-amd64 / Node 22",
+      "conclusion": "success"
+    },
+    {
+      "id": 123891981403,
+      "name": "Packaged native lifecycle / windows-arm64 / Node 22",
+      "conclusion": "success"
+    }
+  ],
+  "platforms": [
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.2",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 181,
+      "npmVersion": "10.9.8",
+      "python": "3.14.7",
+      "skipped": [],
+      "target": "darwin-amd64",
+      "runnerLabel": "macos-15-intel",
+      "nativeReceipt": "2026-10-30-ci/validation-darwin-amd64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-darwin-amd64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 61,
+        "winerror": null,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 1,
+        "controlPresent": false,
+        "attempts": 1,
+        "totalElapsedMs": 1
+      }
+    },
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.4",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 181,
+      "npmVersion": "10.9.9",
+      "python": "3.14.10",
+      "skipped": [],
+      "target": "darwin-arm64",
+      "runnerLabel": "macos-15",
+      "nativeReceipt": "2026-10-30-ci/validation-darwin-arm64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-darwin-arm64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 61,
+        "winerror": null,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 0,
+        "controlPresent": false,
+        "attempts": 1,
+        "totalElapsedMs": 0
+      }
+    },
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.4",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 181,
+      "npmVersion": "10.9.9",
+      "python": "3.12.3",
+      "skipped": [],
+      "target": "linux-amd64",
+      "runnerLabel": "ubuntu-24.04",
+      "nativeReceipt": "2026-10-30-ci/validation-linux-amd64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-linux-amd64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 111,
+        "winerror": null,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 0,
+        "controlPresent": false,
+        "attempts": 1,
+        "totalElapsedMs": 0
+      }
+    },
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.4",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 181,
+      "npmVersion": "10.9.9",
+      "python": "3.12.3",
+      "skipped": [],
+      "target": "linux-arm64",
+      "runnerLabel": "ubuntu-24.04-arm",
+      "nativeReceipt": "2026-10-30-ci/validation-linux-arm64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-linux-arm64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 111,
+        "winerror": null,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 0,
+        "controlPresent": false,
+        "attempts": 1,
+        "totalElapsedMs": 0
+      }
+    },
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.4",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 173,
+      "npmVersion": "10.9.9",
+      "python": "3.12.10",
+      "skipped": [
+        "POSIX executable mode rejection: not applicable on Windows",
+        "Windows real console Ctrl+C/CTRL_BREAK: needs interactive console; bounded wait and explicit request cancel tested"
+      ],
+      "target": "windows-amd64",
+      "runnerLabel": "windows-2025",
+      "nativeReceipt": "2026-10-30-ci/validation-windows-amd64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-windows-amd64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 10061,
+        "winerror": 10061,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 2016,
+        "controlPresent": false,
+        "attempts": 2,
+        "totalElapsedMs": 2047
+      }
+    },
+    {
+      "native": "PASS_NATIVE",
+      "node": "22.23.4",
+      "npm": "PASS_LOCAL",
+      "npmChecks": 173,
+      "npmVersion": "10.9.9",
+      "python": "3.13.17",
+      "skipped": [
+        "POSIX executable mode rejection: not applicable on Windows",
+        "Windows real console Ctrl+C/CTRL_BREAK: needs interactive console; bounded wait and explicit request cancel tested"
+      ],
+      "target": "windows-arm64",
+      "runnerLabel": "windows-11-arm",
+      "nativeReceipt": "2026-10-30-ci/validation-windows-arm64/native-preview.json",
+      "npmReceipt": "2026-10-30-ci/validation-windows-arm64/npm-preview.json",
+      "nativeManifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+      "shutdownObservation": {
+        "connectionRefused": true,
+        "errorType": "URLError",
+        "reasonType": "ConnectionRefusedError",
+        "errno": 10061,
+        "winerror": 10061,
+        "probeTimeoutMs": 3000,
+        "probeElapsedMs": 2047,
+        "controlPresent": false,
+        "attempts": 2,
+        "totalElapsedMs": 2068
+      }
+    }
+  ],
+  "receipts": [
+    {
+      "path": "2026-10-30-ci/validation-darwin-amd64/native-preview.json",
+      "sha256": "6d0267b377764287f1faa19cf0d45e342ec133929b6c25694141344fcfb438bc",
+      "size": 991
+    },
+    {
+      "path": "2026-10-30-ci/validation-darwin-amd64/npm-preview.json",
+      "sha256": "c85767f35f2d8036a4839e190980d9ad827a9bba3c3eca53f086561937e2311a",
+      "size": 10003
+    },
+    {
+      "path": "2026-10-30-ci/validation-darwin-arm64/native-preview.json",
+      "sha256": "bcd0f4130303bc862949239600f9d8a0d2195d02b1936d87e52e47106ad41e00",
+      "size": 992
+    },
+    {
+      "path": "2026-10-30-ci/validation-darwin-arm64/npm-preview.json",
+      "sha256": "e86685963b150176053e8bc0ae45eaf4032fb820a7442cbcf431cbebe1f2fc9a",
+      "size": 10009
+    },
+    {
+      "path": "2026-10-30-ci/validation-linux-amd64/native-preview.json",
+      "sha256": "5dbc0d9f925eb14c6761faa9b94e940f066e4e908d0ba7df04e04e5eddc846e3",
+      "size": 992
+    },
+    {
+      "path": "2026-10-30-ci/validation-linux-amd64/npm-preview.json",
+      "sha256": "cbd55c22c9663381e4bc11a12d2527217ac292a2ec6374b9b90122f75cbf4664",
+      "size": 10001
+    },
+    {
+      "path": "2026-10-30-ci/validation-linux-arm64/native-preview.json",
+      "sha256": "fa48b5232424befcf7bb71c6411ca5b6ba4a6d34881751d806b966702f5f29d4",
+      "size": 992
+    },
+    {
+      "path": "2026-10-30-ci/validation-linux-arm64/npm-preview.json",
+      "sha256": "deb95e92187aa876ac66cf2ad535db3667d8023fd6da73d4c261e1d7d1b95e79",
+      "size": 10007
+    },
+    {
+      "path": "2026-10-30-ci/validation-windows-amd64/native-preview.json",
+      "sha256": "ec863a98d5136a08c983a07dc4735469e9301a5cdf6e21c8d78de09d1487664d",
+      "size": 1031
+    },
+    {
+      "path": "2026-10-30-ci/validation-windows-amd64/npm-preview.json",
+      "sha256": "6fb9884b745c5ca44c7e958bcd1f528cec0de1c665554e3af1fd4822e469c511",
+      "size": 10093
+    },
+    {
+      "path": "2026-10-30-ci/validation-windows-arm64/native-preview.json",
+      "sha256": "7c97e8e80e97933ac468c4fc08d63e64cbcdf22854172c7d4e67eddf559d6a88",
+      "size": 1031
+    },
+    {
+      "path": "2026-10-30-ci/validation-windows-arm64/npm-preview.json",
+      "sha256": "0cb94f811738ba8092e49a6890b5680add1bc6266f91d46dd319ae3a61bab1ef",
+      "size": 10099
+    }
+  ],
+  "windowsShutdownProbeDiagnostic": {
+    "observations": {
+      "windows-amd64": {
+        "portableBudget": {
+          "connectionRefused": true,
+          "errno": 10061,
+          "errorType": "URLError",
+          "probeElapsedMs": 2016,
+          "probeTimeoutMs": 3000,
+          "reasonType": "ConnectionRefusedError",
+          "winerror": 10061
+        },
+        "shortBudget": {
+          "connectionRefused": false,
+          "errno": null,
+          "errorType": "URLError",
+          "probeElapsedMs": 312,
+          "probeTimeoutMs": 300,
+          "reasonType": "TimeoutError",
+          "winerror": null
+        }
+      },
+      "windows-arm64": {
+        "portableBudget": {
+          "connectionRefused": true,
+          "errno": 10061,
+          "errorType": "URLError",
+          "probeElapsedMs": 2044,
+          "probeTimeoutMs": 3000,
+          "reasonType": "ConnectionRefusedError",
+          "winerror": 10061
+        },
+        "shortBudget": {
+          "connectionRefused": false,
+          "errno": null,
+          "errorType": "URLError",
+          "probeElapsedMs": 296,
+          "probeTimeoutMs": 300,
+          "reasonType": "TimeoutError",
+          "winerror": null
+        }
+      }
+    },
+    "runId": 41002898575,
+    "scope": "OWN_CLOSED_LOOPBACK_PORT",
+    "sourceCommit": "e08bbca4c1011700ac15230354181af0359f2168"
+  },
+  "scope": "Native hosted-runner headless packaged CLI and offline local npm installation; no registry or Release publication",
+  "frozenLocalCandidateSource": "b14aa42133c3a5c00032aa4e2affe873c46a84be",
+  "notRun": [
+    "Finder/default browser/desktop GUI",
+    "OS-default runtime-directory discovery",
+    "actual phone/LAN/QR/clipboard",
+    "actual Codex host",
+    "minimum supported OS versions and other distributions",
+    "Windows ACL audit and interactive console Ctrl+C/CTRL_BREAK",
+    "downloaded Gatekeeper/SmartScreen first-launch trust",
+    "Developer ID signing or notarization",
+    "public npm registry/npx install"
+  ]
+}

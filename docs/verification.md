@@ -15,7 +15,7 @@ Alpha.4 is an **unpublished local candidate** built from clean source `b14aa4213
 | Legacy service update | [Upgrade receipt](benchmarks/2026-10-29-alpha4-upgrade-validation.json): **15 checks passed** using the real frozen alpha.2 binary and new alpha.4 binary. Legacy metadata refused reuse, original state and running service survived, a separate private alpha.4 instance reported the right identity, both owned services quit and removed control/socket state. No shared user service was stopped. |
 | Same-input reproduction | [Native receipt](benchmarks/2026-10-29-alpha4-native-reproducibility.json): eight archives + manifest + checksum file, **ten outputs**, byte-identical in two builds. [Npm receipt](benchmarks/2026-10-29-alpha4-npm-reproducibility.json): entry + six platform TGZs + manifest + checksum file, **nine outputs**, byte-identical. Scope is the same recorded source/toolchain, not arbitrary environments. |
 | Core regression | The implementation lead recorded exit-zero formatting, `go vet ./...`, full `go test -race -cover ./...`, six executable-format fixtures, 12 HTTP assertions, 27 synthetic request assertions, 11 UI VM checks and the served-script/HTTP run on Mac. These do not establish a real phone or Agent host. |
-| Remote native CI | Six OS/CPU native packaging/npm jobs, six Go matrix jobs and one packaging job are configured: **13 jobs, NOT_RUN for this batch** pending authorized push. Actual Windows/Linux/Intel Mac execution must be read from a run of its own commit. |
+| Remote native CI | The frozen `b14aa42` local run did not execute foreign platforms. Later hosted execution of its own source is recorded [separately](#hosted-native-ci-2026-10-30); it does not change the frozen local artifact hashes. |
 
 The source package is immutable at `b14aa42`; this later evidence update does not rewrite its bundled documentation or hashes. Manifest generation-time `nativeValidation: NOT_RUN` stays unchanged; subsequent scoped validation is represented by these separate receipts. Old alpha.2 npm/Go and alpha.3 App evidence below retain their own source/artifact identities.
 
@@ -28,7 +28,24 @@ python3 scripts/smoke-package.py --dist dist/native/0.1.0-alpha.4 --require-cli-
 
 For the full eight-archive Mac build, omit `--cli-only`; the host must provide the supported complete-bundle ad-hoc signing tool. The contributor requires Python/Go; recipients do not. Use a fresh output destination because the builder refuses overwrite. Only select a native target matching the actual runner. `--archive-only` inspects foreign artifacts without executing them. The local npm builder takes that six-CLI `dist` directory and exact-source clean entry metadata; its own manifest/checksums inventory all seven TGZs separately.
 
-**NOT_RUN:** native Mac amd64, Linux amd64/arm64, Windows amd64/arm64, minimum supported OS/kernel versions, Windows ACL and interactive console Ctrl+C, OS-default state discovery, Finder/default-browser opening, browser/ChatGPT downloaded quarantine/Gatekeeper/SmartScreen first launch, physical phone/LAN/QR/clipboard and actual Codex host. No Developer ID signing/notarization, npm publication or new Release occurred. No startup/performance measurement is newly claimed.
+**This frozen local run did not test:** native Mac amd64, Linux amd64/arm64, Windows amd64/arm64. Subsequent hosted-native results are separate below. **Still NOT_RUN:** minimum supported OS/kernel versions, Windows ACL and interactive console Ctrl+C, OS-default state discovery, Finder/default-browser opening, browser/ChatGPT downloaded quarantine/Gatekeeper/SmartScreen first launch, physical phone/LAN/QR/clipboard and actual Codex host. No Developer ID signing/notarization, npm publication or new Release occurred. No startup/performance measurement is newly claimed.
+
+## Hosted native CI, 2026-10-30
+
+Hosted CI is independent of the frozen `b14aa42` local artifacts. [Run 41002898575](https://github.com/Yankj/ferry-dock/actions/runs/41002898575), source `e08bbca4c1011700ac15230354181af0359f2168`, produced cap-free native validation receipts matching each actual host/architecture and clean source. All six packaged CLI headless lifecycle checks passed. All 13 jobs completed successfully: six Go matrix jobs, one package job and six native jobs. npm package installation/execution passed on all six targets. The [CI summary and 12 raw receipt index](benchmarks/2026-10-30-cross-platform-ci.json) record job conclusions, host/source identity, exact runtime versions, SHA-256 and intentional skips.
+
+| Actual native target | Packaged CLI | npm assertions passed | Node / npm runtime |
+| --- | --- | ---: | --- |
+| macOS arm64 | PASS_NATIVE | 181, no skips | 22.23.4 / 10.9.9 |
+| macOS amd64 | PASS_NATIVE | 181, no skips | 22.23.2 / 10.9.8 |
+| Linux arm64 | PASS_NATIVE | 181, no skips | 22.23.4 / 10.9.9 |
+| Linux amd64 | PASS_NATIVE | 181, no skips | 22.23.4 / 10.9.9 |
+| Windows arm64 | PASS_NATIVE | 173, two explicit skips | 22.23.4 / 10.9.9 |
+| Windows amd64 | PASS_NATIVE | 173, two explicit skips | 22.23.4 / 10.9.9 |
+
+Windows skips POSIX executable-mode rejection as inapplicable and real interactive Ctrl+C/CTRL_BREAK as NOT_RUN; bounded wait and explicit request cancellation passed. The Windows shutdown check still requires actual connection refusal, not a timeout. In an isolated closed-loopback-port diagnostic, a 300 ms probe timed out, while a 3 s probe returned Winsock 10061 after 2,016 ms (x64) / 2,044 ms (arm64). These are probe observations supporting the portable test budget, not application shutdown-performance measurements.
+
+These are actual hosted no-browser executions, not VM platform selection. They test private-loopback ordinary/request flows, bounded waits, retry/read/cancel/expiry, background survival/reuse/Quit and stale/unknown-service cleanup through the packaged native core. GUI/default-browser opening, downloaded-file Gatekeeper/SmartScreen trust, minimum OS/kernel, Windows ACL audit and real interactive console Ctrl+C, physical phones and actual Codex-host use remain NOT_RUN. The green result belongs to this exact source/run; later documentation or distribution artifacts do not inherit its hashes.
 
 ## App signature incident and alpha.3 correction
 
@@ -66,8 +83,7 @@ A read-only signing-identity query listed zero valid code-signing identities;
 no private key was used. Developer ID/notarization and normal downloaded-file
 first-launch acceptance are still outstanding, so the test ZIP must not be
 presented as a trusted ready-to-distribute application. No original archive,
-user download, quarantine attribute or security setting was changed. Remote CI
-for these local commits is NOT_RUN; no new public push was authorized.
+user download, quarantine attribute or security setting was changed. At the time of that local alpha.3 attestation, remote CI had not run and no new public push had been authorized; the later hosted-CI section above records subsequent work separately.
 
 ## Historical alpha.2 local npm entry and fixed-tag Go install, 2026-10-29
 

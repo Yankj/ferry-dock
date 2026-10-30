@@ -1,0 +1,34 @@
+{
+  "archiveCount": 8,
+  "checks": 4936,
+  "host": {
+    "arch": "arm64",
+    "os": "windows",
+    "python": "3.13.17"
+  },
+  "manifestSha256": "dd556a02899bf5bd441b52bb09dfabbf4ca9ea171d3dd08ba4a62cad3cf40b1f",
+  "nativeAppSignature": "NOT_RUN",
+  "nativeLifecycle": "PASS",
+  "nativeTarget": "windows/arm64",
+  "notRun": [
+    "actual phone/LAN/QR/clipboard/browser",
+    "actual Codex host",
+    "downloaded OS trust/first launch",
+    "minimum upstream OS versions",
+    "OS-default runtime directory",
+    "other OS/CPU native execution"
+  ],
+  "requiredCliTargets": true,
+  "schemaVersion": 1,
+  "source": {
+    "binaryCommit": "e08bbca4c1011700ac15230354181af0359f2168",
+    "commit": "e08bbca4c1011700ac15230354181af0359f2168",
+    "dirty": false,
+    "epoch": 1793334371,
+    "treeSha256": "dfddb956853dc5e1740a560048924cf0eeb0cba56e1ba042c22bcb00a3142480"
+  },
+  "status": "PASS_NATIVE",
+  "version": "0.1.0-alpha.4",
+  "windowsAclAudit": "NOT_RUN",
+  "windowsConsoleCtrlC": "NOT_RUN"
+}

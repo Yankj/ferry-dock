@@ -179,7 +179,9 @@ runtime_dir="$(mktemp -d)"
 
 ## 验证与贡献
 
-Alpha.2 的八个归档通过当时的归档／元数据检查，相同输入两次构建的十个输出逐字节一致；Mac arm64 包内程序的直接执行、生命周期与 CLI 检查通过。这些检查遗漏了完整 App 签名验证，后来复现的签名缺陷推翻了基于它们给出的 App 启动建议。Go、12 项 HTTP、27 项合成请求、11 项 UI VM 与真实服务脚本／HTTP 检查通过。Safari 浅色桌面收发及 **Copied** 标签通过，新版未重复实际系统粘贴。深色／手机尺寸 GUI 仍因桌面认证交互边界受阻。[验证记录](docs/verification.md)与[主张／证据](docs/claims-evidence.md)保留独立的历史 alpha.1 观察。Finder／默认缓存发现、默认浏览器自动打开、手机局域网／扫码、Gatekeeper、实际 Codex 宿主及 Intel Mac/Windows/Linux 本机验收仍为 **NOT_RUN**。
+**当前 alpha.4 托管验收：**macOS、Windows、Linux 各 amd64／arm64 的原生包无界面生命周期已通过；npm 包安装／执行也已在六种托管平台通过；所记录源码的 13 项 CI 作业均成功。[运行、源码与范围](docs/verification.md#hosted-native-ci-2026-10-30)。这些是独立构建的 CI 制品，不是下方冻结 alpha.1／alpha.2 程序；GUI、系统下载信任、Windows ACL／真实控制台、真机和 Agent 宿主仍须各自验收。
+
+Alpha.2 的八个归档通过当时的归档／元数据检查，相同输入两次构建的十个输出逐字节一致；Mac arm64 包内程序的直接执行、生命周期与 CLI 检查通过。这些检查遗漏了完整 App 签名验证，后来复现的签名缺陷推翻了基于它们给出的 App 启动建议。Go、12 项 HTTP、27 项合成请求、11 项 UI VM 与真实服务脚本／HTTP 检查通过。Safari 浅色桌面收发及 **Copied** 标签通过，新版未重复实际系统粘贴。深色／手机尺寸 GUI 仍因桌面认证交互边界受阻。[验证记录](docs/verification.md)与[主张／证据](docs/claims-evidence.md)保留独立的历史 alpha.1 观察。Finder／默认缓存发现、默认浏览器自动打开、手机局域网／扫码、Gatekeeper、实际 Codex 宿主及 Intel Mac/Windows/Linux 本机验收仍为 **该固定 alpha.2 快照的 NOT_RUN**。
 
 [此前 macOS arm64／Go 1.27.3 loopback 基线](docs/performance-baseline.md)与[原始样本](docs/benchmarks/2026-10-28-macos-arm64.json)测的是特定旧 CLI／核心二进制，不代表应用启动、浏览器打开、手机操作或 Agent 速度。[预算](docs/performance.md)仍是工程目标。
 

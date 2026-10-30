@@ -82,16 +82,16 @@ make the candidate a trusted, ready-to-distribute Mac app. See
 
 ## Alpha.4 platform matrix
 
-`0.1.0-alpha.4` is the next **unpublished local candidate**, separate from the frozen alpha.2 Release and alpha.3 App repair. There is no alpha.4 tag, Release URL or published npm version. A source checkout does not contain generated `dist/` archives. This matrix does not convert a cross-build or test definition into native acceptance.
+`0.1.0-alpha.4` is the next **unpublished local candidate**, separate from the frozen alpha.2 Release and alpha.3 App repair. There is no alpha.4 tag, Release URL or published npm version. A source checkout does not contain generated `dist/` archives. The hosted-CI column is independent of the frozen local artifact column and covers no-browser runtime checks, not downloaded-file or GUI acceptance. Hosted evidence and its exact source are recorded in [verification](verification.md#hosted-native-ci-2026-10-30).
 
-| Native target | CLI archive | npm platform package candidate | Public download | Alpha.4 build / native status |
-| --- | --- | --- | --- | --- |
-| macOS arm64 | `ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz` | `ferry-dock-darwin-arm64` | Alpha.2 CLI only, linked above | Built/inspected; scoped native PASS |
-| macOS amd64 | `ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz` | `ferry-dock-darwin-x64` | None | Built/inspected; native amd64 NOT_RUN |
-| Linux amd64 | `ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz` | `ferry-dock-linux-x64` | None | Built/inspected; native NOT_RUN |
-| Linux arm64 | `ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz` | `ferry-dock-linux-arm64` | None | Built/inspected; native NOT_RUN |
-| Windows amd64 | `ferry-dock-0.1.0-alpha.4-windows-amd64.zip` | `ferry-dock-win32-x64` | None | Built/inspected; native NOT_RUN |
-| Windows arm64 | `ferry-dock-0.1.0-alpha.4-windows-arm64.zip` | `ferry-dock-win32-arm64` | None | Built/inspected; native NOT_RUN |
+| Native target | CLI archive | npm platform package candidate | Public download | Alpha.4 build / native status | Hosted headless CI |
+| --- | --- | --- | --- | --- | --- |
+| macOS arm64 | `ferry-dock-0.1.0-alpha.4-darwin-arm64.tar.gz` | `ferry-dock-darwin-arm64` | Alpha.2 CLI only, linked above | Built/inspected; scoped native PASS | CLI + npm PASS |
+| macOS amd64 | `ferry-dock-0.1.0-alpha.4-darwin-amd64.tar.gz` | `ferry-dock-darwin-x64` | None | Built/inspected; native amd64 NOT_RUN | CLI + npm PASS |
+| Linux amd64 | `ferry-dock-0.1.0-alpha.4-linux-amd64.tar.gz` | `ferry-dock-linux-x64` | None | Built/inspected; native NOT_RUN | CLI + npm PASS |
+| Linux arm64 | `ferry-dock-0.1.0-alpha.4-linux-arm64.tar.gz` | `ferry-dock-linux-arm64` | None | Built/inspected; native NOT_RUN | CLI + npm PASS |
+| Windows amd64 | `ferry-dock-0.1.0-alpha.4-windows-amd64.zip` | `ferry-dock-win32-x64` | None | Built/inspected; native NOT_RUN | CLI + npm PASS |
+| Windows arm64 | `ferry-dock-0.1.0-alpha.4-windows-arm64.zip` | `ferry-dock-win32-arm64` | None | Built/inspected; native NOT_RUN | CLI + npm PASS |
 
 The formal local build is clean source `b14aa42133c3a5c00032aa4e2affe873c46a84be`, Go 1.27.3, with `CGO_ENABLED=0`, `GOAMD64=v1` and `GOARM64=v8.0`. The [artifact inventory](benchmarks/2026-10-29-alpha4-artifacts.json) records exact binary/archive sizes, SHA-256, source/toolchain and format fields. Native output is `dist/native/0.1.0-alpha.4/`; npm output is `dist/npm-final/0.1.0-alpha.4/`. These are generated local paths, not public URLs or guaranteed source-checkout files.
 
@@ -108,11 +108,11 @@ The thin npm entry is **13,599 bytes**; an installation needs it plus one matchi
 
 [Native validation](benchmarks/2026-10-29-alpha4-native-validation.json) passed all eight archive/binary/metadata/layout/allowlist checks, both complete Mac App signatures and the scoped Mac arm64 native lifecycle. The latter used Chinese/space paths, private state, loopback and `--no-open`, with no Go/Node in PATH; it exercised ordinary Unicode text, request isolation/timeout/submission/retry/read/cancel/expiry, reuse, Quit, stale/unknown-port safety and owned cleanup. The [App seal regression](benchmarks/2026-10-29-alpha4-app-signature-validation.json) also passed baseline verification and rejected changed Info.plist, changed resources and a missing resource seal. None of this is downloaded-file or GUI acceptance.
 
-[Npm validation](benchmarks/2026-10-29-alpha4-npm-validation.json) passed **181 assertions** on Mac arm64, Node 22.17.1/npm 10.9.2: local dual-TGZ installation/exec offline with scripts disabled, omitted/missing optional dependency diagnostics, version/corruption/missing/executable guards, literal argv/stdio/exits, POSIX signals and actual PTY Ctrl+C canceling only a wait, plus ordinary/request/retry/no-browser lifecycle and cleanup. Six-platform dispatch/spawn guards were VM checks; other-platform npm execution remains NOT_RUN.
+[Npm validation](benchmarks/2026-10-29-alpha4-npm-validation.json) passed **181 assertions** on Mac arm64, Node 22.17.1/npm 10.9.2: local dual-TGZ installation/exec offline with scripts disabled, omitted/missing optional dependency diagnostics, version/corruption/missing/executable guards, literal argv/stdio/exits, POSIX signals and actual PTY Ctrl+C canceling only a wait, plus ordinary/request/retry/no-browser lifecycle and cleanup. That frozen local run used VM checks for six-platform dispatch/spawn guards. Later hosted-native results are recorded separately below and do not change its artifact identities.
 
 The [actual alpha.2 → alpha.4 upgrade test](benchmarks/2026-10-29-alpha4-upgrade-validation.json) passed 15 checks: alpha.4 refused a running legacy instance without changing its state or stopping it, a separate private alpha.4 instance worked, and both owned test services quit cleanly. Same-input second builds matched **all ten native outputs** and **all nine npm outputs** byte-for-byte: [native comparison](benchmarks/2026-10-29-alpha4-native-reproducibility.json), [npm comparison](benchmarks/2026-10-29-alpha4-npm-reproducibility.json). This is scoped to the recorded clean source/toolchain, not arbitrary reproducibility.
 
-The artifacts and bundled documentation remain fixed at `b14aa42`; this post-build attestation does not rebuild them. Manifest `nativeValidation: NOT_RUN` describes generation time; subsequent scoped native results are in the separate receipts. All five other OS/CPU native targets, minimum upstream OS versions, OS-default state directory, Windows ACL/interactive console Ctrl+C, default-browser/OS download trust, physical-phone LAN/QR and actual Codex-host acceptance remain uncompleted as applicable. The 13 configured CI jobs have **not run for this batch**; a workflow definition is not remote test evidence.
+The artifacts and bundled documentation remain fixed at `b14aa42`; this post-build attestation does not rebuild them. Manifest `nativeValidation: NOT_RUN` describes generation time; subsequent scoped native results are in the separate receipts. Hosted CI has separately executed packaged CLI lifecycle checks on all six OS/CPU pairs, with npm package installation/execution passing on all six hosted targets. These use source `e08bbca4c1011700ac15230354181af0359f2168` in [run 41002898575](https://github.com/Yankj/ferry-dock/actions/runs/41002898575), not the frozen `b14aa42` bytes above. All 13 jobs in that run completed successfully: six Go jobs, one package job and six native jobs. The [CI summary/raw receipt index](benchmarks/2026-10-30-cross-platform-ci.json) records 181 npm assertions on each Mac/Linux runner and 173 on each Windows runner; Windows skips POSIX mode rejection and real interactive Ctrl+C/CTRL_BREAK. Windows interactive console Ctrl+C and ACL audit remain separate, unexecuted checks. Minimum upstream OS versions, OS-default state directory, Windows ACL/interactive console Ctrl+C, default-browser/OS download trust, physical-phone LAN/QR and actual Codex-host acceptance remain NOT_RUN.
 
 Go `amd64` is Node/npm `x64`; Go `windows` is Node/npm `win32`. The native archive is chosen for the intended OS/CPU. The npm entry selects for the **running Node process**; hardware alone does not determine a Rosetta or emulation process architecture. A successful selection is not an emulation/runtime acceptance result.
 
@@ -167,7 +167,7 @@ python3 scripts/package-npm.py \
   --out dist/npm
 ```
 
-The builder is a local packaging operation, not login, publication or a release upload. Test installation with scripts disabled and empty configs/cache; do not substitute a cached registry package for the supplied TGZ. The packaging/validation receipts must report exact files, sizes/hashes and the OS/CPU that actually executed. A configured six-runner CI matrix is **NOT_RUN** until a matching commit has run remotely.
+The builder is a local packaging operation, not login, publication or a release upload. Test installation with scripts disabled and empty configs/cache; do not substitute a cached registry package for the supplied TGZ. The packaging/validation receipts must report exact files, sizes/hashes and the OS/CPU that actually executed. Use the independently recorded hosted-CI results above for the tested source/run; a configured matrix alone is not a passing result.
 
 ### Historical alpha.2 npm evidence
 
