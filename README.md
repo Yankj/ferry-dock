@@ -7,7 +7,9 @@
 
 **Information on your phone. Work on your computer.**
 
-[简体中文](README.zh-CN.md) · [Usage & prompts](docs/usage.md) · [Product FAQ](PRFAQ.md) · [Distribution](docs/distribution.md)
+[简体中文](README.zh-CN.md) · [产品页（中文）](https://heydusk.com/zh/products/ferry-dock) · [Product page](https://heydusk.com/products/ferry-dock) · [Usage & prompts](docs/usage.md) · [Product FAQ](PRFAQ.md) · [Distribution](docs/distribution.md)
+
+Official product pages: early alpha, Apple Silicon CLI preview. Status on the site matches this repository; this is not a general-availability release.
 
 Client comments are in a phone chat; the proposal is on your computer. Or an error message is on your phone while your coding task is on the computer. Ferry Dock moves that **plain text** into a temporary computer inbox, or directly into the collection request created for that task. The phone uses a browser; ordinary transfer needs no AI component or phone app.
 

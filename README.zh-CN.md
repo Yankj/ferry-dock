@@ -7,7 +7,9 @@
 
 **资料在手机，工作在电脑。**
 
-[English](README.md) · [使用指南与 Prompt](docs/usage.zh-CN.md) · [产品问答](PRFAQ.md) · [分发说明](docs/distribution.md)
+[English](README.md) · [产品页（中文）](https://heydusk.com/zh/products/ferry-dock) · [Product page](https://heydusk.com/products/ferry-dock) · [使用指南与 Prompt](docs/usage.zh-CN.md) · [产品问答](PRFAQ.md) · [分发说明](docs/distribution.md)
+
+官网产品页口径：早期 alpha · Apple Silicon CLI 预览版。状态与本仓库一致，不是正式发行版。
 
 客户意见在手机聊天里，提案在电脑；报错文字在手机，代码任务在电脑。渡口把这些**纯文本**送进电脑临时收件箱，或准确交回为该任务创建的收集请求。手机使用浏览器，普通传输不需要 AI，也不用安装手机 App。
 
